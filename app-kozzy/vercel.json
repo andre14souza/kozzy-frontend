@@ -1,7 +1,0 @@
-{
-  "buildCommand": "npm install && npm run build",
-  "outputDirectory": "APP-WEB/dist/APP-WEB/browser",
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
-}
