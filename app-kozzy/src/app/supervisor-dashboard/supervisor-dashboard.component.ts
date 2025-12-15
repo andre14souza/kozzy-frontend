@@ -43,13 +43,13 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
   showSearchModal: boolean = false;
   showDetailScreen: boolean = false;
   origemDetalhe: 'dashboard' | 'relatorio' = 'dashboard';
-  chamadoDetalhe: Chamado | null = null;
-  chamadoSelecionado: Chamado | null = null;
+  chamadoDetalhe: any = null;
+  chamadoSelecionado: any = null;
   relatorioChamados: Chamado[] = [];
   
   menuCollapsed: boolean = false;
   menuItems: MenuItem[] = [];
-  usuarioLogado: UsuarioLogado | null = null;
+  usuarioLogado: any = {};
   filtros: FilterOptions = { busca: '', status: 'todos', prioridade: 'todas', ordenacao: 'mais-recentes' };
   toast: ToastMessage = { message: '', type: 'info', visible: false };
   kpis: KPI[] = [
@@ -226,7 +226,7 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  abrirModalEdicao(c: Chamado) { this.chamadoSelecionado = { ...c }; this.showTicketModal = true; }
+  abrirModalEdicao(c: any) { this.chamadoSelecionado = { ...c }; this.showTicketModal = true; }
   fecharTicketModal() { this.showTicketModal = false; this.chamadoSelecionado = null; }
   
   onChamadoAtualizado(c: Chamado) {

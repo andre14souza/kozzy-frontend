@@ -177,7 +177,7 @@
 
 <app-create-ticket-modal
   [isVisible]="showTicketModal"
-  [chamadoParaEditar]="chamadoSelecionado"
+  [chamadoParaEditar]="$any(chamadoSelecionado)"
   [perfilUsuario]="authService.getUsuarioLogado()?.perfil || 'supervisor'"
   [usuarioLogadoNome]="usuarioLogado?.nome || ''"
   (closeModal)="fecharTicketModal()"
