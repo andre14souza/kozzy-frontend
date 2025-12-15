@@ -29,7 +29,7 @@
     <div class="user-section">
       <div class="user-info" [class.hidden]="menuCollapsed" *ngIf="usuarioLogado">
          <div class="user-avatar"><span>{{ usuarioLogado.nome?.charAt(0)?.toUpperCase() }}</span></div>
-         <div class="user-details"><p class="user-name">{{ usuarioLogado.nome }}</p><p class="user-email">{{ usuarioLogado.email }}</p></div>
+         <div class="user-details"><p class="user-name">{{ usuarioLogado?.nome }}</p><p class="user-email">{{ usuarioLogado?.email }}</p></div>
       </div>
       <button (click)="logout()" class="logout-btn" [class.collapsed]="menuCollapsed" title="Sair"><span class="icon">↪</span><span [class.hidden]="menuCollapsed">Sair</span></button>
     </div>
