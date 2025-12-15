@@ -23,7 +23,11 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              "vercel.json"
+              {
+                "glob": "vercel.json",
+                "input": ".",
+                "output": "/"
+              }
             ],
             "styles": [
               "src/styles.css"
