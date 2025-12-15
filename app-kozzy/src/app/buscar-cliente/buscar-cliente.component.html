@@ -1,0 +1,50 @@
+<div class="modal-overlay" *ngIf="isVisible" (click)="onOverlayClick($event)" [@fadeIn]>
+  <div class="modal-container" [@slideIn]>
+    <div class="modal-header">
+      <h2 class="modal-title">🔍 Buscar Chamados por Cliente</h2>
+      <button class="close-button" (click)="closeModalHandler()" aria-label="Fechar modal" type="button">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="search-input-group">
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchTermChange()"
+          placeholder="Digite o nome ou parte do nome do cliente..."
+          class="search-input"
+        >
+        <button class="search-button" (click)="performSearch()" [disabled]="!searchTerm || searchTerm.length < 2">
+          Buscar
+        </button>
+      </div>
+
+      <div *ngIf="searchPerformed && filteredChamados.length > 0" class="results-section">
+        <h3>Resultados da Busca ({{ filteredChamados.length }})</h3>
+        <div class="chamados-list">
+          <div *ngFor="let chamado of filteredChamados" class="chamado-item">
+            <div class="chamado-header">
+              <span class="chamado-protocolo">#{{ chamado.numeroProtocolo }}</span>
+              <span class="chamado-status" [class]="chamado.status">{{ getStatusLabel(chamado.status) }}</span>
+            </div>
+            <p class="chamado-cliente">{{ chamado.cliente }}</p>
+            <p class="chamado-descricao">{{ chamado.descricao | slice:0:100 }}...</p>
+            <div class="chamado-meta">
+              <span>{{ chamado.categoria }}</span>
+              <span>{{ chamado.atendente }}</span>
+              <span>{{ formatDateTime(chamado.dataAbertura, chamado.horaAbertura) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="searchPerformed && filteredChamados.length === 0" class="empty-results">
+        <p>Nenhum chamado encontrado para "{{ lastSearchTerm }}".</p>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="closeModalHandler()">Fechar</button>
+    </div>
+  </div>
+</div>

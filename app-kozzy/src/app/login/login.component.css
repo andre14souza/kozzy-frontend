@@ -1,0 +1,193 @@
+:host {
+    display: flex;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-container {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Faixa vermelha no topo */
+.login-container::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: #dc2626;
+}
+
+.logo-container {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: 800;
+    color: #dc2626; /* Vermelho Kozzy */
+    letter-spacing: -0.5px;
+}
+
+.logo::after {
+    content: 'Distribuidora';
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+    margin-top: 4px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* Inputs e Ícones */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    color: #334155;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.form-input {
+    width: 100%;
+    height: 48px;
+    padding: 0 40px 0 16px; /* Espaço na direita para o ícone */
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #1e293b;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #dc2626;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.form-input.error {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+}
+
+/* Ícones SVG dentro do input */
+.input-icon, .password-toggle {
+    position: absolute;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    height: 100%;
+}
+
+.input-icon svg, .password-toggle svg {
+    width: 20px;
+    height: 20px;
+}
+
+.password-toggle {
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.password-toggle:hover {
+    color: #475569;
+}
+
+/* Opções (Checkbox e Link) */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    font-size: 14px;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    cursor: pointer;
+}
+
+.checkbox-container input {
+    width: 16px;
+    height: 16px;
+    accent-color: #dc2626;
+    cursor: pointer;
+}
+
+.checkbox-container label {
+    cursor: pointer;
+}
+
+.forgot-password {
+    color: #dc2626;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+/* Botão Login */
+.login-button {
+    width: 100%;
+    height: 48px;
+    background-color: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    letter-spacing: 0.5px;
+}
+
+.login-button:hover {
+    background-color: #b91c1c;
+}
+
+.login-button:disabled {
+    background-color: #fca5a5;
+    cursor: not-allowed;
+}
+
+/* Responsivo */
+@media (max-width: 480px) {
+    .login-container {
+        padding: 30px 20px;
+        box-shadow: none; /* Remove sombra no mobile pra ficar mais clean */
+    }
+}

@@ -1,0 +1,102 @@
+/* --- CSS CORRIGIDO E FORÇADO PARA O MODAL --- */
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-container {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title { font-size: 18px; font-weight: 700; margin: 0; color: #111827; }
+.close-button { background: transparent; border: none; font-size: 24px; cursor: pointer; color: #9ca3af; }
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  background-color: #fff;
+}
+
+/* Estilos de Form */
+.form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: 14px; font-weight: 600; color: #374151; }
+.form-input, .form-select, .form-textarea {
+  width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;
+  box-sizing: border-box; /* Importante para não estourar */
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.error-message { color: #dc2626; font-size: 12px; }
+
+/* --- CORREÇÃO DOS BOTÕES AQUI --- */
+.modal-footer {
+  padding: 20px 24px;
+  background-color: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  
+  /* Flexbox Obrigatório */
+  display: flex !important;
+  flex-direction: row !important; /* Garante lado a lado */
+  align-items: center;
+  justify-content: flex-end; /* Alinha à direita */
+  gap: 12px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+  min-width: 100px; /* Garante tamanho mínimo */
+  height: 42px; /* Garante altura igual */
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  border-color: #d1d5db;
+  color: #374151;
+}
+.btn-secondary:hover { background-color: #f3f4f6; }
+
+.btn-primary {
+  background-color: #dc2626;
+  color: white;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.btn-primary:hover { background-color: #b91c1c; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

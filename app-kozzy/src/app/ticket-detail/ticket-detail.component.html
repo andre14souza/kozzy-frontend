@@ -1,0 +1,70 @@
+<div class="detail-container">
+  <header class="detail-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="onClose()">← Voltar</button>
+      <div class="protocol-info">
+        <h1>Protocolo #{{ chamado.numeroProtocolo }}</h1>
+        <span class="status-badge" [class]="'status-' + chamado.status">
+          {{ getStatusLabel(chamado.status) }}
+        </span>
+      </div>
+    </div>
+    
+    <div class="header-right" style="display: flex; gap: 10px;">
+      <button *ngIf="isSupervisor()" class="btn-delete" (click)="onDelete()">
+        🗑️ Excluir
+      </button>
+
+      <button class="btn-edit" (click)="onEdit()">
+        ✎ Editar Chamado
+      </button>
+    </div>
+  </header>
+
+  <div class="detail-body">
+    <div class="main-info">
+        <div class="info-card">
+          <h3>📝 Descrição da Solicitação</h3>
+          <p class="description-text">{{ chamado.descricao }}</p>
+        </div>
+  
+        <div class="info-card">
+          <h3>📂 Dados do Chamado</h3>
+          <div class="grid-info">
+            <div class="info-item">
+              <label>Departamento (Área)</label>
+              <span>{{ chamado.area || 'Geral' }}</span>
+            </div>
+            <div class="info-item">
+              <label>Assunto</label>
+              <span>{{ chamado.categoria }}</span>
+            </div>
+            <div class="info-item">
+              <label>Cliente</label>
+              <span>{{ chamado.cliente }}</span>
+            </div>
+            <div class="info-item">
+              <label>Prioridade</label>
+              <span class="priority-badge" [class]="'priority-' + chamado.prioridade">
+                {{ getPrioridadeLabel(chamado.prioridade) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <div class="sidebar-info">
+        <div class="meta-card">
+          <h3>👤 Atendimento</h3>
+          <div class="meta-row">
+            <span class="meta-label">Atendente:</span>
+            <span class="meta-value">{{ chamado.atendente }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Criado em:</span>
+            <span class="meta-value">{{ chamado.dataAbertura | date: 'dd/MM/yyyy' }} às {{ chamado.horaAbertura }}</span>
+          </div>
+        </div>
+      </div>
+  </div>
+</div>

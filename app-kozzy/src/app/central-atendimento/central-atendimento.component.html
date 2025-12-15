@@ -1,0 +1,149 @@
+<div class="app-container">
+  <aside class="sidebar" [class.collapsed]="menuCollapsed">
+    <div class="logo-area" style="padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+      <div class="logo-box" *ngIf="!menuCollapsed" style="display: flex; align-items: center; gap: 10px;">
+        <span class="logo-icon" style="background: #dc2626; color: white; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold;">K</span>
+        <div class="logo-text"><h1 style="font-size: 18px; margin: 0; color: #333;">KOZZY</h1></div>
+      </div>
+      <button class="toggle-btn" (click)="toggleMenu()" style="background: none; border: none; font-size: 20px; cursor: pointer;">☰</button>
+    </div>
+
+    <nav class="menu" style="flex: 1; margin-top: 20px;">
+      <ul class="menu-list">
+        <li *ngFor="let item of menuItems">
+          <ng-container *ngIf="item.action">
+            <button class="menu-item" [class.active]="item.active" (click)="item.action()">
+                <span class="menu-icon">{{ item.icon }}</span>
+                <span class="menu-label" *ngIf="!menuCollapsed">{{ item.label }}</span>
+                <span class="menu-badge" *ngIf="item.badge && !menuCollapsed">{{ item.badge }}</span>
+            </button>
+          </ng-container>
+          <ng-container *ngIf="item.route">
+            <a [routerLink]="item.route" routerLinkActive="active" class="menu-item" style="text-decoration: none;">
+                <span class="menu-icon">{{ item.icon }}</span>
+                <span class="menu-label" *ngIf="!menuCollapsed">{{ item.label }}</span>
+            </a>
+          </ng-container>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="user-profile" *ngIf="usuarioLogado" style="padding: 20px; border-top: 1px solid #eee;">
+      <div class="user-info" *ngIf="!menuCollapsed"><strong>{{ usuarioLogado.nome }}</strong><br><small>{{ usuarioLogado.perfil }}</small></div>
+      <button class="logout-btn" (click)="logout()" title="Sair" style="margin-top: 10px; width: 100%;">↪ Sair</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    
+    <ng-container *ngIf="!showRelatorioScreen && !showDetailScreen">
+      <header class="header">
+        <div class="header-content">
+          <div class="header-title"><h2>Central de Atendimento</h2><p>Gerencie todos os chamados e solicitações</p></div>
+          <div class="header-actions">
+            <button class="btn btn-primary" 
+                    *ngIf="authService.podeGerenciarChamados()"
+                    (click)="abrirModalCriarChamado()">
+              + Novo Chamado
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="filters-section" style="padding: 0 30px; margin-top: 20px;">
+        <div class="filters-list" style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="filter-btn" *ngFor="let filter of statusFilters" [class.active]="filter.active" (click)="setFilter(filter.value)">
+                {{ filter.icon }} {{ filter.label }} <span class="filter-count">{{ filter.count }}</span>
+            </button>
+        </div>
+
+        <div class="filters-origin" style="display: flex; gap: 10px;">
+            <button class="filter-btn small" [class.active]="filtroOrigem === 'todos'" (click)="setFiltroOrigem('todos')">🌐 Todos</button>
+            <button class="filter-btn small" [class.active]="filtroOrigem === 'whatsapp'" (click)="setFiltroOrigem('whatsapp')">📱 WhatsApp</button>
+            <button class="filter-btn small" [class.active]="filtroOrigem === 'email'" (click)="setFiltroOrigem('email')">📧 E-mail</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="chamados-grid">
+            <div class="chamado-card" *ngFor="let chamado of getFilteredChamados()" (click)="onSelectChamado(chamado)" [class.novo-chamado]="chamado.isNovo">
+            
+            <div class="card-header">
+                <div class="card-header-left">
+                
+                <div class="origin-icon" 
+                     [title]="chamado.origem === 'whatsapp' ? 'Via WhatsApp' : 'Via E-mail'">
+                    {{ chamado.origem === 'whatsapp' ? '📱' : '📧' }}
+                </div>
+
+                <div class="card-info">
+                    <div class="card-number-priority">
+                        <span class="card-number" *ngIf="chamado.origem === 'whatsapp'">#{{ chamado.numeroProtocolo }}</span>
+                        <span class="card-number system-id" *ngIf="chamado.origem !== 'whatsapp'">VIA SISTEMA</span>
+
+                        <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
+                    </div>
+                    <h3 class="card-title">{{ chamado.cliente }}</h3>
+                </div>
+                </div>
+                <span class="status-badge" [class]="'status-' + chamado.status">{{ getStatusLabel(chamado.status) }}</span>
+            </div>
+
+            <div class="card-content">
+                <p class="card-description">{{ chamado.descricao }}</p>
+                <div class="card-details">
+                    <div class="detail-item"><span class="detail-label">Departamento</span><span class="detail-value" style="font-weight: bold;">{{ chamado.area || 'Geral' }}</span></div>
+                    <div class="detail-item"><span class="detail-label">Assunto</span><span class="detail-value">{{ chamado.categoria }}</span></div>
+                    <div class="detail-item"><span class="detail-label">Atendente</span><span class="detail-value">{{ chamado.atendente }}</span></div>
+                </div>
+                <div class="card-footer"><span class="card-meta">📅 {{ chamado.dataAbertura | date: 'dd/MM/yyyy' }} às {{ chamado.horaAbertura }}</span></div>
+            </div>
+            </div>
+            <div class="empty-state" *ngIf="getFilteredChamados().length === 0"><div class="empty-icon">📭</div><h3>Nenhum chamado encontrado</h3></div>
+        </div>
+      </div>
+    </ng-container>
+
+    <app-ticket-detail
+        *ngIf="showDetailScreen && chamadoDetalhe"
+        [chamado]="chamadoDetalhe"
+        [usuarioLogado]="usuarioLogado"  (close)="fecharTelaDetalhes()"
+        (edit)="onEditarAPartirDoDetalhe($event)">
+    </app-ticket-detail>
+
+    <app-relatorio-screen
+      *ngIf="showRelatorioScreen"
+      [chamados]="relatorioChamados"
+      [filtrosUtilizados]="filtrosRelatorioSalvos"
+      (closeReportScreen)="fecharRelatorioScreen()"
+      (openFilterModal)="reabrirModalFiltros()"
+      (chamadoSelecionado)="onSelectChamadoDoRelatorio($event)"> </app-relatorio-screen>
+  </main>
+</div>
+
+<app-create-ticket-modal
+  [isVisible]="showCreateModal" 
+  [chamadoParaEditar]="chamadoSelecionado"
+  [perfilUsuario]="usuarioLogado?.perfil || 'atendente'"
+  [usuarioLogadoNome]="usuarioLogado?.nome || ''"
+  (closeModal)="fecharModal()"
+  (chamadoCriado)="onChamadoCriado($event)"
+  (chamadoAtualizado)="onChamadoAtualizado($event)">
+</app-create-ticket-modal>
+
+<app-relatorio-filtro-modal
+  [isVisible]="showRelatorioFiltrosModal"
+  [filtrosSalvos]="filtrosRelatorioSalvos"
+  (closeModal)="fecharModalRelatorioFiltros()"
+  (gerarRelatorioEvent)="onGerarRelatorio($event)">
+</app-relatorio-filtro-modal>
+
+<app-search-protocol-modal
+  [isVisible]="showSearchModal"
+  (close)="fecharModalBusca()"
+  (search)="onBuscarProtocolo($event)">
+</app-search-protocol-modal>
+
+<div class="toast-container" [class.show]="toast.visible" *ngIf="toast.visible">
+  <div class="toast" [class]="'toast-' + toast.type">{{ toast.message }}</div>
+</div>

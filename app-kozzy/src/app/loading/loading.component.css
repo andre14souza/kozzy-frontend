@@ -1,0 +1,49 @@
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(255, 255, 255, 0.8); /* Fundo branco meio transparente */
+  backdrop-filter: blur(2px); /* Efeito de desfoque moderno */
+  z-index: 999999; /* Fica acima de TUDO (inclusive modais e toasts) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: wait; /* Muda o mouse para ampulheta/carregando */
+}
+
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3; /* Cinza claro */
+  border-top: 5px solid #dc2626; /* Vermelho da Kozzy */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+p {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  color: #333;
+  font-size: 16px;
+  margin: 0;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

@@ -1,0 +1,144 @@
+<div class="ds-container">
+  <header class="ds-header">
+    <h1>🎨 Kozzy Design System</h1>
+    <p>Guia de estilos, componentes e padrões visuais da aplicação.</p>
+  </header>
+
+  <section class="ds-section">
+    <h2>1. Cores</h2>
+    <div class="ds-grid-colors">
+      <div class="color-card">
+        <div class="swatch bg-primary"></div>
+        <div class="info">
+          <strong>Primary</strong>
+          <span>#dc2626</span>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="swatch bg-secondary"></div>
+        <div class="info">
+          <strong>Secondary</strong>
+          <span>#333333</span>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="swatch bg-background"></div>
+        <div class="info">
+          <strong>Background</strong>
+          <span>#f4f7f6</span>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="swatch bg-success"></div>
+        <div class="info">
+          <strong>Success</strong>
+          <span>#10b981</span>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="swatch bg-warning"></div>
+        <div class="info">
+          <strong>Warning</strong>
+          <span>#f59e0b</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ds-section">
+    <h2>2. Tipografia (Font: Inter)</h2>
+    <div class="ds-content">
+      <h1>Heading 1 - Título de Página (24px/700)</h1>
+      <h2>Heading 2 - Títulos de Seção (20px/600)</h2>
+      <h3>Heading 3 - Títulos de Card (16px/600)</h3>
+      <p><strong>Body Text:</strong> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Utilizado para descrições de chamados e textos corridos. (14px/400)</p>
+      <small>Caption / Small Text: Informações secundárias, datas e metadados. (12px/400)</small>
+    </div>
+  </section>
+
+  <section class="ds-section">
+    <h2>3. Botões</h2>
+    <div class="ds-row">
+      <button class="btn btn-primary">Botão Primário</button>
+      <button class="btn btn-secondary">Botão Secundário</button>
+      <button class="btn btn-outline">Botão Outline</button>
+      <button class="btn btn-primary" disabled>Desabilitado</button>
+    </div>
+  </section>
+
+  <section class="ds-section">
+    <h2>4. Status & Prioridade</h2>
+    <div class="ds-row">
+      <span class="status-badge status-aberto">🔴 Aberto</span>
+      <span class="status-badge status-andamento">🟡 Em Andamento</span>
+      <span class="status-badge status-fechado">🟢 Fechado</span>
+    </div>
+    <div class="ds-row" style="margin-top: 15px;">
+      <span class="priority-badge priority-baixa">⬇️ Baixa</span>
+      <span class="priority-badge priority-media">➡️ Média</span>
+      <span class="priority-badge priority-alta">⬆️ Alta</span>
+      <span class="priority-badge priority-urgente">🚨 Urgente</span>
+    </div>
+  </section>
+
+  <section class="ds-section">
+    <h2>5. Campos de Formulário</h2>
+    <div class="ds-grid-forms">
+      <div class="form-group">
+        <label>Input Padrão</label>
+        <input type="text" class="form-control" placeholder="Digite algo...">
+      </div>
+      <div class="form-group">
+        <label>Select</label>
+        <select class="form-control">
+          <option>Selecione uma opção</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Input com Erro</label>
+        <input type="text" class="form-control error" value="Valor inválido">
+        <span class="error-msg">⚠️ Campo obrigatório</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="ds-section">
+    <h2>6. Card de Chamado</h2>
+    <div class="ds-row">
+      <div class="chamado-card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon">🔧</div>
+            <div class="card-info">
+              <div class="card-number-priority">
+                <span class="card-number">#10234</span>
+                <div class="priority-indicator priority-alta"></div>
+              </div>
+              <h3 class="card-title">João da Silva</h3>
+            </div>
+          </div>
+          <span class="status-badge status-andamento">Em Andamento</span>
+        </div>
+        <div class="card-content">
+          <div class="card-description">
+            <p>Problema de conexão com a internet, cliente relatando lentidão.</p>
+          </div>
+          <div class="card-details">
+            <div class="detail-item">
+              <p class="detail-label">Categoria</p>
+              <p class="detail-value">Técnico</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Atendente</p>
+              <p class="detail-value">Mariana Silva</p>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="card-meta">📅 15/01/2024</span>
+            <button class="details-btn">Ver detalhes →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

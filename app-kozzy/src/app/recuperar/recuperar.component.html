@@ -1,0 +1,30 @@
+<div class="recover-password-container">
+    <div class="logo-container">
+        <div class="logo" role="img" aria-label="KOZZY Distribuidora">KOZZY</div>
+    </div>
+
+    <form [formGroup]="recuperarForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+            <label for="email" class="form-label">E-mail ou usuário</label>
+            <input 
+                type="text" 
+                id="email" 
+                formControlName="email" 
+                class="form-input" 
+                placeholder="Digite seu e-mail ou usuário cadastrado"
+                autocomplete="email"
+                autofocus
+                [class.error]="recuperarForm.controls['email'].invalid && recuperarForm.controls['email'].touched"
+                [class.success]="recuperarForm.controls['email'].valid && recuperarForm.controls['email'].touched"
+            >
+            <span class="input-icon user-icon" aria-hidden="true"></span>
+        </div>
+
+        <button type="submit" class="recover-button" [disabled]="recuperarForm.invalid">Recuperar Senha</button>
+        
+        <div class="back-to-login">
+            <a href="#" (click)="goToLogin($event)">Voltar para o Login</a>
+        </div>
+    </form>
+</div>
+

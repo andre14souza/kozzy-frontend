@@ -1,0 +1,94 @@
+<div class="modal-overlay" *ngIf="isVisible" (click)="onOverlayClick($event)" [@fadeIn]>
+  <div class="modal-container" [@slideIn]>
+    <div class="modal-header">
+      <h2 class="modal-title">📊 Filtros de Relatório</h2>
+      <button class="close-button" (click)="closeModalHandler()" aria-label="Fechar modal" type="button">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <form [formGroup]="filterForm" (ngSubmit)="gerarRelatorio()">
+        <!-- Campos de Data em Grid -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="dataInicio">Período de Início <span class="required">*</span></label>
+            <input type="date" id="dataInicio" formControlName="dataInicio" class="form-control" [class.is-invalid]="hasFieldError('dataInicio')">
+            <div *ngIf="hasFieldError('dataInicio')" class="invalid-feedback">
+              {{ getFieldError('dataInicio') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="dataFim">Período de Fim <span class="required">*</span></label>
+            <input type="date" id="dataFim" formControlName="dataFim" class="form-control" [class.is-invalid]="hasFieldError('dataFim')">
+            <div *ngIf="hasFieldError('dataFim')" class="invalid-feedback">
+              {{ getFieldError('dataFim') }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Campos de Filtro em Grid -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" formControlName="status" class="form-control">
+              <option value="">Todos</option>
+              <option value="aberto">Aberto</option>
+              <option value="em-andamento">Em Andamento</option>
+              <option value="fechado">Fechado</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="prioridade">Prioridade</label>
+            <select id="prioridade" formControlName="prioridade" class="form-control">
+              <option value="">Todas</option>
+              <option value="baixa">Baixa</option>
+              <option value="media">Média</option>
+              <option value="alta">Alta</option>
+              <option value="urgente">Urgente</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Campos de Texto -->
+        <div class="form-group">
+          <label for="atendente">Atendente</label>
+          <input type="text" id="atendente" formControlName="atendente" class="form-control" placeholder="Nome do atendente">
+        </div>
+
+        <div class="form-group">
+          <label for="cliente">Cliente</label>
+          <input type="text" id="cliente" formControlName="cliente" class="form-control" placeholder="Nome ou parte do nome do cliente">
+        </div>
+
+        <!-- Botões de Ação para Limpar Filtros -->
+        <div class="filter-actions">
+          <button type="button" class="btn-clear-optional" (click)="limparFiltrosOpcionais()" title="Limpar apenas filtros opcionais (manter datas)">
+            <svg viewBox="0 0 24 24">
+              <path d="M3 6h18"></path>
+              <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+              <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"></path>
+            </svg>
+            Limpar Filtros Opcionais
+          </button>
+          <button type="button" class="btn-clear-all" (click)="limparTodosFiltros()" title="Limpar todos os filtros">
+            <svg viewBox="0 0 24 24">
+              <path d="M3 6h18"></path>
+              <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+              <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+            Limpar Tudo
+          </button>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModalHandler()">Cancelar</button>
+          <button type="submit" class="btn btn-primary" [disabled]="filterForm.invalid">Gerar Relatório</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+

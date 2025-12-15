@@ -1,0 +1,23 @@
+<div class="modal-overlay" *ngIf="isVisible" (click)="onOverlayClick($event)">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3>🔍 Buscar Protocolo</h3>
+      <button class="close-btn" (click)="onClose()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input 
+        type="text" 
+        [(ngModel)]="protocoloInput" 
+        (keyup.enter)="onSearch()"
+        placeholder="Digite o número do protocolo..." 
+        class="search-input"
+        autofocus
+      />
+      <p class="hint">Pressione Enter para buscar</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="onClose()">Cancelar</button>
+      <button class="btn-confirm" (click)="onSearch()" [disabled]="!protocoloInput">Buscar</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,114 @@
+<div class="modal-overlay" *ngIf="isVisible" (click)="onOverlayClick($event)">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <span *ngIf="!showPreview">📝 {{ isEditMode ? 'Editar Chamado' : 'Novo Chamado' }}</span>
+        <span *ngIf="showPreview">👁️ Preview do Chamado</span>
+      </h2>
+      <button class="close-button" (click)="closeModalHandler()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <form [formGroup]="ticketForm" *ngIf="!showPreview" class="ticket-form">
+        
+        <div class="form-group">
+          <label for="origem" class="form-label required">Origem do Chamado <span class="field-info">*</span></label>
+          <select id="origem" formControlName="origem" class="form-select">
+            <option *ngFor="let opt of origemOptions" [value]="opt.value">{{ opt.label }}</option>
+          </select>
+        </div>
+
+        <div class="form-group" *ngIf="ticketForm.get('origem')?.value === 'whatsapp' || isEditMode">
+          <label for="numeroProtocolo" class="form-label">
+            Nº do Protocolo (WhatsApp)
+            <span class="field-info" *ngIf="ticketForm.get('origem')?.value === 'whatsapp'">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="numeroProtocolo" 
+            formControlName="numeroProtocolo" 
+            class="form-input" 
+            [class.error]="hasFieldError('numeroProtocolo')" 
+            placeholder="Cole o número aqui">
+          <div class="error-message" *ngIf="hasFieldError('numeroProtocolo')">{{ getFieldError('numeroProtocolo') }}</div>
+        </div>
+
+        <div class="form-group" *ngIf="isEditMode">
+            <label for="status" class="form-label required">Status / Situação <span class="field-info">*</span></label>
+            <select id="status" formControlName="status" class="form-select">
+              <option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+          <label for="cliente" class="form-label required">Tipo de Cliente <span class="field-info">*</span></label>
+          <select id="cliente" formControlName="cliente" class="form-select" [class.error]="hasFieldError('cliente')">
+            <option value="">Selecione o tipo de cliente</option>
+            <option *ngFor="let option of clienteOptions" [value]="option.value">{{ option.label }}</option>
+          </select>
+          <div class="error-message" *ngIf="hasFieldError('cliente')">{{ getFieldError('cliente') }}</div>
+        </div>
+
+        <div class="form-group">
+            <label for="area" class="form-label required">Área / Departamento <span class="field-info">*</span></label>
+            <select id="area" formControlName="area" class="form-select" [class.error]="hasFieldError('area')">
+              <option value="">Selecione o departamento</option>
+              <option *ngFor="let option of areaOptions" [value]="option.value">{{ option.label }}</option>
+            </select>
+            <div class="error-message" *ngIf="hasFieldError('area')">{{ getFieldError('area') }}</div>
+        </div>
+
+        <div class="form-group">
+          <label for="assunto" class="form-label required">Assunto Específico <span class="field-info">*</span></label>
+          <select id="assunto" formControlName="assunto" class="form-select" [class.error]="hasFieldError('assunto')">
+            <option value="">Selecione o assunto</option>
+            <option *ngFor="let option of assuntoOptions" [value]="option.value">{{ option.label }}</option>
+          </select>
+          <div class="error-message" *ngIf="hasFieldError('assunto')">{{ getFieldError('assunto') }}</div>
+        </div>
+
+        <div class="form-group" *ngIf="isEditMode && perfilUsuario === 'supervisor'">
+            <label for="atendente" class="form-label required">Atendente <span class="field-info">*</span></label>
+            <select id="atendente" formControlName="atendente" class="form-select">
+                <option *ngFor="let opt of atendenteOptions" [value]="opt.value">{{ opt.label }}</option>
+            </select>
+         </div>
+         
+         <div class="form-row">
+            <div class="form-group"><label class="form-label">Data</label><input type="date" formControlName="data" class="form-input readonly" readonly></div>
+            <div class="form-group"><label class="form-label">Hora</label><input type="time" formControlName="hora" class="form-input readonly" readonly></div>
+         </div>
+
+         <div class="form-group" *ngIf="isEditMode && perfilUsuario === 'supervisor'">
+            <label class="form-label">Prioridade</label>
+            <select formControlName="prioridade" class="form-select">
+                <option *ngFor="let opt of prioridadeOptions" [value]="opt.value">{{ opt.label }}</option>
+            </select>
+         </div>
+
+         <div class="form-group">
+            <label for="descricao" class="form-label">Descrição <span class="field-optional">(opcional)</span></label>
+            <textarea id="descricao" formControlName="descricao" class="form-textarea" rows="4"></textarea>
+         </div>
+
+      </form>
+
+      <div *ngIf="showPreview" class="preview-container">
+         <div class="preview-card">
+             <h3>📋 Resumo</h3>
+             <p><strong>Origem:</strong> {{ getPreviewData().origem }}</p>
+             <p><strong>Protocolo:</strong> {{ getPreviewData().numeroProtocolo || 'Gerado Automaticamente' }}</p>
+             <p *ngIf="isEditMode"><strong>Status:</strong> {{ getPreviewData().status }}</p> <p><strong>Cliente:</strong> {{ getPreviewData().cliente }}</p>
+             <p><strong>Área:</strong> {{ getPreviewData().area }}</p> 
+             <p><strong>Assunto:</strong> {{ getPreviewData().assunto }}</p>
+             <p><strong>Descrição:</strong> {{ getPreviewData().descricao }}</p>
+          </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+       <button class="btn btn-secondary" (click)="closeModalHandler()">Cancelar</button>
+       <button class="btn btn-primary" (click)="salvarChamado()">{{ isEditMode ? 'Atualizar' : 'Salvar' }}</button>
+    </div>
+  </div>
+</div>
