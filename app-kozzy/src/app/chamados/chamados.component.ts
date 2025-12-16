@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
+import { environment } from '../../environments/environment';
 // Interface que bate com o seu modal
 export interface NovoChamado {
   numeroProtocolo?: string;
@@ -22,8 +22,9 @@ export interface NovoChamado {
 })
 export class ChamadosService {
   // Rota da sua API Node.js
-  private readonly API_URL = 'http://localhost:3000/api/atendimentos';
-
+// NOVO SERVICE (ex: area.service.ts)
+private readonly API_URL = `${environment.apiUrl}/atendimentos`; 
+// ...
   constructor(private http: HttpClient) {}
 
   criarChamado(chamado: NovoChamado): Observable<any> {
