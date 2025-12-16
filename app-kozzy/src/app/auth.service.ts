@@ -19,11 +19,8 @@ export interface UsuarioLogado {
   providedIn: 'root'
 })
 export class AuthService {
-  // CORREÇÃO ESSENCIAL: Separar as rotas
-  // Esta rota é para o CRUD de Usuários (Login, Criar, Listar)
+  // CORREÇÃO ESSENCIAL: Separar as rotas para não misturar /atendimentos com /usuarios
   private readonly API_USUARIOS = `${environment.apiUrl}/usuarios`;
-  // Esta rota é para o CRUD de Atendimentos, se necessário usar o AuthService
-  // private readonly API_ATENDIMENTOS = `${environment.apiUrl}/atendimentos`;
 
   private usuarioLogadoSubject = new BehaviorSubject<UsuarioLogado | null>(null);
   public usuarioLogado$ = this.usuarioLogadoSubject.asObservable();
@@ -40,7 +37,7 @@ export class AuthService {
   login(email: string, password: string, rememberMe: boolean = false): Observable<any> {
     const payload = { email, senha: password };
 
-    // CORREÇÃO PRINCIPAL: Mudando de /atendimentos/login para /usuarios/login
+    // CORREÇÃO: Usando a rota de USUARIOS e enviando credenciais
     return this.http.post<any>(`${this.API_USUARIOS}/login`, payload, { withCredentials: true }).pipe(
       tap(response => {
         const usuarioBack = response.usuario;
@@ -59,15 +56,16 @@ export class AuthService {
     );
   }
 
+  // --- DELETE USUÁRIO ---
   deletarUsuario(id: string): Observable<any> {
-    // CORREÇÃO: Usando a rota de USUARIOS para deletar usuário
+    // CORREÇÃO: Enviando credenciais
     return this.http.delete(`${this.API_USUARIOS}/${id}`, { withCredentials: true });
   }
 
   // --- LOGOUT ---
   logout(): void {
     if (isPlatformBrowser(this.platformId)) {
-      // CORREÇÃO: Mudando de /atendimentos/logout para /usuarios/logout
+      // CORREÇÃO: Usando a rota de USUARIOS e enviando credenciais
       this.http.post(`${this.API_USUARIOS}/logout`, {}, { withCredentials: true }).subscribe();
       this.limparSessaoLocal();
     }
@@ -76,7 +74,7 @@ export class AuthService {
 
   // --- GET USUÁRIOS ---
   getTodosUsuarios(): Observable<any[]> {
-    // CORREÇÃO: Usando a rota de USUARIOS para listar
+    // CORREÇÃO: Usando a rota de USUARIOS e ENVIANDO AS CREDENCIAIS (Essencial para o 401!)
     return this.http.get<any[]>(this.API_USUARIOS, { withCredentials: true }).pipe(
       map(listaDoBackend => {
         return listaDoBackend.map(u => ({
@@ -97,7 +95,7 @@ export class AuthService {
       senha: dados.password,
       perfilAcesso: dados.perfil
     };
-    // CORREÇÃO: Usando a rota de USUARIOS para register
+    // CORREÇÃO: Usando a rota de USUARIOS
     return this.http.post(`${this.API_USUARIOS}/register`, payload);
   }
 
@@ -106,7 +104,7 @@ export class AuthService {
   }
 
   // =========================================================================
-  // MÉTODOS AUXILIARES (Sem alterações, pois são internos)
+  // MÉTODOS AUXILIARES (Sem alterações)
   // =========================================================================
 
   private definirSessao(usuario: UsuarioLogado, rememberMe: boolean): void {
@@ -172,13 +170,9 @@ export class AuthService {
     return usuario.perfil;
   }
 
-  // --- CORREÇÃO AQUI: MÉTODO ADICIONADO ---
   podeGerenciarChamados(): boolean {
     const usuario = this.getUsuarioLogado();
     if (!usuario) return false;
-
-    // Retorna true APENAS se o perfil for explicitamente 'supervisor' ou 'atendente'
-    // Retorna false para 'Logistica', 'Financeiro', etc.
     return usuario.perfil === 'supervisor' || usuario.perfil === 'atendente';
   }
 }
