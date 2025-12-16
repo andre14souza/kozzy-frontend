@@ -1,5 +1,5 @@
-import { Injectable, Inject, PLATFORM_ID } from '@angular/core'; 
-import { isPlatformBrowser } from '@angular/common'; 
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
@@ -10,23 +10,28 @@ export interface UsuarioLogado {
   id?: string;
   email: string;
   nome: string;
-  perfil: string; 
+  perfil: string;
   token?: string;
-  areas: string[]; 
+  areas: string[];
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_URL = `${environment.apiUrl}/atendimentos`;  
+  // CORREÇÃO ESSENCIAL: Separar as rotas
+  // Esta rota é para o CRUD de Usuários (Login, Criar, Listar)
+  private readonly API_USUARIOS = `${environment.apiUrl}/usuarios`;
+  // Esta rota é para o CRUD de Atendimentos, se necessário usar o AuthService
+  // private readonly API_ATENDIMENTOS = `${environment.apiUrl}/atendimentos`;
+
   private usuarioLogadoSubject = new BehaviorSubject<UsuarioLogado | null>(null);
   public usuarioLogado$ = this.usuarioLogadoSubject.asObservable();
 
   constructor(
     private router: Router,
     private http: HttpClient,
-    @Inject(PLATFORM_ID) private platformId: Object 
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.verificarUsuarioLogado();
   }
@@ -35,10 +40,11 @@ export class AuthService {
   login(email: string, password: string, rememberMe: boolean = false): Observable<any> {
     const payload = { email, senha: password };
 
-    return this.http.post<any>(`${this.API_URL}/login`, payload, { withCredentials: true }).pipe(
+    // CORREÇÃO PRINCIPAL: Mudando de /atendimentos/login para /usuarios/login
+    return this.http.post<any>(`${this.API_USUARIOS}/login`, payload, { withCredentials: true }).pipe(
       tap(response => {
         const usuarioBack = response.usuario;
-        
+
         const usuarioFormatado: UsuarioLogado = {
           id: usuarioBack.id,
           email: usuarioBack.email,
@@ -54,21 +60,24 @@ export class AuthService {
   }
 
   deletarUsuario(id: string): Observable<any> {
-    return this.http.delete(`${this.API_URL}/${id}`, { withCredentials: true });
+    // CORREÇÃO: Usando a rota de USUARIOS para deletar usuário
+    return this.http.delete(`${this.API_USUARIOS}/${id}`, { withCredentials: true });
   }
 
   // --- LOGOUT ---
   logout(): void {
     if (isPlatformBrowser(this.platformId)) {
-        this.http.post(`${this.API_URL}/logout`, {}, { withCredentials: true }).subscribe();
-        this.limparSessaoLocal();
+      // CORREÇÃO: Mudando de /atendimentos/logout para /usuarios/logout
+      this.http.post(`${this.API_USUARIOS}/logout`, {}, { withCredentials: true }).subscribe();
+      this.limparSessaoLocal();
     }
     this.router.navigate(['/login']);
   }
 
   // --- GET USUÁRIOS ---
   getTodosUsuarios(): Observable<any[]> {
-    return this.http.get<any[]>(this.API_URL, { withCredentials: true }).pipe(
+    // CORREÇÃO: Usando a rota de USUARIOS para listar
+    return this.http.get<any[]>(this.API_USUARIOS, { withCredentials: true }).pipe(
       map(listaDoBackend => {
         return listaDoBackend.map(u => ({
           id: u._id,
@@ -88,7 +97,8 @@ export class AuthService {
       senha: dados.password,
       perfilAcesso: dados.perfil
     };
-    return this.http.post(`${this.API_URL}/register`, payload);
+    // CORREÇÃO: Usando a rota de USUARIOS para register
+    return this.http.post(`${this.API_USUARIOS}/register`, payload);
   }
 
   recuperarSenha(email: string): Observable<any> {
@@ -96,7 +106,7 @@ export class AuthService {
   }
 
   // =========================================================================
-  // MÉTODOS AUXILIARES
+  // MÉTODOS AUXILIARES (Sem alterações, pois são internos)
   // =========================================================================
 
   private definirSessao(usuario: UsuarioLogado, rememberMe: boolean): void {
@@ -119,7 +129,7 @@ export class AuthService {
     if (isPlatformBrowser(this.platformId)) {
       const uL = localStorage.getItem('usuario');
       const uS = sessionStorage.getItem('usuario');
-      
+
       if (uL) {
         this.usuarioLogadoSubject.next(JSON.parse(uL));
       } else if (uS) {
@@ -128,29 +138,29 @@ export class AuthService {
     }
   }
 
-  isLogado(): boolean { 
-    return this.usuarioLogadoSubject.value !== null; 
+  isLogado(): boolean {
+    return this.usuarioLogadoSubject.value !== null;
   }
-  
-  getUsuarioLogado(): UsuarioLogado | null { 
-    return this.usuarioLogadoSubject.value; 
+
+  getUsuarioLogado(): UsuarioLogado | null {
+    return this.usuarioLogadoSubject.value;
   }
-  
-  isSupervisor(): boolean { 
-    return this.getUsuarioLogado()?.perfil === 'supervisor'; 
+
+  isSupervisor(): boolean {
+    return this.getUsuarioLogado()?.perfil === 'supervisor';
   }
-  
-  isAtendente(): boolean { 
+
+  isAtendente(): boolean {
     const p = this.getUsuarioLogado()?.perfil;
-    return !!p && p !== 'supervisor'; 
+    return !!p && p !== 'supervisor';
   }
 
-  canAccessAtendenteRoute(): boolean { 
-    return this.isLogado(); 
+  canAccessAtendenteRoute(): boolean {
+    return this.isLogado();
   }
 
-  canAccessSupervisorRoute(): boolean { 
-    return this.isLogado() && this.isSupervisor(); 
+  canAccessSupervisorRoute(): boolean {
+    return this.isLogado() && this.isSupervisor();
   }
 
   getAreaDoUsuario(): string {
@@ -159,14 +169,14 @@ export class AuthService {
     if (usuario.perfil === 'supervisor' || usuario.perfil === 'atendente') {
         return usuario.areas && usuario.areas.length > 0 ? usuario.areas[0] : '';
     }
-    return usuario.perfil; 
+    return usuario.perfil;
   }
 
   // --- CORREÇÃO AQUI: MÉTODO ADICIONADO ---
   podeGerenciarChamados(): boolean {
     const usuario = this.getUsuarioLogado();
     if (!usuario) return false;
-    
+
     // Retorna true APENAS se o perfil for explicitamente 'supervisor' ou 'atendente'
     // Retorna false para 'Logistica', 'Financeiro', etc.
     return usuario.perfil === 'supervisor' || usuario.perfil === 'atendente';
