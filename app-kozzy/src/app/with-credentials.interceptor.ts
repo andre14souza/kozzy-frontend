@@ -1,11 +1,7 @@
-// ABRIR: with-credentials.interceptor.ts
+// ABRIR: with-credentials.interceptor.ts (CRIAR ESTE ARQUIVO)
+
 import { Injectable } from '@angular/core';
-import {
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpInterceptor
-} from '@angular/common/http';
+import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment'; // Ajuste o caminho se necessário
 
@@ -26,7 +22,7 @@ export class WithCredentialsInterceptor implements HttpInterceptor {
       return next.handle(clonedRequest);
     }
 
-    // Para todas as outras requisições (não API), segue o fluxo normal
+    // Para todas as outras requisições, segue o fluxo normal
     return next.handle(request);
   }
 }
