@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Chamado, NovoChamado } from '../chamados.service';
 import { AuthService } from '../auth.service';
 import { HttpClient } from '@angular/common/http';
-
+import { environment } from '../../environments/environment'; // 💥 NOVO: Adicione este import no topo do arquivo!
 interface SelectOption { value: string; label: string; }
 
 @Component({
@@ -100,12 +100,17 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
     const usuario = this.authService.getUsuarioLogado();
     if (!usuario || !usuario.id) return;
 
-    this.http.get<any>(`http://localhost:3000/api/areas/${usuario.id}`).subscribe({
+    // 💥 CORREÇÃO: Usar environment.apiUrl para apontar para o Render
+    this.http.get<any>(`${environment.apiUrl}/areas/${usuario.id}`, { withCredentials: true }).subscribe({
       next: (res) => {
         if (res && res.areas && res.areas.length > 0) {
           this.areaOptions = this.areaOptions.filter(opt => res.areas.includes(opt.value));
           if (this.areaOptions.length === 1) this.ticketForm.patchValue({ area: this.areaOptions[0].value });
         }
+      },
+      error: (err) => {
+        console.error('Erro ao carregar áreas do usuário:', err);
+        // Pode ser útil para debug, mas não bloqueia a aplicação
       }
     });
   }
