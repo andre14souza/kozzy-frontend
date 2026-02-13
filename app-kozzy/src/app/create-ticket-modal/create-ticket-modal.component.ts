@@ -4,14 +4,8 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Chamado, NovoChamado } from '../chamados.service';
 import { AuthService } from '../auth.service';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment'; // 💥 NOVO: Adicione este import no topo do arquivo!
-interface SelectOption { value: string; label: string; }
-interface UsuarioSimples {
-  id?: string;
-  _id?: string;
-  nome: string;
-  perfil: string;
-}
+import { environment } from '../../environments/environment';
+
 @Component({
   selector: 'app-create-ticket-modal',
   standalone: true,
@@ -23,7 +17,6 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
   @Input() isVisible: boolean = false;
   @Input() chamadoParaEditar?: Chamado | null;
   @Input() perfilUsuario: string = 'atendente';
-  @Input() usuarioLogadoNome: string = '';
 
   @Output() closeModal = new EventEmitter<void>();
   @Output() chamadoCriado = new EventEmitter<NovoChamado>();
@@ -32,94 +25,21 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
   ticketForm!: FormGroup;
   isEditMode = false;
   isLoading = false;
-  showPreview = false;
+  atendenteOptions: any[] = [];
 
-  // --- OPÇÕES DE STATUS (NOVO) ---
-  statusOptions: SelectOption[] = [
-    { value: 'aberto', label: '🔴 Aberto' },
-    { value: 'em-andamento', label: '🟡 Em Andamento' },
-    { value: 'fechado', label: '🟢 Concluído' }
-  ];
-
-  origemOptions: SelectOption[] = [
-    { value: 'email', label: '📧 E-mail' },
-    { value: 'whatsapp', label: '📱 WhatsApp' }
-  ];
-
-  areaOptions: SelectOption[] = [
-    { value: 'Logistica', label: '📦 Logística' },
-    { value: 'Contas a Pagar', label: '💸 Contas a Pagar' },
-    { value: 'Contas a Receber', label: '💵 Contas a Receber' },
-    { value: 'Compra', label: '🛒 Compras' },
-    { value: 'T.I', label: '💻 T.I' },
-    { value: 'Comercial', label: '📞 Comercial' }
-  ];
-
-  assuntoOptions: SelectOption[] = [
-    { value: 'Dúvida Geral', label: 'Dúvida Geral' },
-    { value: 'Reclamação', label: 'Reclamação' },
-    { value: 'Solicitação de Serviço', label: 'Solicitação de Serviço' },
-    { value: 'Erro no Sistema', label: 'Erro no Sistema' },
-    { value: 'Troca/Devolução', label: 'Troca/Devolução' }
-  ];
-
-  clienteOptions: SelectOption[] = [
-    { value: 'entregador', label: '🚴 Entregador' },
-    { value: 'cliente', label: '👤 Cliente Final' },
-    { value: 'vendedor', label: '🏪 Loja/Vendedor' },
-    { value: 'interno', label: '🏢 Interno' }
-  ];
-
-  atendenteOptions: SelectOption[] = [];
-  
-  prioridadeOptions: SelectOption[] = [ 
-    { value: 'Baixa Prioridade', label: '🟢 Baixa' },
-    { value: 'Média Prioridade', label: '🟡 Média' }, 
-    { value: 'Alta Prioridade', label: '🟠 Alta' }, 
-    { value: 'Urgente', label: '🔴 Urgente' } 
-  ];
-
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private http: HttpClient
-  ) {}
+  constructor(private fb: FormBuilder, private authService: AuthService, private http: HttpClient) {}
 
   ngOnInit() {
     this.initializeForm();
     this.carregarAtendentes();
-    this.filtrarAreasPermitidas();
   }
 
-carregarAtendentes() {
-  this.authService.getTodosUsuarios().subscribe({
-    next: (usuarios: any[]) => {
-      this.atendenteOptions = usuarios
-        .filter(u => u.perfil === 'atendente')
-        .map(u => ({ 
-          value: u.id || u._id, // <--- MUDANÇA: Envie o ID para o banco
-          label: u.nome 
-        }));
-    }
-  });
-}
-
-  filtrarAreasPermitidas() {
-    if (this.perfilUsuario === 'supervisor') return;
-    const usuario = this.authService.getUsuarioLogado();
-    if (!usuario || !usuario.id) return;
-
-    // 💥 CORREÇÃO: Usar environment.apiUrl para apontar para o Render
-    this.http.get<any>(`${environment.apiUrl}/areas/${usuario.id}`, { withCredentials: true }).subscribe({
-      next: (res) => {
-        if (res && res.areas && res.areas.length > 0) {
-          this.areaOptions = this.areaOptions.filter(opt => res.areas.includes(opt.value));
-          if (this.areaOptions.length === 1) this.ticketForm.patchValue({ area: this.areaOptions[0].value });
-        }
-      },
-      error: (err) => {
-        console.error('Erro ao carregar áreas do usuário:', err);
-        // Pode ser útil para debug, mas não bloqueia a aplicação
+  carregarAtendentes() {
+    this.authService.getTodosUsuarios().subscribe({
+      next: (usuarios: any[]) => {
+        this.atendenteOptions = usuarios
+          .filter(u => u.perfil === 'atendente')
+          .map(u => ({ value: u.id || u._id, label: u.nome }));
       }
     });
   }
@@ -128,153 +48,66 @@ carregarAtendentes() {
     if (changes['isVisible'] && this.isVisible) {
       this.isEditMode = !!this.chamadoParaEditar;
       this.initializeForm(); 
-      this.filtrarAreasPermitidas();
-
-      if (this.isEditMode) {
-        this.populateFormForEdit();
-        this.checkPermissionsAndPopulate();
-      } 
-    }
-  }
-
-  checkPermissionsAndPopulate(): void {
-    this.populateFormForEdit();
-    if (this.perfilUsuario === 'supervisor') {
-      this.ticketForm.get('atendente')?.enable();
-      this.ticketForm.get('prioridade')?.enable();
-    } else {
-      this.ticketForm.get('atendente')?.disable();
-      this.ticketForm.get('prioridade')?.disable();
+      if (this.isEditMode) this.populateFormForEdit();
     }
   }
 
   initializeForm() {
     this.ticketForm = this.fb.group({
       origem: ['email', Validators.required],
-      
-      // --- CAMPO STATUS (Adicionado) ---
-      status: ['aberto', Validators.required], 
-
+      status: ['aberto', Validators.required],
       numeroProtocolo: [{ value: '', disabled: true }],
       cliente: ['', Validators.required],
       area: ['', Validators.required],
       assunto: ['', Validators.required],
-      atendente: [{ value: '', disabled: true }], 
-      prioridade: [{ value: 'Média Prioridade', disabled: true }],
+      atendente: [''], 
+      prioridade: ['Média Prioridade'],
       descricao: ['', Validators.maxLength(500)],
       data: [new Date().toISOString().split('T')[0]],
       hora: [new Date().toTimeString().slice(0, 5)]
     });
+  }
 
-    this.ticketForm.get('origem')?.valueChanges.subscribe(origem => {
-      this.atualizarValidacaoProtocolo(origem);
+  populateFormForEdit() {
+    if (!this.chamadoParaEditar) return;
+    const a = this.chamadoParaEditar.atendente;
+    const id = (a && typeof a === 'object') ? (a.id || a._id) : a;
+    this.ticketForm.patchValue({
+      origem: this.chamadoParaEditar.origem,
+      status: this.chamadoParaEditar.status,
+      cliente: this.chamadoParaEditar.cliente,
+      area: this.chamadoParaEditar.area,
+      atendente: id || '',
+      prioridade: this.chamadoParaEditar.prioridade,
+      descricao: this.chamadoParaEditar.descricao
     });
   }
 
-  atualizarValidacaoProtocolo(origem: string) {
-    const protocoloControl = this.ticketForm.get('numeroProtocolo');
-    if (!protocoloControl) return;
-
-    if (origem === 'whatsapp') {
-      protocoloControl.setValidators([Validators.required]);
-      protocoloControl.enable();
-    } else {
-      protocoloControl.clearValidators();
-      protocoloControl.setValue('');
-    }
-    protocoloControl.updateValueAndValidity();
-  }
-
-populateFormForEdit(): void {
-  if (!this.chamadoParaEditar) return;
-  
-  // Pegamos o ID de forma segura, seja objeto ou string
-  const atendenteInfo = this.chamadoParaEditar.atendente;
-  let atendenteId = '';
-
-  if (atendenteInfo && typeof atendenteInfo === 'object') {
-    atendenteId = (atendenteInfo as any).id || (atendenteInfo as any)._id || '';
-  } else {
-    atendenteId = (atendenteInfo as string) || '';
-  }
-
-  this.ticketForm.patchValue({
-    origem: this.chamadoParaEditar.origem || 'email',
-    status: this.chamadoParaEditar.status || 'aberto',
-    numeroProtocolo: this.chamadoParaEditar.numeroProtocolo || '',
-    cliente: this.chamadoParaEditar.cliente || '',
-    area: this.chamadoParaEditar.area || this.chamadoParaEditar.categoria || '',
-    assunto: 'Dúvida Geral',
-    atendente: atendenteId, // Agora o valor bate com o select
-    prioridade: this.chamadoParaEditar.prioridade,
-    descricao: this.chamadoParaEditar.descricao,
-    data: this.chamadoParaEditar.dataAbertura,
-    hora: this.chamadoParaEditar.horaAbertura
-  });
-}
-
   salvar() {
-    if (this.ticketForm.invalid) {
-        this.ticketForm.markAllAsTouched();
-        return; 
-    }
+    if (this.ticketForm.invalid) return;
     this.isLoading = true;
 
-    setTimeout(() => {
-      const val = this.ticketForm.getRawValue();
-      const atendenteSelecionado = this.atendenteOptions.find(opt => opt.value === val.atendente);
-    
-    const atendenteFormatado = atendenteSelecionado ? {
-      _id: atendenteSelecionado.value,
-      nomeCompleto: atendenteSelecionado.label
-    } : val.atendente;
-      const dadosComuns = {
-        cliente: val.cliente,
-        area: val.area,
-        assunto: val.assunto,
-        atendente: atendenteFormatado,
-        prioridade: val.prioridade,
-        descricao: val.descricao,
-        data: val.data,
-        hora: val.hora,
-        origem: val.origem
-      };
+    const val = this.ticketForm.getRawValue();
+    const user = this.authService.getUsuarioLogado();
 
-      if (this.isEditMode && this.chamadoParaEditar) {
-        const editado: Chamado = {
-          ...this.chamadoParaEditar,
-          ...dadosComuns,
-          categoria: val.assunto,
-          numeroProtocolo: val.numeroProtocolo,
-          
-          // --- USA O STATUS SELECIONADO NA EDIÇÃO ---
-          status: val.status 
-        };
-        this.chamadoAtualizado.emit(editado);
-      } else {
-        const novo: NovoChamado = {
-          ...dadosComuns,
-          numeroProtocolo: val.origem === 'whatsapp' ? val.numeroProtocolo : undefined,
-          
-          // --- NA CRIAÇÃO, FORÇA ABERTO ---
-          status: 'aberto', 
-          
-          dataHoraCriacao: new Date().toISOString()
-        };
-        this.chamadoCriado.emit(novo);
-      }
-      this.isLoading = false;
-    }, 200);
+    let atendenteFinal;
+    if (this.isEditMode) {
+      const opt = this.atendenteOptions.find(o => o.value === val.atendente);
+      atendenteFinal = opt ? { _id: opt.value, nomeCompleto: opt.label } : val.atendente;
+    } else {
+      atendenteFinal = { _id: user?.id, nomeCompleto: user?.nome };
+    }
+
+    const dados = { ...val, atendente: atendenteFinal };
+
+    if (this.isEditMode) {
+      this.chamadoAtualizado.emit({ ...this.chamadoParaEditar, ...dados } as any);
+    } else {
+      this.chamadoCriado.emit(dados as any);
+    }
+    this.isLoading = false;
+    this.close();
   }
 
-  // ... (Outros métodos: close, handlers, etc. mantidos iguais)
   close() { this.closeModal.emit(); }
-  closeModalHandler() { this.close(); }
-  onOverlayClick(event: MouseEvent) { if ((event.target as HTMLElement).classList.contains('modal-overlay')) { this.close(); } }
-  showPreviewHandler() { this.showPreview = true; }
-  backToForm() { this.showPreview = false; }
-  getPreviewData() { return this.ticketForm.getRawValue(); } 
-  hasFieldError(field: string): boolean { const control = this.ticketForm.get(field); return !!(control && control.invalid && (control.dirty || control.touched)); }
-  getFieldError(field: string): string { const control = this.ticketForm.get(field); if (control?.errors?.['required']) return 'Campo obrigatório'; return ''; }
-  salvarChamado() { this.salvar(); }
 }

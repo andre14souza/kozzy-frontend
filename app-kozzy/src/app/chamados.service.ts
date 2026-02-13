@@ -101,8 +101,7 @@ export class ChamadosService {
   adicionarChamado(chamado: NovoChamado): Observable<any> {
     // Garante que enviamos apenas o ID, não o objeto
     const idAtendente = (chamado.atendente && typeof chamado.atendente === 'object') 
-      ? chamado.atendente._id 
-      : chamado.atendente;
+      ? chamado.atendente._id : chamado.atendente;
 
     const payload = {
       numeroProtocolo: chamado.numeroProtocolo,
