@@ -191,8 +191,11 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
 
       numeroProtocolo: protocolo,
       cliente: safeValue(this.chamadoParaEditar.cliente),
-      area: safeValue(this.chamadoParaEditar.area), 
-      assunto: safeValue(this.chamadoParaEditar.categoria),
+      area: safeValue(this.chamadoParaEditar.area || this.chamadoParaEditar.categoria), 
+    
+    // Se você não tiver um campo específico para 'Assunto' no banco ainda, 
+    // ele pode ficar como 'Dúvida Geral' por padrão na edição
+    assunto: 'Dúvida Geral',
       atendente: this.chamadoParaEditar.atendente,
       prioridade: this.chamadoParaEditar.prioridade,
       descricao: this.chamadoParaEditar.descricao,

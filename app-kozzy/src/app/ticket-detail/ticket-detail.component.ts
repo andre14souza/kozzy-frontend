@@ -35,16 +35,17 @@ export class TicketDetailComponent {
 
   // Lógica de Edição (Mantida)
   podeEditar(): boolean {
-    if (!this.usuarioLogado || !this.chamado) return false;
-    if (this.usuarioLogado.perfil === 'supervisor') return true;
+  if (!this.usuarioLogado || !this.chamado) return false;
+  if (this.usuarioLogado.perfil === 'supervisor') return true;
 
-    const nomeBate = this.usuarioLogado.nome.toLowerCase() === (this.chamado.atendente || '').toLowerCase();
-    const areasDoUsuario = this.usuarioLogado.areas || [];
-    const areaDoChamado = this.chamado.area;
-    const areaBate = areasDoUsuario.includes(areaDoChamado);
-
-    return this.usuarioLogado.perfil === 'atendente' && nomeBate && areaBate;
-  }
+  // Verifica se o nome ou ID bate com quem deve atender ou quem criou
+  const ehDonoOuAtendente = 
+    this.usuarioLogado.nome.toLowerCase() === (this.chamado.atendente || '').toLowerCase();
+  
+  // Se for atendente, ele pode editar se for o responsável 
+  // (Remova a trava de área aqui para facilitar o teste inicial)
+  return this.usuarioLogado.perfil === 'atendente' && ehDonoOuAtendente;
+}
 
   onEdit() {
     if (this.podeEditar()) {
