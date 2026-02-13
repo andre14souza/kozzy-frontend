@@ -26,7 +26,7 @@ export interface Chamado {
   cliente: string;
   area: string;
   categoria: string;
-  atendente: any; // CORREÇÃO: Alterado para any para evitar erro de build (NG9)
+  atendente?: any; // CORREÇÃO: Alterado para any para evitar erro de build (NG9)
   prioridade: string;
   status: string;
   descricao: string;
