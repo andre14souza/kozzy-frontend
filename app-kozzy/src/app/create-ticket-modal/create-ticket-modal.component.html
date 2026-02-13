@@ -18,7 +18,7 @@
           </select>
         </div>
 
-        <div class="form-group" *ngIf="ticketForm.get('origem')?.value === 'whatsapp' || isEditMode">
+        <div class="form-group" *ngIf="ticketForm.get('origem')?.value === 'whatsapp'">
           <label for="numeroProtocolo" class="form-label">
             Nº do Protocolo (WhatsApp)
             <span class="field-info" *ngIf="ticketForm.get('origem')?.value === 'whatsapp'">*</span>

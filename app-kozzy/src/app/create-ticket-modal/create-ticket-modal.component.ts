@@ -177,34 +177,29 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
   }
 
   populateFormForEdit(): void {
-    if (!this.chamadoParaEditar) return;
-    const safeValue = (val: any) => val || '';
+  if (!this.chamadoParaEditar) return;
+  const safeValue = (val: any) => val || '';
 
-    const protocolo = this.chamadoParaEditar.numeroProtocolo || '';
-    const origemInferida = this.chamadoParaEditar.origem || (protocolo.startsWith('ATD-') ? 'email' : 'whatsapp');
-
-    this.ticketForm.patchValue({
-      origem: origemInferida,
-      
-      // --- POPULAR O STATUS ---
-      status: this.chamadoParaEditar.status || 'aberto',
-
-      numeroProtocolo: protocolo,
-      cliente: safeValue(this.chamadoParaEditar.cliente),
-      area: safeValue(this.chamadoParaEditar.area || this.chamadoParaEditar.categoria), 
+  this.ticketForm.patchValue({
+    // 1. Pega a origem direto do chamado vindo do banco
+    origem: this.chamadoParaEditar.origem || 'email', 
     
-    // Se você não tiver um campo específico para 'Assunto' no banco ainda, 
-    // ele pode ficar como 'Dúvida Geral' por padrão na edição
-    assunto: 'Dúvida Geral',
-      atendente: this.chamadoParaEditar.atendente,
-      prioridade: this.chamadoParaEditar.prioridade,
-      descricao: this.chamadoParaEditar.descricao,
-      data: this.chamadoParaEditar.dataAbertura,
-      hora: this.chamadoParaEditar.horaAbertura
-    });
+    status: this.chamadoParaEditar.status || 'aberto',
+    numeroProtocolo: this.chamadoParaEditar.numeroProtocolo,
+    cliente: safeValue(this.chamadoParaEditar.cliente),
     
-    this.atualizarValidacaoProtocolo(origemInferida);
-  }
+    // 2. Corrigindo o problema do "Assunto" vazio para Supervisor:
+    // Mapeamos a 'categoria' do banco para o campo 'area' do formulário
+    area: safeValue(this.chamadoParaEditar.area || this.chamadoParaEditar.categoria),
+    assunto: 'Dúvida Geral', // Valor padrão para o campo de assunto específico
+    
+    atendente: this.chamadoParaEditar.atendente,
+    prioridade: this.chamadoParaEditar.prioridade,
+    descricao: this.chamadoParaEditar.descricao,
+    data: this.chamadoParaEditar.dataAbertura,
+    hora: this.chamadoParaEditar.horaAbertura
+  });
+}
 
   salvar() {
     if (this.ticketForm.invalid) {
