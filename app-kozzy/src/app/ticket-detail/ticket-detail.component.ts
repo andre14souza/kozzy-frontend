@@ -16,36 +16,41 @@ export class TicketDetailComponent {
   
   @Output() close = new EventEmitter<void>();
   @Output() edit = new EventEmitter<Chamado>();
-  @Output() deleteTicket = new EventEmitter<string>(); // <--- NOVO OUTPUT
+  @Output() deleteTicket = new EventEmitter<string>();
 
   onClose() {
     this.close.emit();
   }
 
-  // Verifica se é Supervisor para mostrar o botão de Excluir
   isSupervisor(): boolean {
     return this.usuarioLogado?.perfil === 'supervisor';
   }
 
   onDelete() {
-    // A confirmação fica aqui ou no componente pai. 
-    // Vamos emitir o evento e deixar o pai confirmar e apagar.
-    this.deleteTicket.emit(this.chamado.id);
+    if (this.chamado?.id) {
+      this.deleteTicket.emit(this.chamado.id);
+    }
   }
 
-  // Lógica de Edição (Mantida)
+  // CORREÇÃO: Lógica para evitar o erro de toLowerCase()
   podeEditar(): boolean {
-  if (!this.usuarioLogado || !this.chamado) return false;
-  if (this.usuarioLogado.perfil === 'supervisor') return true;
+    if (!this.usuarioLogado || !this.chamado) return false;
+    
+    // Supervisores sempre podem editar
+    if (this.usuarioLogado.perfil === 'supervisor') return true;
 
-  // Verifica se o nome ou ID bate com quem deve atender ou quem criou
-  const ehDonoOuAtendente = 
-    this.usuarioLogado.nome.toLowerCase() === (this.chamado.atendente || '').toLowerCase();
-  
-  // Se for atendente, ele pode editar se for o responsável 
-  // (Remova a trava de área aqui para facilitar o teste inicial)
-  return this.usuarioLogado.perfil === 'atendente' && ehDonoOuAtendente;
-}
+    const atendente = this.chamado.atendente;
+    
+    // Pegamos o ID do atendente de forma segura, seja ele um objeto ou string
+    const atendenteId = (atendente && typeof atendente === 'object') 
+      ? (atendente.id || atendente._id) 
+      : atendente;
+
+    // Se o perfil for atendente, ele só edita se o ID dele bater com o ID do responsável
+    const ehResponsavel = this.usuarioLogado.id === atendenteId;
+    
+    return this.usuarioLogado.perfil === 'atendente' && ehResponsavel;
+  }
 
   onEdit() {
     if (this.podeEditar()) {
@@ -55,7 +60,14 @@ export class TicketDetailComponent {
     }
   }
 
-  // Helpers
-  getStatusLabel(s: string) { const m:any={'aberto':'Aberto','em-andamento':'Em Andamento','fechado':'Fechado'}; return m[s]||s; }
-  getPrioridadeLabel(p: string) { const m:any={'baixa':'Baixa','media':'Média','alta':'Alta','urgente':'Urgente'}; return m[p]||p; }
+  // Helpers de exibição
+  getStatusLabel(s: string) { 
+    const m: any = { 'aberto': 'Aberto', 'em-andamento': 'Em Andamento', 'fechado': 'Concluído' }; 
+    return m[s] || s; 
+  }
+
+  getPrioridadeLabel(p: string) { 
+    const m: any = { 'baixa': 'Baixa', 'media': 'Média', 'alta': 'Alta', 'urgente': 'Urgente' }; 
+    return m[p] || p; 
+  }
 }
