@@ -6,12 +6,7 @@ import { AuthService } from '../auth.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment'; // 💥 NOVO: Adicione este import no topo do arquivo!
 interface SelectOption { value: string; label: string; }
-interface UsuarioSimples {
-  id?: string;
-  _id?: string;
-  nome: string;
-  perfil: string;
-}
+
 @Component({
   selector: 'app-create-ticket-modal',
   standalone: true,
@@ -91,18 +86,14 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
     this.filtrarAreasPermitidas();
   }
 
-carregarAtendentes() {
-  this.authService.getTodosUsuarios().subscribe({
-    next: (usuarios: any[]) => {
-      this.atendenteOptions = usuarios
-        .filter(u => u.perfil === 'atendente')
-        .map(u => ({ 
-          value: u.id || u._id, // <--- MUDANÇA: Envie o ID para o banco
-          label: u.nome 
-        }));
-    }
-  });
-}
+  carregarAtendentes() {
+    this.authService.getTodosUsuarios().subscribe({
+      next: (usuarios) => {
+        this.atendenteOptions = usuarios.map(u => ({ value: u.nome, label: u.nome }));
+      },
+      error: (err) => console.error(err)
+    });
+  }
 
   filtrarAreasPermitidas() {
     if (this.perfilUsuario === 'supervisor') return;
@@ -185,33 +176,32 @@ carregarAtendentes() {
     protocoloControl.updateValueAndValidity();
   }
 
-populateFormForEdit(): void {
-  if (!this.chamadoParaEditar) return;
-  
-  // Pegamos o ID de forma segura, seja objeto ou string
-  const atendenteInfo = this.chamadoParaEditar.atendente;
-  let atendenteId = '';
+  populateFormForEdit(): void {
+    if (!this.chamadoParaEditar) return;
+    const safeValue = (val: any) => val || '';
 
-  if (atendenteInfo && typeof atendenteInfo === 'object') {
-    atendenteId = (atendenteInfo as any).id || (atendenteInfo as any)._id || '';
-  } else {
-    atendenteId = (atendenteInfo as string) || '';
+    const protocolo = this.chamadoParaEditar.numeroProtocolo || '';
+    const origemInferida = this.chamadoParaEditar.origem || (protocolo.startsWith('ATD-') ? 'email' : 'whatsapp');
+
+    this.ticketForm.patchValue({
+      origem: origemInferida,
+      
+      // --- POPULAR O STATUS ---
+      status: this.chamadoParaEditar.status || 'aberto',
+
+      numeroProtocolo: protocolo,
+      cliente: safeValue(this.chamadoParaEditar.cliente),
+      area: safeValue(this.chamadoParaEditar.area), 
+      assunto: safeValue(this.chamadoParaEditar.categoria),
+      atendente: this.chamadoParaEditar.atendente,
+      prioridade: this.chamadoParaEditar.prioridade,
+      descricao: this.chamadoParaEditar.descricao,
+      data: this.chamadoParaEditar.dataAbertura,
+      hora: this.chamadoParaEditar.horaAbertura
+    });
+    
+    this.atualizarValidacaoProtocolo(origemInferida);
   }
-
-  this.ticketForm.patchValue({
-    origem: this.chamadoParaEditar.origem || 'email',
-    status: this.chamadoParaEditar.status || 'aberto',
-    numeroProtocolo: this.chamadoParaEditar.numeroProtocolo || '',
-    cliente: this.chamadoParaEditar.cliente || '',
-    area: this.chamadoParaEditar.area || this.chamadoParaEditar.categoria || '',
-    assunto: 'Dúvida Geral',
-    atendente: atendenteId, // Agora o valor bate com o select
-    prioridade: this.chamadoParaEditar.prioridade,
-    descricao: this.chamadoParaEditar.descricao,
-    data: this.chamadoParaEditar.dataAbertura,
-    hora: this.chamadoParaEditar.horaAbertura
-  });
-}
 
   salvar() {
     if (this.ticketForm.invalid) {
@@ -227,7 +217,7 @@ populateFormForEdit(): void {
         cliente: val.cliente,
         area: val.area,
         assunto: val.assunto,
-        atendente: val.atendente,
+        atendente: this.perfilUsuario === 'supervisor' && val.atendente ? val.atendente : this.usuarioLogadoNome,
         prioridade: val.prioridade,
         descricao: val.descricao,
         data: val.data,
