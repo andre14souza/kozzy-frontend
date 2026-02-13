@@ -99,6 +99,11 @@ export class ChamadosService {
 
   // 2. POST (Criar)
   adicionarChamado(chamado: NovoChamado): Observable<any> {
+    // Garante que enviamos apenas o ID, não o objeto
+    const idAtendente = (chamado.atendente && typeof chamado.atendente === 'object') 
+      ? chamado.atendente._id 
+      : chamado.atendente;
+
     const payload = {
       numeroProtocolo: chamado.numeroProtocolo,
       tipoCliente: chamado.cliente,
@@ -108,22 +113,26 @@ export class ChamadosService {
       dataAtendimento: chamado.data,
       descricaoDetalhada: chamado.descricao,
       nivelPrioridade: chamado.prioridade,
-      atendente: chamado.atendente, // Garante envio na criação
+      atendente: idAtendente || null, // ✅ Apenas ID ou null
       avanco: 'aberto',
       origem: chamado.origem
     };
     return this.http.post(this.API_URL, payload, { withCredentials: true });
   }
 
-  // 3. PUT (Atualizar)
+  // 3. PUT (Atualização)
   atualizarChamado(chamado: Chamado): Observable<any> {
+    const idAtendente = (chamado.atendente && typeof chamado.atendente === 'object') 
+      ? chamado.atendente._id 
+      : chamado.atendente;
+
     const payload = {
       tipoCliente: chamado.cliente,
       categoriaAssunto: chamado.area,
       assuntoEspecifico: chamado.categoria,
       descricaoDetalhada: chamado.descricao,
       nivelPrioridade: chamado.prioridade,
-      atendente: chamado.atendente, // CORREÇÃO: Campo adicionado para o back salvar!
+      atendente: idAtendente || null, // ✅ Apenas ID ou null
       avanco: chamado.status
     };
     const url = `${this.API_URL}/${chamado.id}`;
