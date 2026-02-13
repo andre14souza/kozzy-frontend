@@ -58,7 +58,9 @@
           <h3>👤 Atendimento</h3>
           <div class="meta-row">
             <span class="meta-label">Atendente:</span>
-            <span class="meta-value">{{ chamado.atendente }}</span>
+            <span class="meta-value">
+  {{ chamado.atendente?.nomeCompleto || chamado.atendente || 'Não atribuído' }}
+</span>
           </div>
           <div class="meta-row">
             <span class="meta-label">Criado em:</span>

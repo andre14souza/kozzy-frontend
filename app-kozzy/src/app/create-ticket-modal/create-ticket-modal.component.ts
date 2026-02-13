@@ -93,11 +93,11 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
 
 carregarAtendentes() {
   this.authService.getTodosUsuarios().subscribe({
-    next: (usuarios: any[]) => { // Usamos any para matar o erro 'never' de vez
+    next: (usuarios: any[]) => {
       this.atendenteOptions = usuarios
         .filter(u => u.perfil === 'atendente')
         .map(u => ({ 
-          value: u.nome, // <--- AGORA SALVAMOS O NOME, NÃO O ID
+          value: u.id || u._id, // <--- MUDANÇA: Envie o ID para o banco
           label: u.nome 
         }));
     }
@@ -227,7 +227,7 @@ populateFormForEdit(): void {
         cliente: val.cliente,
         area: val.area,
         assunto: val.assunto,
-        atendente: this.perfilUsuario === 'supervisor' && val.atendente ? val.atendente : this.usuarioLogadoNome,
+        atendente: val.atendente,
         prioridade: val.prioridade,
         descricao: val.descricao,
         data: val.data,
