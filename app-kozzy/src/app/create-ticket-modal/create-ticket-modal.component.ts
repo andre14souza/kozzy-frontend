@@ -91,19 +91,16 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
     this.filtrarAreasPermitidas();
   }
 
-  carregarAtendentes() {
-  // Tipamos o retorno do GET para UsuarioSimples[]
+carregarAtendentes() {
   this.authService.getTodosUsuarios().subscribe({
-    next: (usuarios: UsuarioSimples[]) => { 
-      // Agora o TS sabe que 'u' não é 'never'
+    next: (usuarios: any[]) => { // Usamos any para matar o erro 'never' de vez
       this.atendenteOptions = usuarios
         .filter(u => u.perfil === 'atendente')
         .map(u => ({ 
-          value: (u.id || u._id) as string, 
+          value: u.nome, // <--- AGORA SALVAMOS O NOME, NÃO O ID
           label: u.nome 
         }));
-    },
-    error: (err) => console.error('Erro ao carregar atendentes:', err)
+    }
   });
 }
 
