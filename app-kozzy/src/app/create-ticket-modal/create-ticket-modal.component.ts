@@ -232,7 +232,7 @@ populateFormForEdit(): void {
         cliente: val.cliente,
         area: val.area,
         assunto: val.assunto,
-        atendente: val.atendenteFormatado,
+        atendente: atendenteFormatado,
         prioridade: val.prioridade,
         descricao: val.descricao,
         data: val.data,
