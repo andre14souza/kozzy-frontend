@@ -6,7 +6,12 @@ import { AuthService } from '../auth.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment'; // 💥 NOVO: Adicione este import no topo do arquivo!
 interface SelectOption { value: string; label: string; }
-
+interface UsuarioSimples {
+  id?: string;
+  _id?: string;
+  nome: string;
+  perfil: string;
+}
 @Component({
   selector: 'app-create-ticket-modal',
   standalone: true,
@@ -87,13 +92,20 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
   }
 
   carregarAtendentes() {
-    this.authService.getTodosUsuarios().subscribe({
-      next: (usuarios) => {
-        this.atendenteOptions = usuarios.map(u => ({ value: u.nome, label: u.nome }));
-      },
-      error: (err) => console.error(err)
-    });
-  }
+  // Tipamos o retorno do GET para UsuarioSimples[]
+  this.authService.getTodosUsuarios().subscribe({
+    next: (usuarios: UsuarioSimples[]) => { 
+      // Agora o TS sabe que 'u' não é 'never'
+      this.atendenteOptions = usuarios
+        .filter(u => u.perfil === 'atendente')
+        .map(u => ({ 
+          value: (u.id || u._id) as string, 
+          label: u.nome 
+        }));
+    },
+    error: (err) => console.error('Erro ao carregar atendentes:', err)
+  });
+}
 
   filtrarAreasPermitidas() {
     if (this.perfilUsuario === 'supervisor') return;
@@ -176,24 +188,27 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
     protocoloControl.updateValueAndValidity();
   }
 
-  populateFormForEdit(): void {
+populateFormForEdit(): void {
   if (!this.chamadoParaEditar) return;
-  const safeValue = (val: any) => val || '';
+  
+  // Pegamos o ID de forma segura, seja objeto ou string
+  const atendenteInfo = this.chamadoParaEditar.atendente;
+  let atendenteId = '';
+
+  if (atendenteInfo && typeof atendenteInfo === 'object') {
+    atendenteId = (atendenteInfo as any).id || (atendenteInfo as any)._id || '';
+  } else {
+    atendenteId = (atendenteInfo as string) || '';
+  }
 
   this.ticketForm.patchValue({
-    // 1. Pega a origem direto do chamado vindo do banco
-    origem: this.chamadoParaEditar.origem || 'email', 
-    
+    origem: this.chamadoParaEditar.origem || 'email',
     status: this.chamadoParaEditar.status || 'aberto',
-    numeroProtocolo: this.chamadoParaEditar.numeroProtocolo,
-    cliente: safeValue(this.chamadoParaEditar.cliente),
-    
-    // 2. Corrigindo o problema do "Assunto" vazio para Supervisor:
-    // Mapeamos a 'categoria' do banco para o campo 'area' do formulário
-    area: safeValue(this.chamadoParaEditar.area || this.chamadoParaEditar.categoria),
-    assunto: 'Dúvida Geral', // Valor padrão para o campo de assunto específico
-    
-    atendente: this.chamadoParaEditar.atendente,
+    numeroProtocolo: this.chamadoParaEditar.numeroProtocolo || '',
+    cliente: this.chamadoParaEditar.cliente || '',
+    area: this.chamadoParaEditar.area || this.chamadoParaEditar.categoria || '',
+    assunto: 'Dúvida Geral',
+    atendente: atendenteId, // Agora o valor bate com o select
     prioridade: this.chamadoParaEditar.prioridade,
     descricao: this.chamadoParaEditar.descricao,
     data: this.chamadoParaEditar.dataAbertura,
