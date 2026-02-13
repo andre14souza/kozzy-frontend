@@ -222,12 +222,17 @@ populateFormForEdit(): void {
 
     setTimeout(() => {
       const val = this.ticketForm.getRawValue();
-      
+      const atendenteSelecionado = this.atendenteOptions.find(opt => opt.value === val.atendente);
+    
+    const atendenteFormatado = atendenteSelecionado ? {
+      _id: atendenteSelecionado.value,
+      nomeCompleto: atendenteSelecionado.label
+    } : val.atendente;
       const dadosComuns = {
         cliente: val.cliente,
         area: val.area,
         assunto: val.assunto,
-        atendente: val.atendente,
+        atendente: val.atendenteFormatado,
         prioridade: val.prioridade,
         descricao: val.descricao,
         data: val.data,
