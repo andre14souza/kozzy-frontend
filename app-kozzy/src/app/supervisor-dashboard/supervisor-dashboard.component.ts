@@ -5,8 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AuthService, UsuarioLogado } from '../auth.service';
 import { ChamadosService, Chamado, NovoChamado, RelatorioFilters } from '../chamados.service';
-// Se você tiver o LoadingService, mantenha. Se não, remova o import e o uso no construtor.
 import { LoadingService } from '../loading.service'; 
+import { NgApexchartsModule } from 'ng-apexcharts'; 
 
 import { CreateTicketModalComponent } from '../create-ticket-modal/create-ticket-modal.component';
 import { CriarUsuarioModalComponent } from '../criar-usuario-modal/criar-usuario-modal.component';
@@ -30,7 +30,8 @@ interface MenuItem { label: string; icon: string; route?: string; action?: () =>
     RelatorioFiltroModalComponent, 
     RelatorioScreenComponent,
     TicketDetailComponent,
-    SearchProtocolModalComponent
+    SearchProtocolModalComponent,
+    NgApexchartsModule
   ],
   templateUrl: './supervisor-dashboard.component.html',
   styleUrl: './supervisor-dashboard.component.css'
@@ -64,6 +65,10 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
   viewMode: 'dashboard' | 'usuarios' = 'dashboard';
   listaUsuarios: any[] = [];
 
+  // ApexCharts
+  statusChartOptions: Partial<any> = {};
+  priorityChartOptions: Partial<any> = {};
+
   constructor(
     private router: Router, 
     public authService: AuthService,
@@ -73,6 +78,7 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.usuarioLogado = this.authService.getUsuarioLogado();
+    this.initCharts();
     this.carregarDados(); // Carrega os chamados ao iniciar
     
     this.menuItems = [
@@ -94,6 +100,7 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
         next: (dados) => {
             this.chamados = dados;
             this.calcularKPIs();
+            this.updateCharts();
             // this.loadingService.hide();
         },
         error: (err) => {
@@ -274,8 +281,54 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
   logout() { if (confirm('Tem certeza?')) { this.authService.logout(); } }
   showToast(message: string, type: any) { this.toast = { message, type, visible: true }; setTimeout(() => { this.toast.visible = false; }, 3000); }
   
-  calcularKPIs() { const abertos = this.chamados.filter(c => c.status === 'aberto').length; const emAndamento = this.chamados.filter(c => c.status === 'em-andamento').length; const concluidos = this.chamados.filter(c => c.status === 'fechado').length; const urgentes = this.chamados.filter(c => c.prioridade === 'urgente' || c.prioridade === 'alta').length; this.kpis[0].value=abertos; this.kpis[1].value=emAndamento; this.kpis[2].value=concluidos; this.kpis[3].value=urgentes; }
-  setFilter(key: any, value: any) { (this.filtros as any)[key] = value; }
+  calcularKPIs() { const abertos = this.chamados.filter(c => c.status === 'aberto').length; const emAndamento = this.chamados.filter(c => c.status === 'em-andamento' || c.status === 'em andamento').length; const concluidos = this.chamados.filter(c => c.status === 'fechado' || c.status === 'concluido').length; const urgentes = this.chamados.filter(c => c.prioridade === 'urgente' || c.prioridade === 'alta').length; this.kpis[0].value=abertos; this.kpis[1].value=emAndamento; this.kpis[2].value=concluidos; this.kpis[3].value=urgentes; }
+
+  // === CHARTS LOGIC ===
+  initCharts() {
+    this.statusChartOptions = {
+      series: [0, 0, 0, 0],
+      chart: { type: 'donut', height: 280, fontFamily: 'Inter, sans-serif' },
+      labels: ['Abertos', 'Em Andamento', 'Concluídos', 'Encerrados'],
+      colors: ['#ef4444', '#f59e0b', '#10b981', '#6b7280'],
+      plotOptions: { pie: { donut: { size: '60%' } } },
+      dataLabels: { enabled: false },
+      legend: { position: 'bottom' },
+      stroke: { width: 0 }
+    };
+
+    this.priorityChartOptions = {
+      series: [{ name: 'Chamados', data: [0, 0, 0, 0] }],
+      chart: { type: 'bar', height: 280, fontFamily: 'Inter, sans-serif', toolbar: { show: false } },
+      plotOptions: { bar: { horizontal: false, columnWidth: '50%', borderRadius: 4, distributed: true } },
+      dataLabels: { enabled: false },
+      xaxis: { categories: ['Urgente', 'Alta', 'Média', 'Baixa'] },
+      colors: ['#ef4444', '#f59e0b', '#facc15', '#22c55e'],
+      legend: { show: false },
+      tooltip: { theme: 'light' }
+    };
+  }
+
+  updateCharts() {
+    const list = this.getChamadosFiltrados();
+    
+    // Status Chart
+    const abertos = list.filter(c => c.status === 'aberto').length;
+    const andamento = list.filter(c => c.status === 'em-andamento' || c.status === 'em andamento').length;
+    const concluidos = list.filter(c => c.status === 'fechado' || c.status === 'concluido').length;
+    const encerrados = list.filter(c => c.status === 'encerrado').length;
+
+    this.statusChartOptions = { ...this.statusChartOptions, series: [abertos, andamento, concluidos, encerrados] };
+
+    // Priority Chart
+    const urgente = list.filter(c => c.prioridade === 'urgente').length;
+    const alta = list.filter(c => c.prioridade === 'alta').length;
+    const media = list.filter(c => c.prioridade === 'media').length;
+    const baixa = list.filter(c => c.prioridade === 'baixa').length;
+
+    this.priorityChartOptions = { ...this.priorityChartOptions, series: [{ name: 'Chamados', data: [urgente, alta, media, baixa] }] };
+  }
+
+  setFilter(key: any, value: any) { this.filtros[key as keyof FilterOptions] = value; this.updateCharts(); }
   getChamadosFiltrados(): Chamado[] { let r = [...this.chamados]; if(this.filtros.busca.trim()){const b=this.filtros.busca.toLowerCase(); r=r.filter(c=>c.numeroProtocolo.toLowerCase().includes(b) || c.cliente.toLowerCase().includes(b) || c.descricao.toLowerCase().includes(b))} if(this.filtros.status!=='todos'){r=r.filter(c=>c.status===this.filtros.status)} return r; }
   getStatusLabel(s: string) { const labels: { [key: string]: string } = { 'aberto': 'Aberto', 'em-andamento': 'Em Andamento', 'fechado': 'Concluído' }; return labels[s] || ''; }
   getPrioridadeLabel(p: string) { const labels: { [key: string]: string } = { 'baixa': 'Baixa', 'media': 'Média', 'alta': 'Alta', 'urgente': 'Urgente' }; return labels[p] || ''; }

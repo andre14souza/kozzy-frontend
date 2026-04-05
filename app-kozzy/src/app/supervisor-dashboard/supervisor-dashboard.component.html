@@ -54,6 +54,35 @@
           </div>
         </div>
 
+        <div class="charts-grid-container" *ngIf="chamados.length > 0">
+          <div class="chart-card">
+            <h3>Distribuição de Status</h3>
+            <apx-chart 
+              [series]="statusChartOptions.series" 
+              [chart]="statusChartOptions.chart" 
+              [labels]="statusChartOptions.labels" 
+              [colors]="statusChartOptions.colors" 
+              [legend]="statusChartOptions.legend" 
+              [plotOptions]="statusChartOptions.plotOptions"
+              [stroke]="statusChartOptions.stroke"
+              [dataLabels]="statusChartOptions.dataLabels">
+            </apx-chart>
+          </div>
+          <div class="chart-card">
+            <h3>Volume por Prioridade</h3>
+            <apx-chart 
+              [series]="priorityChartOptions.series" 
+              [chart]="priorityChartOptions.chart" 
+              [xaxis]="priorityChartOptions.xaxis" 
+              [colors]="priorityChartOptions.colors" 
+              [legend]="priorityChartOptions.legend" 
+              [plotOptions]="priorityChartOptions.plotOptions"
+              [tooltip]="priorityChartOptions.tooltip"
+              [dataLabels]="priorityChartOptions.dataLabels">
+            </apx-chart>
+          </div>
+        </div>
+
         <div class="filters-section">
           <div class="filters-list">
             <button (click)="setFilter('status', 'todos')" [class.active]="filtros.status === 'todos'" class="filter-btn">Todos</button>
