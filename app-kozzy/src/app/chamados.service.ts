@@ -153,6 +153,10 @@ export class ChamadosService {
     return this.chamadosSubject.value.find(c => c.numeroProtocolo === protocolo);
   }
 
+  adicionarComentario(id: string, mensagem: string): Observable<any> {
+    return this.http.post(`${this.API_URL}/${id}/comentarios`, { mensagem }, { withCredentials: true });
+  }
+  
   buscarChamadosPorFiltros(filtros: RelatorioFilters): Chamado[] {
     let lista = this.chamadosSubject.value;
 

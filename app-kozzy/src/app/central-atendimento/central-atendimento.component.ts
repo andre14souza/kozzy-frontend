@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 
 import { ChamadosService, Chamado, NovoChamado, RelatorioFilters } from '../chamados.service';
 import { AuthService, UsuarioLogado } from '../auth.service';
@@ -21,7 +22,7 @@ interface ToastMessage { message: string; type: 'success' | 'info' | 'warning' |
   selector: 'app-central-atendimento',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, RouterModule,
+    CommonModule, FormsModule, RouterModule, DragDropModule,
     CreateTicketModalComponent, RelatorioFiltroModalComponent,
     RelatorioScreenComponent, SearchProtocolModalComponent, TicketDetailComponent
   ],
@@ -29,6 +30,12 @@ interface ToastMessage { message: string; type: 'success' | 'info' | 'warning' |
   styleUrls: ['./central-atendimento.component.css'],
 })
 export class CentralAtendimentoComponent implements OnInit, OnDestroy {
+  viewMode: 'kanban' | 'list' = 'kanban';
+  chamadosAbertos: Chamado[] = [];
+  chamadosEmAndamento: Chamado[] = [];
+  chamadosConcluidos: Chamado[] = [];
+  chamadosEncerrados: Chamado[] = [];
+
   showCreateModal: boolean = false; 
   showSearchModal: boolean = false;
   showRelatorioFiltrosModal: boolean = false;
@@ -100,6 +107,7 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
         }
         this.updateStatusCounts();
         this.updateMenuBadge();
+        this.updateKanbanColumns();
         this.loadingService.hide();
       },
       error: (err) => {
@@ -112,10 +120,12 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   setFilter(filterValue: string) {
     this.currentFilter = filterValue;
     this.statusFilters.forEach((filter) => (filter.active = filter.value === filterValue));
+    this.updateKanbanColumns();
   }
 
   setFiltroOrigem(origem: 'todos' | 'whatsapp' | 'email') {
     this.filtroOrigem = origem;
+    this.updateKanbanColumns();
   }
 
   getFilteredChamados(): Chamado[] {
@@ -276,4 +286,49 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   }
 
   logout() { if (confirm('Tem certeza que deseja sair?')) this.authService.logout(); }
+
+  // ==== KANBAN LOGIC ====
+  updateKanbanColumns() {
+    const list = this.getFilteredChamados();
+    this.chamadosAbertos = list.filter(c => c.status === 'aberto');
+    this.chamadosEmAndamento = list.filter(c => c.status === 'em andamento');
+    this.chamadosConcluidos = list.filter(c => c.status === 'concluido');
+    this.chamadosEncerrados = list.filter(c => c.status === 'encerrado');
+  }
+
+  drop(event: CdkDragDrop<Chamado[]>) {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex,
+      );
+      
+      const chamadoMovido = event.container.data[event.currentIndex];
+      let novoStatus = chamadoMovido.status;
+      
+      if (event.container.id === 'listaAbertos') novoStatus = 'aberto';
+      else if (event.container.id === 'listaEmAndamento') novoStatus = 'em andamento';
+      else if (event.container.id === 'listaConcluidos') novoStatus = 'concluido';
+      else if (event.container.id === 'listaEncerrados') novoStatus = 'encerrado';
+
+      if (chamadoMovido.status !== novoStatus) {
+        chamadoMovido.status = novoStatus;
+        this.chamadosService.atualizarChamado(chamadoMovido).subscribe({
+          next: () => {
+             this.showToast('Status atualizado via Kanban', 'success');
+             this.updateStatusCounts();
+             this.updateMenuBadge();
+          },
+          error: () => {
+             this.showToast('Erro ao atualizar status', 'error');
+             this.carregarDados(); // Reverte a view
+          }
+        });
+      }
+    }
+  }
 }
