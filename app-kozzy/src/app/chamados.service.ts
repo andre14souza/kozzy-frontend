@@ -77,16 +77,19 @@ export class ChamadosService {
             id: item._id,
             numeroProtocolo: item.numeroProtocolo,
             cliente: item.tipoCliente,
-            area: item.categoriaAssunto,
-            categoria: item.assuntoEspecifico || item.categoriaAssunto || '', 
-            origem: item.origem || 'email',
-
-            // CORREÇÃO: Mantemos o objeto completo do atendente vindo do populate
-            atendente: item.atendente, 
             
+            // ✅ CORREÇÃO: 'area' no front recebe 'categoriaAssunto' do banco
+            area: item.categoriaAssunto, 
+            
+            // ✅ CORREÇÃO: 'categoria' no front (que é o Assunto) recebe 'assuntoEspecifico' do banco
+            categoria: item.assuntoEspecifico || '', 
+            
+            origem: item.origem || 'email',
+            atendente: item.atendente, 
             prioridade: item.nivelPrioridade,
             status: item.avanco,
             descricao: item.descricaoDetalhada,
+            solucao: item.solucao,
             dataAbertura: item.dataAtendimento ? item.dataAtendimento.split('T')[0] : '',
             horaAbertura: item.hora,
             icone: iconeVisual,

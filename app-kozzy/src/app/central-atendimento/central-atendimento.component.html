@@ -106,11 +106,9 @@
               <p class="card-description">{{ chamado.descricao }}</p>
               <div class="card-details">
                 <div class="info-item">
-                  <span class="label">Assunto:</span>
                   <span>{{ chamado.categoria }}</span>
                 </div>
                 <div class="info-item">
-                  <span class="label">Atendente:</span>
                   <span>{{ chamado.atendente?.nomeCompleto || chamado.atendente?.nome || chamado.atendente || 'Não
                     atribuído' }}</span>
                 </div>
