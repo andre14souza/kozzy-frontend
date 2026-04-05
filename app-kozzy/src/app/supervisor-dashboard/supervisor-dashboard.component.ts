@@ -66,8 +66,8 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
   listaUsuarios: any[] = [];
 
   // ApexCharts
-  statusChartOptions: Partial<any> = {};
-  priorityChartOptions: Partial<any> = {};
+  statusChartOptions: { series?: any; chart?: any; labels?: any; colors?: any; legend?: any; plotOptions?: any; stroke?: any; dataLabels?: any; xaxis?: any; tooltip?: any; } = {};
+  priorityChartOptions: { series?: any; chart?: any; labels?: any; colors?: any; legend?: any; plotOptions?: any; stroke?: any; dataLabels?: any; xaxis?: any; tooltip?: any; } = {};
 
   constructor(
     private router: Router, 
