@@ -30,12 +30,13 @@ export interface Chamado {
   prioridade: string;
   status: string;
   descricao: string;
+  solucao?: string;
   dataAbertura: string;
   horaAbertura: string;
   icone?: string;
   isNovo?: boolean;
   origem?: 'whatsapp' | 'email';
-}
+} 
 
 export interface RelatorioFilters {
   status: string;
@@ -131,6 +132,7 @@ export class ChamadosService {
       assuntoEspecifico: chamado.categoria,
       descricaoDetalhada: chamado.descricao,
       nivelPrioridade: chamado.prioridade,
+      solucao: chamado.solucao,
       atendente: idAtendente || null, // ✅ Apenas ID ou null
       avanco: chamado.status
     };
@@ -149,6 +151,25 @@ export class ChamadosService {
   }
 
   buscarChamadosPorFiltros(filtros: RelatorioFilters): Chamado[] {
-    return this.chamadosSubject.value; 
+    let lista = this.chamadosSubject.value;
+
+    if (filtros.status && filtros.status !== 'todos') {
+      lista = lista.filter(c => c.status === filtros.status);
+    }
+    if (filtros.prioridade && filtros.prioridade !== 'todos') {
+      lista = lista.filter(c => c.prioridade === filtros.prioridade);
+    }
+    if (filtros.cliente && filtros.cliente !== 'todos') {
+      lista = lista.filter(c => c.cliente === filtros.cliente);
+    }
+    // Lógica simples de data (Pode ser melhorada comparando Timestamps reais)
+    if (filtros.dataInicio) {
+      lista = lista.filter(c => c.dataAbertura >= filtros.dataInicio);
+    }
+    if (filtros.dataFim) {
+      lista = lista.filter(c => c.dataAbertura <= filtros.dataFim);
+    }
+
+    return lista; 
   }
 }

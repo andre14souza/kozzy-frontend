@@ -19,7 +19,7 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
   @Input() isVisible: boolean = false;
   @Input() chamadoParaEditar?: Chamado | null;
   @Input() perfilUsuario: string = 'atendente';
-  @Input() usuarioLogadoNome: string = ''; // FIX NG8002: Adicionado Input que faltava
+  @Input() usuarioLogadoNome: string = '';
 
   @Output() closeModal = new EventEmitter<void>();
   @Output() chamadoCriado = new EventEmitter<NovoChamado>();
@@ -28,18 +28,19 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
   ticketForm!: FormGroup;
   isEditMode = false;
   isLoading = false;
-  showPreview = false; // FIX NG9: Variável de controle do Preview
+  showPreview = false;
 
-  // --- OPÇÕES PARA OS SELECTS (FIX NG9: Todas as listas solicitadas pelo HTML) ---
   origemOptions: SelectOption[] = [
     { value: 'email', label: '📧 E-mail' },
     { value: 'whatsapp', label: '📱 WhatsApp' }
   ];
 
+  // ✅ CORREÇÃO: Status atualizados e 'encerrado' adicionado
   statusOptions: SelectOption[] = [
     { value: 'aberto', label: '🔴 Aberto' },
     { value: 'em andamento', label: '🟡 Em Andamento' },
-    { value: 'concluido', label: '🟢 Concluído' }
+    { value: 'concluido', label: '🟢 Concluído' },
+    { value: 'encerrado', label: '🔒 Encerrado' }
   ];
 
   areaOptions: SelectOption[] = [
@@ -74,11 +75,7 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
 
   atendenteOptions: any[] = [];
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private http: HttpClient
-  ) {}
+  constructor(private fb: FormBuilder, private authService: AuthService) {}
 
   ngOnInit() {
     this.initializeForm();
@@ -88,7 +85,7 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isVisible'] && this.isVisible) {
       this.isEditMode = !!this.chamadoParaEditar;
-      this.showPreview = false; // Reseta o preview ao abrir
+      this.showPreview = false; 
       this.initializeForm(); 
       if (this.isEditMode) this.populateFormForEdit();
     }
@@ -105,21 +102,27 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
       atendente: [''], 
       prioridade: ['Média Prioridade'],
       descricao: ['', Validators.maxLength(500)],
+      solucao: [''], // ✅ CORREÇÃO: Campo solução adicionado ao FormGroup
       data: [new Date().toISOString().split('T')[0]],
       hora: [new Date().toTimeString().slice(0, 5)]
     });
 
-    // Monitora a origem para habilitar protocolo se for WhatsApp
     this.ticketForm.get('origem')?.valueChanges.subscribe(val => {
       const prot = this.ticketForm.get('numeroProtocolo');
-      if (val === 'whatsapp') {
-        prot?.enable();
-        prot?.setValidators([Validators.required]);
-      } else {
-        prot?.disable();
-        prot?.clearValidators();
-      }
+      if (val === 'whatsapp') { prot?.enable(); prot?.setValidators([Validators.required]); } 
+      else { prot?.disable(); prot?.clearValidators(); }
       prot?.updateValueAndValidity();
+    });
+
+    // ✅ VALIDAÇÃO DINÂMICA: Exige solução se estiver concluído/encerrado
+    this.ticketForm.get('status')?.valueChanges.subscribe(status => {
+      const solControl = this.ticketForm.get('solucao');
+      if (status === 'concluido' || status === 'encerrado') {
+        solControl?.setValidators([Validators.required, Validators.minLength(5)]);
+      } else {
+        solControl?.clearValidators();
+      }
+      solControl?.updateValueAndValidity();
     });
   }
 
@@ -147,21 +150,16 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
       assunto: this.chamadoParaEditar.categoria,
       atendente: idAtendente || '',
       prioridade: this.chamadoParaEditar.prioridade,
-      descricao: this.chamadoParaEditar.descricao
+      descricao: this.chamadoParaEditar.descricao,
+      solucao: this.chamadoParaEditar.solucao || '' // ✅ Preenche a solução anterior
     });
   }
 
-  // --- MÉTODOS DE INTERAÇÃO (FIX NG9) ---
-
   onOverlayClick(event: MouseEvent) {
-    if ((event.target as HTMLElement).classList.contains('modal-overlay')) {
-      this.closeModalHandler();
-    }
+    if ((event.target as HTMLElement).classList.contains('modal-overlay')) this.closeModalHandler();
   }
 
-  closeModalHandler() {
-    this.closeModal.emit();
-  }
+  closeModalHandler() { this.closeModal.emit(); }
 
   salvarChamado() {
     if (this.ticketForm.invalid) {
@@ -176,7 +174,8 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
     let atendenteFinal;
     if (this.isEditMode) {
       const opt = this.atendenteOptions.find(o => o.value === val.atendente);
-      atendenteFinal = opt ? { _id: opt.value, nomeCompleto: opt.label } : val.atendente;
+      // ✅ CORREÇÃO: Se não encontrou na lista (ex: é supervisor), mantém o objeto original
+      atendenteFinal = opt ? { _id: opt.value, nomeCompleto: opt.label } : this.chamadoParaEditar?.atendente;
     } else {
       atendenteFinal = { _id: user?.id, nomeCompleto: user?.nome };
     }
@@ -192,11 +191,7 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
     this.closeModalHandler();
   }
 
-  getPreviewData() {
-    return this.ticketForm.getRawValue();
-  }
-
-  // --- HELPERS DE VALIDAÇÃO (FIX NG9) ---
+  getPreviewData() { return this.ticketForm.getRawValue(); }
 
   hasFieldError(field: string): boolean {
     const control = this.ticketForm.get(field);
@@ -206,6 +201,7 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
   getFieldError(field: string): string {
     const control = this.ticketForm.get(field);
     if (control?.hasError('required')) return 'Campo obrigatório';
+    if (control?.hasError('minlength')) return 'Muito curto (mín. 5 caracteres)';
     return '';
   }
 }

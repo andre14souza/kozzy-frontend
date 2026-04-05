@@ -49,6 +49,10 @@
                 {{ getPrioridadeLabel(chamado.prioridade) }}
               </span>
             </div>
+            <div class="info-card solucao-card" *ngIf="chamado.solucao">
+              <h3>✅ Solução Aplicada</h3>
+              <p class="description-text">{{ chamado.solucao }}</p>
+            </div>
           </div>
         </div>
       </div>

@@ -22,18 +22,14 @@ interface ToastMessage { message: string; type: 'success' | 'info' | 'warning' |
   standalone: true,
   imports: [
     CommonModule, FormsModule, RouterModule,
-    CreateTicketModalComponent,
-    RelatorioFiltroModalComponent,
-    RelatorioScreenComponent,
-    SearchProtocolModalComponent,
-    TicketDetailComponent
+    CreateTicketModalComponent, RelatorioFiltroModalComponent,
+    RelatorioScreenComponent, SearchProtocolModalComponent, TicketDetailComponent
   ],
   templateUrl: './central-atendimento.component.html',
   styleUrls: ['./central-atendimento.component.css'],
 })
 export class CentralAtendimentoComponent implements OnInit, OnDestroy {
-  // Variáveis de Controle de Tela
-  showCreateModal: boolean = false; // <<< É ESSA QUE O HTML USA, NÃO 'isVisible'
+  showCreateModal: boolean = false; 
   showSearchModal: boolean = false;
   showRelatorioFiltrosModal: boolean = false;
   showRelatorioScreen: boolean = false;
@@ -48,17 +44,17 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   usuarioLogado: UsuarioLogado | null = null;
   
   menuItems: MenuItem[] = [];
+  
+  // ✅ CORREÇÃO CRÍTICA: Os 'values' agora batem EXATAMENTE com o banco de dados
   statusFilters = [
     { label: 'Todos', value: 'todos', icon: '📄', count: 0, active: true },
     { label: 'Abertos', value: 'aberto', icon: '🔴', count: 0, active: false },
-    { label: 'Em Andamento', value: 'em-andamento', icon: '🟡', count: 0, active: false },
-    { label: 'Fechados', value: 'fechado', icon: '🟢', count: 0, active: false },
+    { label: 'Em Andamento', value: 'em andamento', icon: '🟡', count: 0, active: false },
+    { label: 'Concluídos', value: 'concluido', icon: '🟢', count: 0, active: false },
+    { label: 'Encerrados', value: 'encerrado', icon: '🔒', count: 0, active: false }
   ];
   currentFilter: string = 'todos';
-  
-  // NOVO: Filtro de Origem
   filtroOrigem: 'todos' | 'whatsapp' | 'email' = 'todos';
-
   menuCollapsed: boolean = false;
   filtrosRelatorioSalvos: RelatorioFilters | null = null;
   toast: ToastMessage = { message: '', type: 'info', visible: false };
@@ -66,7 +62,6 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   constructor(
     public chamadosService: ChamadosService,
     public authService: AuthService,
-    private router: Router,
     private loadingService: LoadingService
   ) {}
 
@@ -85,7 +80,7 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.chamadosSubscription) { this.chamadosSubscription.unsubscribe(); }
+    if (this.chamadosSubscription) this.chamadosSubscription.unsubscribe();
   }
 
   carregarDados(): void {
@@ -107,15 +102,12 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
         this.updateMenuBadge();
         this.loadingService.hide();
       },
-      error: (err: any) => {
-        console.error(err);
+      error: (err) => {
         this.showToast('Erro ao carregar chamados.', 'error');
         this.loadingService.hide();
       }
     });
   }
-
-  // --- FILTROS ---
 
   setFilter(filterValue: string) {
     this.currentFilter = filterValue;
@@ -128,32 +120,20 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
 
   getFilteredChamados(): Chamado[] {
     let lista = this.chamados;
-
-    // 1. Filtro de Status
-    if (this.currentFilter !== 'todos') {
-      lista = lista.filter((chamado) => chamado.status === this.currentFilter);
-    }
-
-    // 2. Filtro de Origem
-    if (this.filtroOrigem !== 'todos') {
-      lista = lista.filter(c => (c.origem || 'email') === this.filtroOrigem);
-    }
-
+    if (this.currentFilter !== 'todos') lista = lista.filter(c => c.status === this.currentFilter);
+    if (this.filtroOrigem !== 'todos') lista = lista.filter(c => (c.origem || 'email') === this.filtroOrigem);
     return lista;
   }
-
-  // --- MÉTODOS CRUD ---
 
   onChamadoCriado(n: NovoChamado) { 
     this.loadingService.show();
     this.chamadosService.adicionarChamado(n).subscribe({
-      next: (res: any) => { 
+      next: () => { 
         this.fecharModal();
         this.showToast('Chamado criado com sucesso!', 'success');
         this.carregarDados();
       },
-      error: (err: any) => { 
-        console.error(err);
+      error: () => { 
         this.showToast('Erro ao criar chamado.', 'error');
         this.loadingService.hide();
       }
@@ -163,7 +143,7 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   onChamadoAtualizado(c: Chamado) { 
     this.loadingService.show();
     this.chamadosService.atualizarChamado(c).subscribe({
-      next: (res: any) => { 
+      next: () => { 
         this.fecharModal();
         this.showToast('Chamado atualizado com sucesso!', 'success');
         if (this.showDetailScreen && this.chamadoDetalhe?.id === c.id) {
@@ -171,15 +151,12 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
         }
         this.carregarDados();
       },
-      error: (err: any) => { 
-        console.error(err);
+      error: () => { 
         this.showToast('Erro ao atualizar chamado.', 'error');
         this.loadingService.hide();
       }
     });
   }
-
-  // --- OUTROS MÉTODOS ---
 
   voltarParaLista() {
     this.showDetailScreen = false;
@@ -194,22 +171,18 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
     this.showRelatorioScreen = false;
     this.origemDetalhe = 'dashboard';
   }
+
   onSelectChamadoDoRelatorio(chamado: Chamado): void {
     this.chamadoDetalhe = chamado;
     this.showDetailScreen = true;
-    
-    // IMPORTANTE: Não setamos showRelatorioScreen = false aqui imediatamente se quisermos manter o estado,
-    // mas geralmente escondemos para mostrar o detalhe full screen.
     this.showRelatorioScreen = false; 
-    
-    this.origemDetalhe = 'relatorio'; // <--- Marca que veio do Relatório
+    this.origemDetalhe = 'relatorio';
   }
+
   fecharTelaDetalhes(): void {
     this.showDetailScreen = false;
     this.chamadoDetalhe = null;
-    if (this.origemDetalhe === 'relatorio') {
-        this.showRelatorioScreen = true;
-    }
+    if (this.origemDetalhe === 'relatorio') this.showRelatorioScreen = true;
   }
 
   abrirModalRelatorios() {
@@ -233,12 +206,7 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
     }
   }
 
-  onEditarAPartirDoDetalhe(chamado: Chamado) {
-    if (this.usuarioLogado?.perfil === 'atendente' && chamado.atendente !== this.usuarioLogado.nome) {
-      // Regra de edição
-    }
-    this.abrirModalEdicao(chamado);
-  }
+  onEditarAPartirDoDetalhe(chamado: Chamado) { this.abrirModalEdicao(chamado); }
 
   abrirModalEdicao(chamado: Chamado) {
     this.chamadoSelecionado = { ...chamado };
@@ -260,6 +228,7 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   onGerarRelatorio(filtros: RelatorioFilters) {
     this.filtrosRelatorioSalvos = { ...filtros };
     this.loadingService.show();
+    // ✅ Agora o serviço realmente filtra os dados
     this.relatorioChamados = this.chamadosService.buscarChamadosPorFiltros(filtros);
     this.loadingService.hide();
     this.showRelatorioFiltrosModal = false;
@@ -272,7 +241,6 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   }
   
   reabrirModalFiltros() { this.showRelatorioFiltrosModal = true; }
-
   toggleMenu() { this.menuCollapsed = !this.menuCollapsed; }
   
   updateStatusCounts() {
@@ -286,25 +254,26 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   updateMenuBadge() {
     const chamadosItem = this.menuItems.find((item) => item.label === 'Chamados');
     if (chamadosItem) {
-      chamadosItem.badge = this.chamados.filter((c) => c.status === 'aberto' || c.status === 'em-andamento').length;
+      // ✅ CORREÇÃO: Usando 'em andamento'
+      chamadosItem.badge = this.chamados.filter(c => c.status === 'aberto' || c.status === 'em andamento').length;
     }
   }
 
+  // ✅ CORREÇÃO: Nomenclatura exata para os rótulos do Frontend
   getStatusLabel(status: string) { 
-    const l:any = { 'aberto': 'Aberto', 'em-andamento': 'Em Andamento', 'fechado': 'Fechado' }; 
+    const l:any = { 
+      'aberto': 'Aberto', 
+      'em andamento': 'Em Andamento', 
+      'concluido': 'Concluído',
+      'encerrado': 'Encerrado' 
+    }; 
     return l[status] || status; 
   }
   
-  formatDateTime(date: string, time: string) { return date + ' ' + time; }
-
   showToast(message: string, type: 'success' | 'info' | 'warning' | 'error') {
     this.toast = { message, type, visible: true };
     setTimeout(() => { this.toast.visible = false; }, 3000);
   }
 
-  logout() {
-    if (confirm('Tem certeza que deseja sair?')) {
-      this.authService.logout();
-    }
-  }
+  logout() { if (confirm('Tem certeza que deseja sair?')) this.authService.logout(); }
 }

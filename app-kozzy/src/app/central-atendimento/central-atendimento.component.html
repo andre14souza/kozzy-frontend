@@ -93,8 +93,16 @@
                 <p class="card-description">{{ chamado.descricao }}</p>
                 <div class="card-details">
                     <div class="detail-item"><span class="detail-label">Departamento</span><span class="detail-value" style="font-weight: bold;">{{ chamado.area || 'Geral' }}</span></div>
-                    <div class="detail-item"><span class="detail-label">Assunto</span><span class="detail-value">{{ chamado.categoria }}</span></div>
-                    <div class="detail-item"><span class="detail-label">Atendente</span><span class="detail-value">{{ chamado.atendente }}</span></div>
+                    <div class="ticket-meta">
+                      <span class="meta-item">
+                        <i class="fas fa-user"></i> 
+                        {{ chamado.atendente?.nomeCompleto || chamado.atendente?.nome || chamado.atendente || 'Não atribuído' }}
+                      </span>
+                      <span class="meta-item">
+                        <i class="fas fa-folder"></i> 
+                        {{ chamado.categoria }}
+                      </span>
+                    </div>
                 </div>
                 <div class="card-footer"><span class="card-meta">📅 {{ chamado.dataAbertura | date: 'dd/MM/yyyy' }} às {{ chamado.horaAbertura }}</span></div>
             </div>
