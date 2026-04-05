@@ -280,6 +280,29 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
     return l[status] || status; 
   }
   
+  getTempoDecorrido(dataAbertura: string, horaAbertura: string): string {
+    if (!dataAbertura) return '';
+    try {
+      const dataStr = dataAbertura.split('T')[0];
+      const horaStr = horaAbertura || '00:00:00';
+      const abertura = new Date(`${dataStr}T${horaStr}`);
+      const agora = new Date();
+      if (isNaN(abertura.getTime())) return '';
+      
+      const diffMs = agora.getTime() - abertura.getTime();
+      const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffDias = Math.floor(diffHrs / 24);
+      
+      if (diffDias > 0) return `${diffDias} d`;
+      if (diffHrs > 0) return `${diffHrs} h`;
+      
+      const diffMins = Math.floor(diffMs / (1000 * 60));
+      return `${diffMins} m`;
+    } catch {
+      return '';
+    }
+  }
+
   showToast(message: string, type: 'success' | 'info' | 'warning' | 'error') {
     this.toast = { message, type, visible: true };
     setTimeout(() => { this.toast.visible = false; }, 3000);
