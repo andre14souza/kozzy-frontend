@@ -72,6 +72,7 @@ export interface Chamado {
   anexo?: {
     nomeOriginal: string;
     url: string;
+    caminho?: string;
   };
 } 
 
