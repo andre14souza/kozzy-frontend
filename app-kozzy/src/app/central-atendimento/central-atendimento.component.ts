@@ -91,7 +91,6 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   }
 
   carregarDados(): void {
-    this.loadingService.show();
     this.chamadosSubscription = this.chamadosService.getChamados().subscribe({
       next: (dados: Chamado[]) => {
         if (this.authService.isSupervisor()) {
@@ -108,11 +107,9 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
         this.updateStatusCounts();
         this.updateMenuBadge();
         this.updateKanbanColumns();
-        this.loadingService.hide();
       },
       error: (err) => {
         this.showToast('Erro ao carregar chamados.', 'error');
-        this.loadingService.hide();
       }
     });
   }
@@ -136,7 +133,6 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   }
 
   onChamadoCriado(n: NovoChamado) { 
-    this.loadingService.show();
     this.chamadosService.adicionarChamado(n).subscribe({
       next: () => { 
         this.fecharModal();
@@ -145,13 +141,11 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
       },
       error: () => { 
         this.showToast('Erro ao criar chamado.', 'error');
-        this.loadingService.hide();
       }
     });
   }
 
   onChamadoAtualizado(c: Chamado) { 
-    this.loadingService.show();
     this.chamadosService.atualizarChamado(c).subscribe({
       next: () => { 
         this.fecharModal();
@@ -163,7 +157,6 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
       },
       error: () => { 
         this.showToast('Erro ao atualizar chamado.', 'error');
-        this.loadingService.hide();
       }
     });
   }
@@ -237,10 +230,8 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   
   onGerarRelatorio(filtros: RelatorioFilters) {
     this.filtrosRelatorioSalvos = { ...filtros };
-    this.loadingService.show();
     // ✅ Agora o serviço realmente filtra os dados
     this.relatorioChamados = this.chamadosService.buscarChamadosPorFiltros(filtros);
-    this.loadingService.hide();
     this.showRelatorioFiltrosModal = false;
     setTimeout(() => { this.showRelatorioScreen = true; }, 100);
   }

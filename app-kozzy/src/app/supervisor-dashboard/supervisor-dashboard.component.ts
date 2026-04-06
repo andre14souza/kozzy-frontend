@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AuthService, UsuarioLogado } from '../auth.service';
 import { ChamadosService, Chamado, NovoChamado, RelatorioFilters } from '../chamados.service';
-import { LoadingService } from '../loading.service'; 
 import { NgApexchartsModule } from 'ng-apexcharts'; 
 
 import { CreateTicketModalComponent } from '../create-ticket-modal/create-ticket-modal.component';
@@ -72,8 +71,7 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router, 
     public authService: AuthService,
-    private chamadosService: ChamadosService,
-    private loadingService: LoadingService // Remova se não tiver o serviço criado
+    private chamadosService: ChamadosService
   ) {}
 
   ngOnInit() {
@@ -95,17 +93,14 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
   }
 
   carregarDados() {
-    // Se tiver LoadingService use: this.loadingService.show();
     this.chamadosSubscription = this.chamadosService.getChamados().subscribe({
         next: (dados) => {
             this.chamados = dados;
             this.calcularKPIs();
             this.updateCharts();
-            // this.loadingService.hide();
         },
         error: (err) => {
             console.error(err);
-            // this.loadingService.hide();
         }
     });
   }
@@ -118,8 +113,6 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
   // --- NOVA FUNÇÃO DE EXCLUIR ---
   excluirChamadoDoDetalhe(id: string) {
     if (confirm('Tem certeza que deseja EXCLUIR este chamado permanentemente?')) {
-        // this.loadingService.show();
-        
         this.chamadosService.deletarChamado(id).subscribe({
             next: () => {
                 this.showToast('Chamado excluído com sucesso!', 'success');
@@ -133,7 +126,6 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
             error: (err) => {
                 console.error(err);
                 this.showToast('Erro ao excluir chamado.', 'error');
-                // this.loadingService.hide();
             }
         });
     }
