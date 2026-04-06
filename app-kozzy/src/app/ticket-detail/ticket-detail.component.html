@@ -26,6 +26,14 @@
         <div class="info-card">
           <h3>📝 Descrição da Solicitação</h3>
           <p class="description-text">{{ chamado.descricao }}</p>
+          
+          <div *ngIf="chamado.anexo" class="attachment-section" style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #e2e8f0;">
+            <h4 style="margin:0 0 10px 0; font-size:13px; color:#64748b;">📎 Anexo</h4>
+            <a [href]="chamado.anexo.url" target="_blank" class="attachment-link">
+              <span class="attachment-icon">📁</span>
+              <span class="attachment-name">{{ chamado.anexo.nomeOriginal }}</span>
+            </a>
+          </div>
         </div>
   
         <div class="info-card">
@@ -76,7 +84,14 @@
                 <span class="comment-author">{{ com.usuario?.nomeCompleto || 'Desconhecido' }}</span>
                 <span class="comment-date">{{ com.data | date:'dd/MM/yyyy HH:mm' }}</span>
               </div>
-              <p class="comment-text">{{ com.mensagem }}</p>
+              <p class="comment-text" *ngIf="com.mensagem">{{ com.mensagem }}</p>
+              
+              <div *ngIf="com.anexo" class="comment-attachment" style="margin-top: 8px;">
+                <a [href]="com.anexo.url" target="_blank" class="attachment-link compact">
+                  <span class="attachment-icon">📎</span>
+                  <span class="attachment-name">{{ com.anexo.nomeOriginal }}</span>
+                </a>
+              </div>
             </div>
           </div>
           <ng-template #noComments>
@@ -90,11 +105,23 @@
               class="comment-input"
               rows="3">
             </textarea>
-            <div class="comment-actions">
-              <button class="btn-submit-comment" [disabled]="isSubmittingComment || !novoComentario.trim()" (click)="enviarComentario()">
-                <ng-container *ngIf="!isSubmittingComment">Enviar</ng-container>
-                <ng-container *ngIf="isSubmittingComment">Enviando...</ng-container>
-              </button>
+            
+            <div class="comment-actions-bar" style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+              <div class="upload-wrapper">
+                <input type="file" #commentFileInput (change)="onCommentFileSelected($event)" accept="image/*,.pdf" style="display:none">
+                <button type="button" class="btn-attach-comment" (click)="commentFileInput.click()" title="Anexar arquivo">📎 Anexar</button>
+                <div *ngIf="comentarioFile" class="comment-file-preview" style="display: flex; align-items: center; gap: 5px; margin-top: 5px; font-size: 12px; color: #475569;">
+                  <span>{{ comentarioFile.name }}</span>
+                  <button type="button" (click)="removeCommentFile()" style="background:none; border:none; color:#ef4444; font-size:10px; cursor:pointer;">✖</button>
+                </div>
+              </div>
+
+              <div class="comment-actions">
+                <button class="btn-submit-comment" [disabled]="isSubmittingComment || (!novoComentario.trim() && !comentarioFile)" (click)="enviarComentario()">
+                  <ng-container *ngIf="!isSubmittingComment">Enviar</ng-container>
+                  <ng-container *ngIf="isSubmittingComment">Enviando...</ng-container>
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -21,6 +21,7 @@ export class TicketDetailComponent {
 
   novoComentario: string = '';
   isSubmittingComment: boolean = false;
+  comentarioFile: File | null = null;
 
   constructor(private chamadosService: ChamadosService) {}
 
@@ -74,18 +75,19 @@ export class TicketDetailComponent {
   }
 
   enviarComentario() {
-    if (!this.novoComentario || !this.novoComentario.trim()) return;
+    if ((!this.novoComentario || !this.novoComentario.trim()) && !this.comentarioFile) return;
     
     this.isSubmittingComment = true;
     
-    this.chamadosService.adicionarComentario(this.chamado.id, this.novoComentario).subscribe({
+    this.chamadosService.adicionarComentario(this.chamado.id, this.novoComentario, this.comentarioFile || undefined).subscribe({
       next: (res) => {
         const comentarioSalvo = res.comentario || {
           mensagem: this.novoComentario,
           data: new Date().toISOString(),
           usuario: {
             nomeCompleto: this.usuarioLogado?.nome || 'Você'
-          }
+          },
+          anexo: this.comentarioFile ? { nomeOriginal: this.comentarioFile.name, url: '#' } : undefined
         };
 
         if (!this.chamado.comentarios) {
@@ -94,6 +96,7 @@ export class TicketDetailComponent {
         
         this.chamado.comentarios.push(comentarioSalvo);
         this.novoComentario = '';
+        this.comentarioFile = null;
         this.isSubmittingComment = false;
       },
       error: (err) => {
@@ -102,5 +105,16 @@ export class TicketDetailComponent {
         this.isSubmittingComment = false;
       }
     });
+  }
+
+  onCommentFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.comentarioFile = input.files[0];
+    }
+  }
+
+  removeCommentFile() {
+    this.comentarioFile = null;
   }
 }

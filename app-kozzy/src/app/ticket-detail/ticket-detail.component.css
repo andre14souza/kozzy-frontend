@@ -290,3 +290,45 @@
   cursor: not-allowed;
   opacity: 0.7;
 }
+
+/* Anexos (Attachments) */
+.attachment-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #f1f5f9;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #3b82f6;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+  border: 1px solid #e2e8f0;
+}
+
+.attachment-link:hover {
+  background-color: #e2e8f0;
+}
+
+.attachment-link.compact {
+  padding: 4px 8px;
+  font-size: 12px;
+  gap: 6px;
+}
+
+.btn-attach-comment {
+  background: #f1f5f9;
+  border: 1px dashed #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-attach-comment:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}

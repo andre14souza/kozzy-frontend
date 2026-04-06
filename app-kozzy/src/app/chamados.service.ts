@@ -38,7 +38,7 @@ export interface NovoChamado {
   cliente: string;
   area: string;
   assunto: string;
-  atendente: any; // CORREÇÃO: Alterado para any para aceitar ID ou Objeto
+  atendente: any;
   prioridade: string;
   status: string;
   descricao: string;
@@ -46,6 +46,7 @@ export interface NovoChamado {
   hora: string;
   dataHoraCriacao: string;
   origem?: 'whatsapp' | 'email';
+  arquivo?: File; // Campo para o anexo real no frontend
 }
 
 export interface Chamado {
@@ -54,7 +55,7 @@ export interface Chamado {
   cliente: string;
   area: string;
   categoria: string;
-  atendente?: any; // CORREÇÃO: Alterado para any para evitar erro de build (NG9)
+  atendente?: any;
   prioridade: string;
   status: string;
   descricao: string;
@@ -68,6 +69,10 @@ export interface Chamado {
   dataLimite?: string;
   slaStatus?: string;
   slaClass?: string;
+  anexo?: {
+    nomeOriginal: string;
+    url: string;
+  };
 } 
 
 export interface RelatorioFilters {
@@ -129,7 +134,8 @@ export class ChamadosService {
             comentarios: item.comentarios || [],
             dataLimite: item.dataLimite,
             slaStatus: getSLADetails(item.dataLimite, item.avanco).label,
-            slaClass: getSLADetails(item.dataLimite, item.avanco).cssClass
+            slaClass: getSLADetails(item.dataLimite, item.avanco).cssClass,
+            anexo: item.anexo || undefined
           } as Chamado;
         });
       }),
@@ -139,10 +145,31 @@ export class ChamadosService {
 
   // 2. POST (Criar)
   adicionarChamado(chamado: NovoChamado): Observable<any> {
-    // Garante que enviamos apenas o ID, não o objeto
     const idAtendente = (chamado.atendente && typeof chamado.atendente === 'object') 
       ? chamado.atendente._id : chamado.atendente;
 
+    // Se tiver arquivo, montamos um FormData
+    if (chamado.arquivo) {
+      const formData = new FormData();
+      if (chamado.numeroProtocolo) formData.append('numeroProtocolo', chamado.numeroProtocolo);
+      formData.append('tipoCliente', chamado.cliente);
+      formData.append('categoriaAssunto', chamado.area);
+      formData.append('assuntoEspecifico', chamado.assunto);
+      formData.append('hora', chamado.hora);
+      formData.append('dataAtendimento', chamado.data);
+      if (chamado.descricao) formData.append('descricaoDetalhada', chamado.descricao);
+      formData.append('nivelPrioridade', chamado.prioridade);
+      if (idAtendente) formData.append('atendente', idAtendente);
+      formData.append('avanco', 'aberto');
+      if (chamado.origem) formData.append('origem', chamado.origem);
+      
+      // O campo para arquivo é 'anexo'
+      formData.append('anexo', chamado.arquivo);
+
+      return this.http.post(this.API_URL, formData, { withCredentials: true });
+    }
+
+    // Comportamento normal de fallback para JSON caso não haja anexo
     const payload = {
       numeroProtocolo: chamado.numeroProtocolo,
       tipoCliente: chamado.cliente,
@@ -152,7 +179,7 @@ export class ChamadosService {
       dataAtendimento: chamado.data,
       descricaoDetalhada: chamado.descricao,
       nivelPrioridade: chamado.prioridade,
-      atendente: idAtendente || null, // ✅ Apenas ID ou null
+      atendente: idAtendente || null,
       avanco: 'aberto',
       origem: chamado.origem
     };
@@ -189,7 +216,13 @@ export class ChamadosService {
     return this.chamadosSubject.value.find(c => c.numeroProtocolo === protocolo);
   }
 
-  adicionarComentario(id: string, mensagem: string): Observable<any> {
+  adicionarComentario(id: string, mensagem: string, arquivo?: File): Observable<any> {
+    if (arquivo) {
+      const formData = new FormData();
+      formData.append('mensagem', mensagem);
+      formData.append('anexo', arquivo);
+      return this.http.post(`${this.API_URL}/${id}/comentarios`, formData, { withCredentials: true });
+    }
     return this.http.post(`${this.API_URL}/${id}/comentarios`, { mensagem }, { withCredentials: true });
   }
   

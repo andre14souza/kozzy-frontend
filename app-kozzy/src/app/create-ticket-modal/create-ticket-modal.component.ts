@@ -29,6 +29,7 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
   isEditMode = false;
   isLoading = false;
   showPreview = false;
+  selectedFile: File | null = null;
 
   origemOptions: SelectOption[] = [
     { value: 'email', label: '📧 E-mail' },
@@ -86,6 +87,7 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
     if (changes['isVisible'] && this.isVisible) {
       this.isEditMode = !!this.chamadoParaEditar;
       this.showPreview = false; 
+      this.selectedFile = null;
       this.initializeForm(); 
       if (this.isEditMode) this.populateFormForEdit();
     }
@@ -161,6 +163,17 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
 
   closeModalHandler() { this.closeModal.emit(); }
 
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+    }
+  }
+
+  removeFile() {
+    this.selectedFile = null;
+  }
+
   salvarChamado() {
     if (this.ticketForm.invalid) {
       this.ticketForm.markAllAsTouched();
@@ -180,7 +193,11 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
       atendenteFinal = { _id: user?.id, nomeCompleto: user?.nome };
     }
 
-    const dados = { ...val, atendente: atendenteFinal };
+    const dados = { 
+      ...val, 
+      atendente: atendenteFinal,
+      ...(this.selectedFile && !this.isEditMode ? { arquivo: this.selectedFile } : {})
+    };
 
     if (this.isEditMode) {
       this.chamadoAtualizado.emit({ ...this.chamadoParaEditar, ...dados } as any);

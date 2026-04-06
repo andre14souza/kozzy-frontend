@@ -102,6 +102,18 @@
           <textarea id="descricao" formControlName="descricao" class="form-textarea" rows="4"></textarea>
         </div>
 
+        <div class="form-group" *ngIf="!isEditMode">
+          <label class="form-label">Anexo <span class="field-optional">(opcional)</span></label>
+          <div class="file-upload-wrapper" style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+            <input type="file" id="anexo" (change)="onFileSelected($event)" accept="image/*,.pdf" style="display: none" #fileInput>
+            <button type="button" class="btn-upload" style="background:#e2e8f0; border:none; padding:8px 12px; border-radius:6px; cursor:pointer;" (click)="fileInput.click()">
+              📎 Escolher Arquivo
+            </button>
+            <span class="file-name" *ngIf="selectedFile" style="font-size:13px; color:#475569;">{{ selectedFile.name }}</span>
+            <button type="button" class="btn-remove-file" *ngIf="selectedFile" (click)="removeFile()" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:12px;" title="Remover anexo">✖</button>
+          </div>
+        </div>
+
       </form>
 
       <div *ngIf="showPreview" class="preview-container">
@@ -114,6 +126,7 @@
           <p><strong>Área:</strong> {{ getPreviewData().area }}</p>
           <p><strong>Assunto:</strong> {{ getPreviewData().assunto }}</p>
           <p><strong>Descrição:</strong> {{ getPreviewData().descricao }}</p>
+          <p *ngIf="selectedFile && !isEditMode"><strong>Anexo:</strong> 📎 {{ selectedFile.name }}</p>
         </div>
       </div>
     </div>
