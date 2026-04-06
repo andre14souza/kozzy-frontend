@@ -125,8 +125,9 @@ export class TicketDetailComponent {
   getAnexoUrl(caminho: string | undefined): string {
     if (!caminho || caminho === '#') return '#';
     if (caminho.startsWith('http') || caminho.startsWith('blob:')) return caminho;
+    const normalizedPath = caminho.replace(/\\/g, '/');
     const baseUrl = environment.apiUrl.replace('/api', '');
-    const cleanPath = caminho.startsWith('/') ? caminho : `/${caminho}`;
+    const cleanPath = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`;
     return `${baseUrl}${cleanPath}`;
   }
 }
