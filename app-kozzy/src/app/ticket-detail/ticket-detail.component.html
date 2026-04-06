@@ -55,9 +55,42 @@
             </div>
           </div>
         </div>
+        </div>
       </div>
   
       <div class="sidebar-info">
+        <div class="info-card comments-card">
+          <h3>💬 Histórico de Interações</h3>
+          
+          <div class="comments-list" *ngIf="chamado.comentarios && chamado.comentarios.length > 0; else noComments">
+            <div class="comment-item" *ngFor="let com of chamado.comentarios">
+              <div class="comment-header">
+                <span class="comment-author">{{ com.usuario?.nomeCompleto || 'Desconhecido' }}</span>
+                <span class="comment-date">{{ com.data | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <p class="comment-text">{{ com.mensagem }}</p>
+            </div>
+          </div>
+          <ng-template #noComments>
+            <p class="no-comments-text">Nenhuma interação registrada neste chamado.</p>
+          </ng-template>
+
+          <div class="add-comment-section" *ngIf="chamado.status !== 'encerrado'">
+            <textarea 
+              [(ngModel)]="novoComentario" 
+              placeholder="Adicione uma interação..." 
+              class="comment-input"
+              rows="3">
+            </textarea>
+            <div class="comment-actions">
+              <button class="btn-submit-comment" [disabled]="isSubmittingComment || !novoComentario.trim()" (click)="enviarComentario()">
+                <ng-container *ngIf="!isSubmittingComment">Enviar</ng-container>
+                <ng-container *ngIf="isSubmittingComment">Enviando...</ng-container>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="meta-card">
           <h3>👤 Atendimento</h3>
           <div class="meta-row">

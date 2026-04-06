@@ -1,12 +1,13 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Chamado } from '../chamados.service';
+import { FormsModule } from '@angular/forms';
+import { Chamado, ChamadosService } from '../chamados.service';
 import { UsuarioLogado } from '../auth.service';
 
 @Component({
   selector: 'app-ticket-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './ticket-detail.component.html',
   styleUrls: ['./ticket-detail.component.css']
 })
@@ -17,6 +18,11 @@ export class TicketDetailComponent {
   @Output() close = new EventEmitter<void>();
   @Output() edit = new EventEmitter<Chamado>();
   @Output() deleteTicket = new EventEmitter<string>();
+
+  novoComentario: string = '';
+  isSubmittingComment: boolean = false;
+
+  constructor(private chamadosService: ChamadosService) {}
 
   onClose() { this.close.emit(); }
 
@@ -65,5 +71,36 @@ export class TicketDetailComponent {
   getPrioridadeLabel(p: string) { 
     const m: any = { 'baixa': 'Baixa', 'media': 'Média', 'alta': 'Alta', 'urgente': 'Urgente' }; 
     return m[p] || p; 
+  }
+
+  enviarComentario() {
+    if (!this.novoComentario || !this.novoComentario.trim()) return;
+    
+    this.isSubmittingComment = true;
+    
+    this.chamadosService.adicionarComentario(this.chamado.id, this.novoComentario).subscribe({
+      next: (res) => {
+        const comentarioSalvo = res.comentario || {
+          mensagem: this.novoComentario,
+          data: new Date().toISOString(),
+          usuario: {
+            nomeCompleto: this.usuarioLogado?.nome || 'Você'
+          }
+        };
+
+        if (!this.chamado.comentarios) {
+          this.chamado.comentarios = [];
+        }
+        
+        this.chamado.comentarios.push(comentarioSalvo);
+        this.novoComentario = '';
+        this.isSubmittingComment = false;
+      },
+      error: (err) => {
+        console.error('Erro ao adicionar comentário:', err);
+        alert('Falha ao enviar comentário.');
+        this.isSubmittingComment = false;
+      }
+    });
   }
 }

@@ -36,6 +36,7 @@ export interface Chamado {
   icone?: string;
   isNovo?: boolean;
   origem?: 'whatsapp' | 'email';
+  comentarios?: any[];
 } 
 
 export interface RelatorioFilters {
@@ -93,7 +94,8 @@ export class ChamadosService {
             dataAbertura: item.dataAtendimento ? item.dataAtendimento.split('T')[0] : '',
             horaAbertura: item.hora,
             icone: iconeVisual,
-            isNovo: false
+            isNovo: false,
+            comentarios: item.comentarios || []
           } as Chamado;
         });
       }),

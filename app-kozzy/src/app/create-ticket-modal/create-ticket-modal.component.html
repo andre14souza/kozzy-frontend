@@ -10,7 +10,7 @@
 
     <div class="modal-body">
       <form [formGroup]="ticketForm" *ngIf="!showPreview" class="ticket-form">
-        
+
         <div class="form-group">
           <label for="origem" class="form-label required">Origem do Chamado <span class="field-info">*</span></label>
           <select id="origem" formControlName="origem" class="form-select">
@@ -23,21 +23,17 @@
             Nº do Protocolo (WhatsApp)
             <span class="field-info" *ngIf="ticketForm.get('origem')?.value === 'whatsapp'">*</span>
           </label>
-          <input 
-            type="text" 
-            id="numeroProtocolo" 
-            formControlName="numeroProtocolo" 
-            class="form-input" 
-            [class.error]="hasFieldError('numeroProtocolo')" 
-            placeholder="Cole o número aqui">
-          <div class="error-message" *ngIf="hasFieldError('numeroProtocolo')">{{ getFieldError('numeroProtocolo') }}</div>
+          <input type="text" id="numeroProtocolo" formControlName="numeroProtocolo" class="form-input"
+            [class.error]="hasFieldError('numeroProtocolo')" placeholder="Cole o número aqui">
+          <div class="error-message" *ngIf="hasFieldError('numeroProtocolo')">{{ getFieldError('numeroProtocolo') }}
+          </div>
         </div>
 
         <div class="form-group" *ngIf="isEditMode">
-            <label for="status" class="form-label required">Status / Situação <span class="field-info">*</span></label>
-            <select id="status" formControlName="status" class="form-select">
-              <option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</option>
-            </select>
+          <label for="status" class="form-label required">Status / Situação <span class="field-info">*</span></label>
+          <select id="status" formControlName="status" class="form-select">
+            <option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</option>
+          </select>
         </div>
 
         <div class="form-group">
@@ -50,12 +46,12 @@
         </div>
 
         <div class="form-group">
-            <label for="area" class="form-label required">Área / Departamento <span class="field-info">*</span></label>
-            <select id="area" formControlName="area" class="form-select" [class.error]="hasFieldError('area')">
-              <option value="">Selecione o departamento</option>
-              <option *ngFor="let option of areaOptions" [value]="option.value">{{ option.label }}</option>
-            </select>
-            <div class="error-message" *ngIf="hasFieldError('area')">{{ getFieldError('area') }}</div>
+          <label for="area" class="form-label required">Área / Departamento <span class="field-info">*</span></label>
+          <select id="area" formControlName="area" class="form-select" [class.error]="hasFieldError('area')">
+            <option value="">Selecione o departamento</option>
+            <option *ngFor="let option of areaOptions" [value]="option.value">{{ option.label }}</option>
+          </select>
+          <div class="error-message" *ngIf="hasFieldError('area')">{{ getFieldError('area') }}</div>
         </div>
 
         <div class="form-group">
@@ -68,62 +64,63 @@
         </div>
 
         <div class="form-group" *ngIf="isEditMode && perfilUsuario === 'supervisor'">
-            <label for="atendente" class="form-label">Alterar Atendente Responsável</label>
-            <select id="atendente" formControlName="atendente" class="form-select">
-                <option value="">-- Não atribuído --</option>
-                <option *ngFor="let opt of atendenteOptions" [value]="opt.value">{{ opt.label }}</option>
-            </select>
+          <label for="atendente" class="form-label">Alterar Atendente Responsável</label>
+          <select id="atendente" formControlName="atendente" class="form-select">
+            <option value="">-- Não atribuído --</option>
+            <option *ngFor="let opt of atendenteOptions" [value]="opt.value">{{ opt.label }}</option>
+          </select>
         </div>
-         
-         <div class="form-row">
-            <div class="form-group"><label class="form-label">Data</label><input type="date" formControlName="data" class="form-input readonly" readonly></div>
-            <div class="form-group"><label class="form-label">Hora</label><input type="time" formControlName="hora" class="form-input readonly" readonly></div>
-         </div>
-         <div class="form-group" *ngIf="isEditMode">
-    <label for="status" class="form-label required">Status / Situação <span class="field-info">*</span></label>
-    <select id="status" formControlName="status" class="form-select">
-      <option value="aberto">🔴 Aberto</option>
-      <option value="em andamento">🟡 Em Andamento</option>
-      <option value="concluido">🟢 Concluído</option>
-      <option value="encerrado">🔒 Encerrado</option> 
-    </select>
-</div>
 
-<div class="form-group" *ngIf="ticketForm.get('status')?.value === 'concluido' || ticketForm.get('status')?.value === 'encerrado'">
-    <label for="solucao" class="form-label required">Descrição da Solução <span class="field-info">*</span></label>
-    <textarea id="solucao" formControlName="solucao" class="form-textarea" rows="3" placeholder="O que foi feito para resolver este chamado?"></textarea>
-</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Data</label><input type="date" formControlName="data"
+              class="form-input readonly" readonly></div>
+          <div class="form-group"><label class="form-label">Hora</label><input type="time" formControlName="hora"
+              class="form-input readonly" readonly></div>
+        </div>
+        <div class="form-group" *ngIf="isEditMode">
+          <label for="status" class="form-label required">Status / Situação <span class="field-info">*</span></label>
 
-         <div class="form-group" *ngIf="isEditMode && perfilUsuario === 'supervisor'">
-            <label class="form-label">Prioridade</label>
-            <select formControlName="prioridade" class="form-select">
-                <option *ngFor="let opt of prioridadeOptions" [value]="opt.value">{{ opt.label }}</option>
-            </select>
-         </div>
+        </div>
 
-         <div class="form-group">
-            <label for="descricao" class="form-label">Descrição <span class="field-optional">(opcional)</span></label>
-            <textarea id="descricao" formControlName="descricao" class="form-textarea" rows="4"></textarea>
-         </div>
+        <div class="form-group"
+          *ngIf="ticketForm.get('status')?.value === 'concluido' || ticketForm.get('status')?.value === 'encerrado'">
+          <label for="solucao" class="form-label required">Descrição da Solução <span
+              class="field-info">*</span></label>
+          <textarea id="solucao" formControlName="solucao" class="form-textarea" rows="3"
+            placeholder="O que foi feito para resolver este chamado?"></textarea>
+        </div>
+
+        <div class="form-group" *ngIf="isEditMode && perfilUsuario === 'supervisor'">
+          <label class="form-label">Prioridade</label>
+          <select formControlName="prioridade" class="form-select">
+            <option *ngFor="let opt of prioridadeOptions" [value]="opt.value">{{ opt.label }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="descricao" class="form-label">Descrição <span class="field-optional">(opcional)</span></label>
+          <textarea id="descricao" formControlName="descricao" class="form-textarea" rows="4"></textarea>
+        </div>
 
       </form>
 
       <div *ngIf="showPreview" class="preview-container">
-         <div class="preview-card">
-             <h3>📋 Resumo</h3>
-             <p><strong>Origem:</strong> {{ getPreviewData().origem }}</p>
-             <p><strong>Protocolo:</strong> {{ getPreviewData().numeroProtocolo || 'Gerado Automaticamente' }}</p>
-             <p *ngIf="isEditMode"><strong>Status:</strong> {{ getPreviewData().status }}</p> <p><strong>Cliente:</strong> {{ getPreviewData().cliente }}</p>
-             <p><strong>Área:</strong> {{ getPreviewData().area }}</p> 
-             <p><strong>Assunto:</strong> {{ getPreviewData().assunto }}</p>
-             <p><strong>Descrição:</strong> {{ getPreviewData().descricao }}</p>
-          </div>
+        <div class="preview-card">
+          <h3>📋 Resumo</h3>
+          <p><strong>Origem:</strong> {{ getPreviewData().origem }}</p>
+          <p><strong>Protocolo:</strong> {{ getPreviewData().numeroProtocolo || 'Gerado Automaticamente' }}</p>
+          <p *ngIf="isEditMode"><strong>Status:</strong> {{ getPreviewData().status }}</p>
+          <p><strong>Cliente:</strong> {{ getPreviewData().cliente }}</p>
+          <p><strong>Área:</strong> {{ getPreviewData().area }}</p>
+          <p><strong>Assunto:</strong> {{ getPreviewData().assunto }}</p>
+          <p><strong>Descrição:</strong> {{ getPreviewData().descricao }}</p>
+        </div>
       </div>
     </div>
 
     <div class="modal-footer">
-       <button class="btn btn-secondary" (click)="closeModalHandler()">Cancelar</button>
-       <button class="btn btn-primary" (click)="salvarChamado()">{{ isEditMode ? 'Atualizar' : 'Salvar' }}</button>
+      <button class="btn btn-secondary" (click)="closeModalHandler()">Cancelar</button>
+      <button class="btn btn-primary" (click)="salvarChamado()">{{ isEditMode ? 'Atualizar' : 'Salvar' }}</button>
     </div>
   </div>
 </div>
