@@ -122,11 +122,11 @@ export class TicketDetailComponent {
     this.comentarioFile = null;
   }
 
-  getFullUrl(path: string | undefined): string {
-    if (!path || path === '#') return '#';
-    if (path.startsWith('http') || path.startsWith('blob:')) return path;
+  getAnexoUrl(caminho: string | undefined): string {
+    if (!caminho || caminho === '#') return '#';
+    if (caminho.startsWith('http') || caminho.startsWith('blob:')) return caminho;
     const baseUrl = environment.apiUrl.replace('/api', '');
-    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    const cleanPath = caminho.startsWith('/') ? caminho : `/${caminho}`;
     return `${baseUrl}${cleanPath}`;
   }
 }
