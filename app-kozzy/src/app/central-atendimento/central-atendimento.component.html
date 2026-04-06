@@ -112,8 +112,8 @@
                     <span class="card-number" *ngIf="chamado.origem === 'whatsapp'">#{{ chamado.numeroProtocolo
                       }}</span>
                     <span class="card-number system-id" *ngIf="chamado.origem !== 'whatsapp'">VIA SISTEMA</span>
-
                     <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
+                    <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass">{{ chamado.slaStatus }}</span>
                   </div>
                   <h3 class="card-title">{{ chamado.cliente }}</h3>
                 </div>
@@ -154,7 +154,10 @@
               <div class="kanban-card" *ngFor="let chamado of chamadosAbertos" cdkDrag (click)="onSelectChamado(chamado)">
                 <div class="k-card-header">
                    <span class="k-protocolo">#{{ chamado.numeroProtocolo }}</span>
-                   <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
+                   <div style="display: flex; align-items: center;">
+                     <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass" style="margin-right: 8px;">{{ chamado.slaStatus }}</span>
+                     <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
+                   </div>
                 </div>
                 <h4 class="k-card-title">{{ chamado.cliente }}</h4>
                 <p class="k-card-desc" *ngIf="chamado.descricao">{{ chamado.descricao | slice:0:60 }}...</p>
@@ -178,7 +181,10 @@
               <div class="kanban-card" *ngFor="let chamado of chamadosEmAndamento" cdkDrag (click)="onSelectChamado(chamado)">
                 <div class="k-card-header">
                    <span class="k-protocolo">#{{ chamado.numeroProtocolo }}</span>
-                   <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
+                   <div style="display: flex; align-items: center;">
+                     <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass" style="margin-right: 8px;">{{ chamado.slaStatus }}</span>
+                     <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
+                   </div>
                 </div>
                 <h4 class="k-card-title">{{ chamado.cliente }}</h4>
                 <p class="k-card-desc" *ngIf="chamado.descricao">{{ chamado.descricao | slice:0:60 }}...</p>
@@ -202,7 +208,10 @@
               <div class="kanban-card" *ngFor="let chamado of chamadosConcluidos" cdkDrag (click)="onSelectChamado(chamado)">
                 <div class="k-card-header">
                    <span class="k-protocolo">#{{ chamado.numeroProtocolo }}</span>
-                   <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
+                   <div style="display: flex; align-items: center;">
+                     <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass" style="margin-right: 8px;">{{ chamado.slaStatus }}</span>
+                     <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
+                   </div>
                 </div>
                 <h4 class="k-card-title">{{ chamado.cliente }}</h4>
                 <p class="k-card-desc" *ngIf="chamado.descricao">{{ chamado.descricao | slice:0:60 }}...</p>
@@ -226,7 +235,10 @@
               <div class="kanban-card" *ngFor="let chamado of chamadosEncerrados" cdkDrag (click)="onSelectChamado(chamado)">
                 <div class="k-card-header">
                    <span class="k-protocolo">#{{ chamado.numeroProtocolo }}</span>
-                   <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
+                   <div style="display: flex; align-items: center;">
+                     <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass" style="margin-right: 8px;">{{ chamado.slaStatus }}</span>
+                     <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
+                   </div>
                 </div>
                 <h4 class="k-card-title">{{ chamado.cliente }}</h4>
                 <p class="k-card-desc" *ngIf="chamado.descricao">{{ chamado.descricao | slice:0:60 }}...</p>

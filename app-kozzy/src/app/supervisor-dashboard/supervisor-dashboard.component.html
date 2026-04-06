@@ -102,10 +102,10 @@
                     <div class="origin-icon" [title]="chamado.origem === 'whatsapp' ? 'Via WhatsApp' : 'Via E-mail'">
                         {{ chamado.origem === 'whatsapp' ? '📱' : '📧' }}
                     </div>
-                    <div class="card-info">
-                         <div class="card-number-priority">
+                     <div class="card-number-priority">
                              <span class="card-number" *ngIf="chamado.origem === 'whatsapp'">#{{ chamado.numeroProtocolo }}</span>
                              <span class="card-number system-id" *ngIf="chamado.origem !== 'whatsapp'">VIA SISTEMA</span>
+                             <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass">{{ chamado.slaStatus }}</span>
                          </div>
                     </div>
                 </div>

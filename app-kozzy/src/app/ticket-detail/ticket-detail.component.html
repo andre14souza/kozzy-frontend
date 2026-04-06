@@ -45,9 +45,18 @@
             </div>
             <div class="info-item">
               <label>Prioridade</label>
-              <span class="priority-badge" [class]="'priority-' + chamado.prioridade">
-                {{ getPrioridadeLabel(chamado.prioridade) }}
-              </span>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="priority-badge" [class]="'priority-' + chamado.prioridade">
+                  {{ getPrioridadeLabel(chamado.prioridade) }}
+                </span>
+              </div>
+            </div>
+            <div class="info-item" *ngIf="chamado.dataLimite">
+              <label>Data Limite (SLA)</label>
+              <div style="display: flex; align-items: center;">
+                <span>{{ chamado.dataLimite | date: 'dd/MM/yyyy HH:mm' }}</span>
+                <span class="sla-badge" [class]="chamado.slaClass" style="font-size: 10px;">{{ chamado.slaStatus }}</span>
+              </div>
             </div>
             <div class="info-card solucao-card" *ngIf="chamado.solucao">
               <h3>✅ Solução Aplicada</h3>

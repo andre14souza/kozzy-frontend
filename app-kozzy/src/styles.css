@@ -66,4 +66,21 @@ html, body {
   from { transform: translateX(100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
 }
+
+/* --- SLA BADGES GLOBALS --- */
+.sla-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.sla-atrasado { background-color: #ef4444; color: #ffffff; }
+.sla-vence-hoje { background-color: #f59e0b; color: #1e293b; }
+.sla-no-prazo { background-color: #e2e8f0; color: #475569; }
+.sla-resolvido { background-color: #10b981; color: #ffffff; }
+
 /* You can add global styles to this file, and also import other style files */

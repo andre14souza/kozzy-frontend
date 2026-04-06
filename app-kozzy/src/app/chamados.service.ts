@@ -5,6 +5,34 @@ import { map } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 
 // Interfaces
+export function getSLADetails(dataLimiteISO: string | undefined, statusAtual: string): { label: string, cssClass: string } {
+  if (statusAtual === 'concluido' || statusAtual === 'encerrado') {
+    return { label: 'Resolvido', cssClass: 'sla-resolvido' };
+  }
+  if (!dataLimiteISO) {
+    return { label: 'No Prazo', cssClass: 'sla-no-prazo' };
+  }
+
+  const limite = new Date(dataLimiteISO);
+  const hoje = new Date();
+
+  // Verifica se é o mesmo dia
+  const isMesmoDia = 
+    limite.getDate() === hoje.getDate() &&
+    limite.getMonth() === hoje.getMonth() &&
+    limite.getFullYear() === hoje.getFullYear();
+
+  if (hoje.getTime() > limite.getTime()) {
+    return { label: 'Atrasado', cssClass: 'sla-atrasado' };
+  }
+
+  if (isMesmoDia) {
+    return { label: 'Vence Hoje', cssClass: 'sla-vence-hoje' };
+  }
+
+  return { label: 'No Prazo', cssClass: 'sla-no-prazo' };
+}
+
 export interface NovoChamado {
   numeroProtocolo?: string;
   cliente: string;
@@ -37,6 +65,9 @@ export interface Chamado {
   isNovo?: boolean;
   origem?: 'whatsapp' | 'email';
   comentarios?: any[];
+  dataLimite?: string;
+  slaStatus?: string;
+  slaClass?: string;
 } 
 
 export interface RelatorioFilters {
@@ -95,7 +126,10 @@ export class ChamadosService {
             horaAbertura: item.hora,
             icone: iconeVisual,
             isNovo: false,
-            comentarios: item.comentarios || []
+            comentarios: item.comentarios || [],
+            dataLimite: item.dataLimite,
+            slaStatus: getSLADetails(item.dataLimite, item.avanco).label,
+            slaClass: getSLADetails(item.dataLimite, item.avanco).cssClass
           } as Chamado;
         });
       }),
