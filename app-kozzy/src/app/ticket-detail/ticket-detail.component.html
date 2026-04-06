@@ -29,7 +29,7 @@
           
           <div *ngIf="chamado.anexo" class="attachment-section" style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #e2e8f0;">
             <h4 style="margin:0 0 10px 0; font-size:13px; color:#64748b;">📎 Anexo</h4>
-            <a [href]="chamado.anexo.url" target="_blank" class="attachment-link">
+            <a [href]="getFullUrl(chamado.anexo.url)" target="_blank" class="attachment-link">
               <span class="attachment-icon">📁</span>
               <span class="attachment-name">{{ chamado.anexo.nomeOriginal }}</span>
             </a>
@@ -87,7 +87,7 @@
               <p class="comment-text" *ngIf="com.mensagem">{{ com.mensagem }}</p>
               
               <div *ngIf="com.anexo" class="comment-attachment" style="margin-top: 8px;">
-                <a [href]="com.anexo.url" target="_blank" class="attachment-link compact">
+                <a [href]="getFullUrl(com.anexo.url)" target="_blank" class="attachment-link compact">
                   <span class="attachment-icon">📎</span>
                   <span class="attachment-name">{{ com.anexo.nomeOriginal }}</span>
                 </a>

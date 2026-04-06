@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Chamado, ChamadosService } from '../chamados.service';
 import { UsuarioLogado } from '../auth.service';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-ticket-detail',
@@ -87,7 +88,10 @@ export class TicketDetailComponent {
           usuario: {
             nomeCompleto: this.usuarioLogado?.nome || 'Você'
           },
-          anexo: this.comentarioFile ? { nomeOriginal: this.comentarioFile.name, url: '#' } : undefined
+          anexo: this.comentarioFile ? { 
+            nomeOriginal: this.comentarioFile.name, 
+            url: URL.createObjectURL(this.comentarioFile)
+          } : undefined
         };
 
         if (!this.chamado.comentarios) {
@@ -116,5 +120,13 @@ export class TicketDetailComponent {
 
   removeCommentFile() {
     this.comentarioFile = null;
+  }
+
+  getFullUrl(path: string | undefined): string {
+    if (!path || path === '#') return '#';
+    if (path.startsWith('http') || path.startsWith('blob:')) return path;
+    const baseUrl = environment.apiUrl.replace('/api', '');
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    return `${baseUrl}${cleanPath}`;
   }
 }
