@@ -128,12 +128,11 @@
 
                 <div class="card-info">
                   <div class="card-number-priority">
-                    <span class="card-number" *ngIf="chamado.origem === 'whatsapp'">#{{ chamado.numeroProtocolo
-                      }}</span>
+                    <span class="card-number" *ngIf="chamado.origem === 'whatsapp'">#{{ chamado.numeroProtocolo }}</span>
                     <span class="card-number system-id" *ngIf="chamado.origem !== 'whatsapp'">VIA SISTEMA</span>
                     <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
-                    <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass">{{ chamado.slaStatus
-                      }}</span>
+                    <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass">{{ chamado.slaStatus }}</span>
+                  </div>
                   <h3 class="card-title" title="{{ chamado.cliente }}">
                     {{ getClienteIcon(chamado.cliente) }} {{ chamado.nomeCliente ? (chamado.nomeCliente + ' - ' + chamado.cliente) : chamado.cliente }}
                   </h3>
