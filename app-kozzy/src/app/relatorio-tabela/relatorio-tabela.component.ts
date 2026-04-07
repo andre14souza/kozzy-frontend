@@ -11,7 +11,7 @@ import { Chamado } from '../chamados.service';
 })
 export class RelatorioTabelaComponent implements OnInit, OnChanges {
   @Input() chamados: Chamado[] = [];
-  
+
   // --- NOVO: Evento para avisar o pai que uma linha foi clicada ---
   @Output() rowClick = new EventEmitter<Chamado>();
 
@@ -194,7 +194,7 @@ export class RelatorioTabelaComponent implements OnInit, OnChanges {
     const headers = Object.keys(dadosCSV[0]);
     const csvContent = [
       headers.join(','),
-      ...dadosCSV.map(row => 
+      ...dadosCSV.map(row =>
         headers.map(header => `"${row[header as keyof typeof row] || ''}"`).join(',')
       )
     ].join('\n');
@@ -212,6 +212,16 @@ export class RelatorioTabelaComponent implements OnInit, OnChanges {
 
   imprimirRelatorio(): void {
     window.print();
+  }
+
+  getClienteIcon(tipoCliente: string): string {
+    const icones: Record<string, string> = {
+      'entregador': '🚴',
+      'cliente': '👤',
+      'vendedor': '🏪',
+      'interno': '🏢'
+    };
+    return icones[tipoCliente?.toLowerCase()] || '👤';
   }
 
   trackByChamado(index: number, chamado: Chamado): string {

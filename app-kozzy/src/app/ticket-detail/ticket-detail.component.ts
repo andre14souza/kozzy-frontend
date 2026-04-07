@@ -15,7 +15,7 @@ import { environment } from '../../environments/environment';
 export class TicketDetailComponent {
   @Input() chamado!: Chamado;
   @Input() usuarioLogado!: UsuarioLogado | null;
-  
+
   @Output() close = new EventEmitter<void>();
   @Output() edit = new EventEmitter<Chamado>();
   @Output() deleteTicket = new EventEmitter<string>();
@@ -24,7 +24,7 @@ export class TicketDetailComponent {
   isSubmittingComment: boolean = false;
   comentarioFile: File | null = null;
 
-  constructor(private chamadosService: ChamadosService) {}
+  constructor(private chamadosService: ChamadosService) { }
 
   onClose() { this.close.emit(); }
 
@@ -38,16 +38,16 @@ export class TicketDetailComponent {
 
   podeEditar(): boolean {
     if (!this.usuarioLogado || !this.chamado) return false;
-    
+
     // ✅ CORREÇÃO: Impede qualquer edição se o chamado foi finalizado de vez
     if (this.chamado.status === 'encerrado' && this.usuarioLogado.perfil !== 'supervisor') return false;
-    
+
     if (this.usuarioLogado.perfil === 'supervisor') return true;
 
     const atendente = this.chamado.atendente;
     const atendenteId = (atendente && typeof atendente === 'object') ? (atendente.id || atendente._id) : atendente;
     const ehResponsavel = this.usuarioLogado.id === atendenteId;
-    
+
     return this.usuarioLogado.perfil === 'atendente' && ehResponsavel;
   }
 
@@ -60,26 +60,26 @@ export class TicketDetailComponent {
   }
 
   // ✅ CORREÇÃO: Mapeamento de status atualizado
-  getStatusLabel(s: string) { 
-    const m: any = { 
-      'aberto': 'Aberto', 
-      'em andamento': 'Em Andamento', 
+  getStatusLabel(s: string) {
+    const m: any = {
+      'aberto': 'Aberto',
+      'em andamento': 'Em Andamento',
       'concluido': 'Concluído',
-      'encerrado': 'Encerrado' 
-    }; 
-    return m[s] || s; 
+      'encerrado': 'Encerrado'
+    };
+    return m[s] || s;
   }
 
-  getPrioridadeLabel(p: string) { 
-    const m: any = { 'baixa': 'Baixa', 'media': 'Média', 'alta': 'Alta', 'urgente': 'Urgente' }; 
-    return m[p] || p; 
+  getPrioridadeLabel(p: string) {
+    const m: any = { 'baixa': 'Baixa', 'media': 'Média', 'alta': 'Alta', 'urgente': 'Urgente' };
+    return m[p] || p;
   }
 
   enviarComentario() {
     if ((!this.novoComentario || !this.novoComentario.trim()) && !this.comentarioFile) return;
-    
+
     this.isSubmittingComment = true;
-    
+
     this.chamadosService.adicionarComentario(this.chamado.id, this.novoComentario, this.comentarioFile || undefined).subscribe({
       next: (res) => {
         const comentarioSalvo = res.comentario || {
@@ -88,8 +88,8 @@ export class TicketDetailComponent {
           usuario: {
             nomeCompleto: this.usuarioLogado?.nome || 'Você'
           },
-          anexo: this.comentarioFile ? { 
-            nomeOriginal: this.comentarioFile.name, 
+          anexo: this.comentarioFile ? {
+            nomeOriginal: this.comentarioFile.name,
             url: URL.createObjectURL(this.comentarioFile)
           } : undefined
         };
@@ -97,7 +97,7 @@ export class TicketDetailComponent {
         if (!this.chamado.comentarios) {
           this.chamado.comentarios = [];
         }
-        
+
         this.chamado.comentarios.push(comentarioSalvo);
         this.novoComentario = '';
         this.comentarioFile = null;
@@ -129,5 +129,15 @@ export class TicketDetailComponent {
     const baseUrl = environment.apiUrl.replace('/api', '');
     const cleanPath = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`;
     return `${baseUrl}${cleanPath}`;
+  }
+
+  getClienteIcon(tipoCliente: string): string {
+    const icones: Record<string, string> = {
+      'entregador': '🚴',
+      'cliente': '👤',
+      'vendedor': '🏪',
+      'interno': '🏢'
+    };
+    return icones[tipoCliente?.toLowerCase()] || '👤';
   }
 }

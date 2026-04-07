@@ -36,7 +36,7 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   chamadosConcluidos: Chamado[] = [];
   chamadosEncerrados: Chamado[] = [];
 
-  showCreateModal: boolean = false; 
+  showCreateModal: boolean = false;
   showSearchModal: boolean = false;
   showRelatorioFiltrosModal: boolean = false;
   showRelatorioScreen: boolean = false;
@@ -44,14 +44,14 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   origemDetalhe: 'dashboard' | 'relatorio' = 'dashboard';
   chamadoSelecionado: Chamado | null = null;
   chamadoDetalhe: Chamado | null = null;
-  
+
   chamados: Chamado[] = [];
   relatorioChamados: Chamado[] = [];
   chamadosSubscription!: Subscription;
   usuarioLogado: UsuarioLogado | null = null;
-  
+
   menuItems: MenuItem[] = [];
-  
+
   // ✅ CORREÇÃO CRÍTICA: Os 'values' agora batem EXATAMENTE com o banco de dados
   statusFilters = [
     { label: 'Todos', value: 'todos', icon: '📄', count: 0, active: true },
@@ -63,6 +63,7 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   currentFilter: string = 'todos';
   filtroOrigem: 'todos' | 'whatsapp' | 'email' = 'todos';
   menuCollapsed: boolean = false;
+  isMobileMenuOpen: boolean = false;
   filtrosRelatorioSalvos: RelatorioFilters | null = null;
   toast: ToastMessage = { message: '', type: 'info', visible: false };
 
@@ -70,11 +71,14 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
     public chamadosService: ChamadosService,
     public authService: AuthService,
     private loadingService: LoadingService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.usuarioLogado = this.authService.getUsuarioLogado();
     this.carregarDados();
+    this.checkScreenSize();
+
+    window.addEventListener('resize', this.checkScreenSize.bind(this));
 
     this.menuItems = [
       { label: 'Chamados', icon: '📞', action: () => this.voltarParaLista(), active: true, badge: 0 },
@@ -88,6 +92,17 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.chamadosSubscription) this.chamadosSubscription.unsubscribe();
+    window.removeEventListener('resize', this.checkScreenSize.bind(this));
+  }
+
+  checkScreenSize() {
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      // Mobile: menu desktop always "collapsed", mobile menu managed by isMobileMenuOpen
+      this.menuCollapsed = true;
+    } else {
+      this.isMobileMenuOpen = false;
+    }
   }
 
   carregarDados(): void {
@@ -98,10 +113,10 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
         } else {
           const areaDoUsuario = this.usuarioLogado?.perfil || '';
           this.chamados = dados.filter(c => {
-             const areaChamado = c.area.toLowerCase();
-             const areaUser = areaDoUsuario.toLowerCase();
-             if (areaUser === 'atendente') return true; 
-             return areaChamado.includes(areaUser);
+            const areaChamado = c.area.toLowerCase();
+            const areaUser = areaDoUsuario.toLowerCase();
+            if (areaUser === 'atendente') return true;
+            return areaChamado.includes(areaUser);
           });
         }
         this.updateStatusCounts();
@@ -132,22 +147,22 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
     return lista;
   }
 
-  onChamadoCriado(n: NovoChamado) { 
+  onChamadoCriado(n: NovoChamado) {
     this.chamadosService.adicionarChamado(n).subscribe({
-      next: () => { 
+      next: () => {
         this.fecharModal();
         this.showToast('Chamado criado com sucesso!', 'success');
         this.carregarDados();
       },
-      error: () => { 
+      error: () => {
         this.showToast('Erro ao criar chamado.', 'error');
       }
     });
   }
 
-  onChamadoAtualizado(c: Chamado) { 
+  onChamadoAtualizado(c: Chamado) {
     this.chamadosService.atualizarChamado(c).subscribe({
-      next: () => { 
+      next: () => {
         this.fecharModal();
         this.showToast('Chamado atualizado com sucesso!', 'success');
         if (this.showDetailScreen && this.chamadoDetalhe?.id === c.id) {
@@ -155,7 +170,7 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
         }
         this.carregarDados();
       },
-      error: () => { 
+      error: () => {
         this.showToast('Erro ao atualizar chamado.', 'error');
       }
     });
@@ -178,7 +193,7 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   onSelectChamadoDoRelatorio(chamado: Chamado): void {
     this.chamadoDetalhe = chamado;
     this.showDetailScreen = true;
-    this.showRelatorioScreen = false; 
+    this.showRelatorioScreen = false;
     this.origemDetalhe = 'relatorio';
   }
 
@@ -227,7 +242,7 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   }
 
   fecharModalRelatorioFiltros() { this.showRelatorioFiltrosModal = false; }
-  
+
   onGerarRelatorio(filtros: RelatorioFilters) {
     this.filtrosRelatorioSalvos = { ...filtros };
     // ✅ Agora o serviço realmente filtra os dados
@@ -240,14 +255,20 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
     this.showRelatorioScreen = false;
     this.relatorioChamados = [];
   }
-  
+
   reabrirModalFiltros() { this.showRelatorioFiltrosModal = true; }
-  toggleMenu() { this.menuCollapsed = !this.menuCollapsed; }
-  
+  toggleMenu() { 
+    if (window.innerWidth <= 768) {
+      this.isMobileMenuOpen = !this.isMobileMenuOpen;
+    } else {
+      this.menuCollapsed = !this.menuCollapsed; 
+    }
+  }
+
   updateStatusCounts() {
     this.statusFilters.forEach((filter) => {
-      filter.count = filter.value === 'todos' 
-        ? this.chamados.length 
+      filter.count = filter.value === 'todos'
+        ? this.chamados.length
         : this.chamados.filter((c) => c.status === filter.value).length;
     });
   }
@@ -261,16 +282,26 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   }
 
   // ✅ CORREÇÃO: Nomenclatura exata para os rótulos do Frontend
-  getStatusLabel(status: string) { 
-    const l:any = { 
-      'aberto': 'Aberto', 
-      'em andamento': 'Em Andamento', 
+  getStatusLabel(status: string) {
+    const l: any = {
+      'aberto': 'Aberto',
+      'em andamento': 'Em Andamento',
       'concluido': 'Concluído',
-      'encerrado': 'Encerrado' 
-    }; 
-    return l[status] || status; 
+      'encerrado': 'Encerrado'
+    };
+    return l[status] || status;
   }
-  
+
+  getClienteIcon(tipoCliente: string): string {
+    const icones: Record<string, string> = {
+      'entregador': '🚴',
+      'cliente': '👤',
+      'vendedor': '🏪',
+      'interno': '🏢'
+    };
+    return icones[tipoCliente?.toLowerCase()] || '👤';
+  }
+
   getTempoDecorrido(dataAbertura: string, horaAbertura: string): string {
     if (!dataAbertura) return '';
     try {
@@ -279,14 +310,14 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
       const abertura = new Date(`${dataStr}T${horaStr}`);
       const agora = new Date();
       if (isNaN(abertura.getTime())) return '';
-      
+
       const diffMs = agora.getTime() - abertura.getTime();
       const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
       const diffDias = Math.floor(diffHrs / 24);
-      
+
       if (diffDias > 0) return `${diffDias} d`;
       if (diffHrs > 0) return `${diffHrs} h`;
-      
+
       const diffMins = Math.floor(diffMs / (1000 * 60));
       return `${diffMins} m`;
     } catch {
@@ -320,10 +351,10 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
         event.previousIndex,
         event.currentIndex,
       );
-      
+
       const chamadoMovido = event.container.data[event.currentIndex];
       let novoStatus = chamadoMovido.status;
-      
+
       if (event.container.id === 'listaAbertos') novoStatus = 'aberto';
       else if (event.container.id === 'listaEmAndamento') novoStatus = 'em andamento';
       else if (event.container.id === 'listaConcluidos') novoStatus = 'concluido';
@@ -333,13 +364,13 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
         chamadoMovido.status = novoStatus;
         this.chamadosService.atualizarChamado(chamadoMovido).subscribe({
           next: () => {
-             this.showToast('Status atualizado via Kanban', 'success');
-             this.updateStatusCounts();
-             this.updateMenuBadge();
+            this.showToast('Status atualizado via Kanban', 'success');
+            this.updateStatusCounts();
+            this.updateMenuBadge();
           },
           error: () => {
-             this.showToast('Erro ao atualizar status', 'error');
-             this.carregarDados(); // Reverte a view
+            this.showToast('Erro ao atualizar status', 'error');
+            this.carregarDados(); // Reverte a view
           }
         });
       }

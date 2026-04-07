@@ -17,7 +17,7 @@ export function getSLADetails(dataLimiteISO: string | undefined, statusAtual: st
   const hoje = new Date();
 
   // Verifica se é o mesmo dia
-  const isMesmoDia = 
+  const isMesmoDia =
     limite.getDate() === hoje.getDate() &&
     limite.getMonth() === hoje.getMonth() &&
     limite.getFullYear() === hoje.getFullYear();
@@ -36,6 +36,7 @@ export function getSLADetails(dataLimiteISO: string | undefined, statusAtual: st
 export interface NovoChamado {
   numeroProtocolo?: string;
   cliente: string;
+  nomeCliente?: string;
   area: string;
   assunto: string;
   atendente: any;
@@ -53,6 +54,7 @@ export interface Chamado {
   id: string;
   numeroProtocolo: string;
   cliente: string;
+  nomeCliente?: string;
   area: string;
   categoria: string;
   atendente?: any;
@@ -74,7 +76,7 @@ export interface Chamado {
     url: string;
     caminho?: string;
   };
-} 
+}
 
 export interface RelatorioFilters {
   status: string;
@@ -89,22 +91,22 @@ export interface RelatorioFilters {
   providedIn: 'root'
 })
 export class ChamadosService {
-  private readonly API_URL = `${environment.apiUrl}/atendimentos`; 
-  
+  private readonly API_URL = `${environment.apiUrl}/atendimentos`;
+
   private chamadosSubject = new BehaviorSubject<Chamado[]>([]);
   public chamados$ = this.chamadosSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // 1. GET (Listar)
   getChamados(): Observable<Chamado[]> {
     return this.http.get<any[]>(this.API_URL, { withCredentials: true }).pipe(
       map(listaDoBackend => {
         return listaDoBackend.map(item => {
-          
+
           let iconeVisual = '📄';
           const area = (item.categoriaAssunto || '').toString();
-          
+
           if (area.includes('Financeiro')) iconeVisual = '💰';
           else if (area.includes('Logistica') || area.includes('Entrega')) iconeVisual = '📦';
           else if (area.includes('Técnico') || area.includes('T.I')) iconeVisual = '🔧';
@@ -115,15 +117,16 @@ export class ChamadosService {
             id: item._id,
             numeroProtocolo: item.numeroProtocolo,
             cliente: item.tipoCliente,
-            
+            nomeCliente: item.nomeCliente,
+
             // ✅ CORREÇÃO: 'area' no front recebe 'categoriaAssunto' do banco
-            area: item.categoriaAssunto, 
-            
+            area: item.categoriaAssunto,
+
             // ✅ CORREÇÃO: 'categoria' no front (que é o Assunto) recebe 'assuntoEspecifico' do banco
-            categoria: item.assuntoEspecifico || '', 
-            
+            categoria: item.assuntoEspecifico || '',
+
             origem: item.origem || 'email',
-            atendente: item.atendente, 
+            atendente: item.atendente,
             prioridade: item.nivelPrioridade,
             status: item.avanco,
             descricao: item.descricaoDetalhada,
@@ -146,7 +149,7 @@ export class ChamadosService {
 
   // 2. POST (Criar)
   adicionarChamado(chamado: NovoChamado): Observable<any> {
-    const idAtendente = (chamado.atendente && typeof chamado.atendente === 'object') 
+    const idAtendente = (chamado.atendente && typeof chamado.atendente === 'object')
       ? chamado.atendente._id : chamado.atendente;
 
     // Se tiver arquivo, montamos um FormData
@@ -154,6 +157,7 @@ export class ChamadosService {
       const formData = new FormData();
       if (chamado.numeroProtocolo) formData.append('numeroProtocolo', chamado.numeroProtocolo);
       formData.append('tipoCliente', chamado.cliente);
+      if (chamado.nomeCliente) formData.append('nomeCliente', chamado.nomeCliente);
       formData.append('categoriaAssunto', chamado.area);
       formData.append('assuntoEspecifico', chamado.assunto);
       formData.append('hora', chamado.hora);
@@ -163,7 +167,7 @@ export class ChamadosService {
       if (idAtendente) formData.append('atendente', idAtendente);
       formData.append('avanco', 'aberto');
       if (chamado.origem) formData.append('origem', chamado.origem);
-      
+
       // O campo para arquivo é 'anexo'
       formData.append('anexo', chamado.arquivo);
 
@@ -174,6 +178,7 @@ export class ChamadosService {
     const payload = {
       numeroProtocolo: chamado.numeroProtocolo,
       tipoCliente: chamado.cliente,
+      nomeCliente: chamado.nomeCliente,
       categoriaAssunto: chamado.area,
       assuntoEspecifico: chamado.assunto,
       hora: chamado.hora,
@@ -189,12 +194,13 @@ export class ChamadosService {
 
   // 3. PUT (Atualização)
   atualizarChamado(chamado: Chamado): Observable<any> {
-    const idAtendente = (chamado.atendente && typeof chamado.atendente === 'object') 
-      ? chamado.atendente._id 
+    const idAtendente = (chamado.atendente && typeof chamado.atendente === 'object')
+      ? chamado.atendente._id
       : chamado.atendente;
 
     const payload = {
       tipoCliente: chamado.cliente,
+      nomeCliente: chamado.nomeCliente,
       categoriaAssunto: chamado.area,
       assuntoEspecifico: chamado.categoria,
       descricaoDetalhada: chamado.descricao,
@@ -226,7 +232,7 @@ export class ChamadosService {
     }
     return this.http.post(`${this.API_URL}/${id}/comentarios`, { mensagem }, { withCredentials: true });
   }
-  
+
   buscarChamadosPorFiltros(filtros: RelatorioFilters): Chamado[] {
     let lista = this.chamadosSubject.value;
 
@@ -247,6 +253,6 @@ export class ChamadosService {
       lista = lista.filter(c => c.dataAbertura <= filtros.dataFim);
     }
 
-    return lista; 
+    return lista;
   }
 }

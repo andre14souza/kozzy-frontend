@@ -9,7 +9,7 @@
         </span>
       </div>
     </div>
-    
+
     <div class="header-right" style="display: flex; gap: 10px;">
       <button *ngIf="isSupervisor()" class="btn-delete" (click)="onDelete()">
         🗑️ Excluir
@@ -23,121 +23,127 @@
 
   <div class="detail-body">
     <div class="main-info">
-        <div class="info-card">
-          <h3>📝 Descrição da Solicitação</h3>
-          <p class="description-text">{{ chamado.descricao }}</p>
-          
-          <div *ngIf="chamado.anexo" class="attachment-section" style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #e2e8f0;">
-            <h4 style="margin:0 0 10px 0; font-size:13px; color:#64748b;">📎 Anexo</h4>
-            <a [href]="getAnexoUrl(chamado.anexo.url || chamado.anexo?.caminho)" target="_blank" rel="noopener noreferrer" class="attachment-link">
-              <span class="attachment-icon">📁</span>
-              <span class="attachment-name">{{ chamado.anexo.nomeOriginal }}</span>
-            </a>
-          </div>
+      <div class="info-card">
+        <h3>📝 Descrição da Solicitação</h3>
+        <p class="description-text">{{ chamado.descricao }}</p>
+
+        <div *ngIf="chamado.anexo" class="attachment-section"
+          style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #e2e8f0;">
+          <h4 style="margin:0 0 10px 0; font-size:13px; color:#64748b;">📎 Anexo</h4>
+          <a [href]="getAnexoUrl(chamado.anexo.url || chamado.anexo?.caminho)" target="_blank" rel="noopener noreferrer"
+            class="attachment-link">
+            <span class="attachment-icon">📁</span>
+            <span class="attachment-name">{{ chamado.anexo.nomeOriginal }}</span>
+          </a>
         </div>
-  
-        <div class="info-card">
-          <h3>📂 Dados do Chamado</h3>
-          <div class="grid-info">
-            <div class="info-item">
-              <label>Departamento (Área)</label>
-              <span>{{ chamado.area || 'Geral' }}</span>
+      </div>
+
+      <div class="info-card">
+        <h3>📂 Dados do Chamado</h3>
+        <div class="grid-info">
+          <div class="info-item">
+            <label>Departamento (Área)</label>
+            <span>{{ chamado.area || 'Geral' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Assunto</label>
+            <span>{{ chamado.categoria }}</span>
+          </div>
+          <div class="info-item">
+            <label>Cliente</label>
+            <span title="{{ chamado.cliente }}">{{ getClienteIcon(chamado.cliente) }} {{ chamado.nomeCliente ? (chamado.nomeCliente + ' - ' + chamado.cliente) : chamado.cliente }}</span>
+          </div>
+          <div class="info-item">
+            <label>Prioridade</label>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="priority-badge" [class]="'priority-' + chamado.prioridade">
+                {{ getPrioridadeLabel(chamado.prioridade) }}
+              </span>
             </div>
-            <div class="info-item">
-              <label>Assunto</label>
-              <span>{{ chamado.categoria }}</span>
+          </div>
+          <div class="info-item" *ngIf="chamado.dataLimite">
+            <label>Data Limite (SLA)</label>
+            <div style="display: flex; align-items: center;">
+              <span>{{ chamado.dataLimite | date: 'dd/MM/yyyy HH:mm' }}</span>
+              <span class="sla-badge" [class]="chamado.slaClass" style="font-size: 10px;">{{ chamado.slaStatus }}</span>
             </div>
-            <div class="info-item">
-              <label>Cliente</label>
-              <span>{{ chamado.cliente }}</span>
-            </div>
-            <div class="info-item">
-              <label>Prioridade</label>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span class="priority-badge" [class]="'priority-' + chamado.prioridade">
-                  {{ getPrioridadeLabel(chamado.prioridade) }}
-                </span>
-              </div>
-            </div>
-            <div class="info-item" *ngIf="chamado.dataLimite">
-              <label>Data Limite (SLA)</label>
-              <div style="display: flex; align-items: center;">
-                <span>{{ chamado.dataLimite | date: 'dd/MM/yyyy HH:mm' }}</span>
-                <span class="sla-badge" [class]="chamado.slaClass" style="font-size: 10px;">{{ chamado.slaStatus }}</span>
-              </div>
-            </div>
-            <div class="info-card solucao-card" *ngIf="chamado.solucao">
-              <h3>✅ Solução Aplicada</h3>
-              <p class="description-text">{{ chamado.solucao }}</p>
-            </div>
+          </div>
+          <div class="info-card solucao-card" *ngIf="chamado.solucao">
+            <h3>✅ Solução Aplicada</h3>
+            <p class="description-text">{{ chamado.solucao }}</p>
           </div>
         </div>
       </div>
-  
-      <div class="sidebar-info">
-        <div class="info-card comments-card">
-          <h3>💬 Histórico de Interações</h3>
-          
-          <div class="comments-list" *ngIf="chamado.comentarios && chamado.comentarios.length > 0; else noComments">
-            <div class="comment-item" *ngFor="let com of chamado.comentarios">
-              <div class="comment-header">
-                <span class="comment-author">{{ com.usuario?.nomeCompleto || 'Desconhecido' }}</span>
-                <span class="comment-date">{{ com.data | date:'dd/MM/yyyy HH:mm' }}</span>
-              </div>
-              <p class="comment-text" *ngIf="com.mensagem">{{ com.mensagem }}</p>
-              
-              <div *ngIf="com.anexo" class="comment-attachment" style="margin-top: 8px;">
-                <a [href]="getAnexoUrl(com.anexo.url || com.anexo?.caminho)" target="_blank" rel="noopener noreferrer" class="attachment-link compact">
-                  <span class="attachment-icon">📎</span>
-                  <span class="attachment-name">{{ com.anexo.nomeOriginal }}</span>
-                </a>
-              </div>
+    </div>
+
+    <div class="sidebar-info">
+      <div class="info-card comments-card">
+        <h3>💬 Histórico de Interações</h3>
+
+        <div class="comments-list" *ngIf="chamado.comentarios && chamado.comentarios.length > 0; else noComments">
+          <div class="comment-item" *ngFor="let com of chamado.comentarios">
+            <div class="comment-header">
+              <span class="comment-author">{{ com.usuario?.nomeCompleto || 'Desconhecido' }}</span>
+              <span class="comment-date">{{ com.data | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <p class="comment-text" *ngIf="com.mensagem">{{ com.mensagem }}</p>
+
+            <div *ngIf="com.anexo" class="comment-attachment" style="margin-top: 8px;">
+              <a [href]="getAnexoUrl(com.anexo.url || com.anexo?.caminho)" target="_blank" rel="noopener noreferrer"
+                class="attachment-link compact">
+                <span class="attachment-icon">📎</span>
+                <span class="attachment-name">{{ com.anexo.nomeOriginal }}</span>
+              </a>
             </div>
           </div>
-          <ng-template #noComments>
-            <p class="no-comments-text">Nenhuma interação registrada neste chamado.</p>
-          </ng-template>
+        </div>
+        <ng-template #noComments>
+          <p class="no-comments-text">Nenhuma interação registrada neste chamado.</p>
+        </ng-template>
 
-          <div class="add-comment-section" *ngIf="chamado.status !== 'encerrado'">
-            <textarea 
-              [(ngModel)]="novoComentario" 
-              placeholder="Adicione uma interação..." 
-              class="comment-input"
-              rows="3">
+        <div class="add-comment-section" *ngIf="chamado.status !== 'encerrado'">
+          <textarea [(ngModel)]="novoComentario" placeholder="Adicione uma interação..." class="comment-input" rows="3">
             </textarea>
-            
-            <div class="comment-actions-bar" style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
-              <div class="upload-wrapper">
-                <input type="file" #commentFileInput (change)="onCommentFileSelected($event)" accept="image/*,.pdf" style="display:none">
-                <button type="button" class="btn-attach-comment" (click)="commentFileInput.click()" title="Anexar arquivo">📎 Anexar</button>
-                <div *ngIf="comentarioFile" class="comment-file-preview" style="display: flex; align-items: center; gap: 5px; margin-top: 5px; font-size: 12px; color: #475569;">
-                  <span>{{ comentarioFile.name }}</span>
-                  <button type="button" (click)="removeCommentFile()" style="background:none; border:none; color:#ef4444; font-size:10px; cursor:pointer;">✖</button>
-                </div>
-              </div>
 
-              <div class="comment-actions">
-                <button class="btn-submit-comment" [disabled]="isSubmittingComment || (!novoComentario.trim() && !comentarioFile)" (click)="enviarComentario()">
-                  <ng-container *ngIf="!isSubmittingComment">Enviar</ng-container>
-                  <ng-container *ngIf="isSubmittingComment">Enviando...</ng-container>
-                </button>
+          <div class="comment-actions-bar"
+            style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+            <div class="upload-wrapper">
+              <input type="file" #commentFileInput (change)="onCommentFileSelected($event)" accept="image/*,.pdf"
+                style="display:none">
+              <button type="button" class="btn-attach-comment" (click)="commentFileInput.click()"
+                title="Anexar arquivo">📎 Anexar</button>
+              <div *ngIf="comentarioFile" class="comment-file-preview"
+                style="display: flex; align-items: center; gap: 5px; margin-top: 5px; font-size: 12px; color: #475569;">
+                <span>{{ comentarioFile.name }}</span>
+                <button type="button" (click)="removeCommentFile()"
+                  style="background:none; border:none; color:#ef4444; font-size:10px; cursor:pointer;">✖</button>
               </div>
+            </div>
+
+            <div class="comment-actions">
+              <button class="btn-submit-comment"
+                [disabled]="isSubmittingComment || (!novoComentario.trim() && !comentarioFile)"
+                (click)="enviarComentario()">
+                <ng-container *ngIf="!isSubmittingComment">Enviar</ng-container>
+                <ng-container *ngIf="isSubmittingComment">Enviando...</ng-container>
+              </button>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="meta-card">
-          <h3>👤 Atendimento</h3>
-          <div class="meta-row">
-            <span class="meta-label">Atendente:</span>
-            <span class="meta-value">
-              {{ chamado.atendente?.nomeCompleto || chamado.atendente || 'Não atribuído' }}            </span>
-          </div>
-          <div class="meta-row">
-            <span class="meta-label">Criado em:</span>
-            <span class="meta-value">{{ chamado.dataAbertura | date: 'dd/MM/yyyy' }} às {{ chamado.horaAbertura }}</span>
-          </div>
+      <div class="meta-card">
+        <h3>👤 Atendimento</h3>
+        <div class="meta-row">
+          <span class="meta-label">Atendente:</span>
+          <span class="meta-value">
+            {{ chamado.atendente?.nomeCompleto || chamado.atendente || 'Não atribuído' }} </span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Criado em:</span>
+          <span class="meta-value">{{ chamado.dataAbertura | date: 'dd/MM/yyyy' }} às {{ chamado.horaAbertura }}</span>
         </div>
       </div>
+    </div>
   </div>
 </div>

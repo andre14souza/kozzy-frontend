@@ -1,10 +1,14 @@
 <div class="app-container">
-  <aside class="sidebar" [class.collapsed]="menuCollapsed">
+  <div class="sidebar-overlay" *ngIf="isMobileMenuOpen" (click)="toggleMenu()"></div>
+  <aside class="sidebar" [class.mobile-open]="isMobileMenuOpen" [class.collapsed]="menuCollapsed">
     <div class="logo-section">
       <div class="logo-content" [class.hidden]="menuCollapsed">
         <div class="logo-wrapper">
           <div class="logo-icon"><span>K</span></div>
-          <div class="logo-text"><h1>KOZZY</h1><p>Distribuidora</p></div>
+          <div class="logo-text">
+            <h1>KOZZY</h1>
+            <p>Distribuidora</p>
+          </div>
         </div>
       </div>
     </div>
@@ -28,19 +32,29 @@
     </nav>
     <div class="user-section">
       <div class="user-info" [class.hidden]="menuCollapsed" *ngIf="usuarioLogado">
-         <div class="user-avatar"><span>{{ usuarioLogado.nome?.charAt(0)?.toUpperCase() }}</span></div>
-         <div class="user-details"><p class="user-name">{{ usuarioLogado?.nome }}</p><p class="user-email">{{ usuarioLogado?.email }}</p></div>
+        <div class="user-avatar"><span>{{ usuarioLogado.nome?.charAt(0)?.toUpperCase() }}</span></div>
+        <div class="user-details">
+          <p class="user-name">{{ usuarioLogado?.nome }}</p>
+          <p class="user-email">{{ usuarioLogado?.email }}</p>
+        </div>
       </div>
-      <button (click)="logout()" class="logout-btn" [class.collapsed]="menuCollapsed" title="Sair"><span class="icon">↪</span><span [class.hidden]="menuCollapsed">Sair</span></button>
+      <button (click)="logout()" class="logout-btn" [class.collapsed]="menuCollapsed" title="Sair"><span
+          class="icon">&#8619;</span><span [class.hidden]="menuCollapsed">Sair</span></button>
     </div>
   </aside>
 
   <main class="main-content">
-    
+
     <ng-container *ngIf="viewMode === 'dashboard' && !showRelatorioScreen && !showDetailScreen">
       <header class="header">
         <div class="header-content">
-          <div class="header-title"><h1>Visão Geral do Supervisor</h1><p>Monitoramento em tempo real dos chamados da equipe</p></div>
+          <button class="menu-toggle" (click)="toggleMenu()" aria-label="Menu">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          <div class="header-title">
+            <h1>Visão Geral do Supervisor</h1>
+            <p>Monitoramento em tempo real dos chamados da equipe</p>
+          </div>
         </div>
       </header>
 
@@ -49,7 +63,10 @@
           <div class="stat-card" *ngFor="let kpi of kpis">
             <div class="stat-content">
               <div class="stat-icon" [class]="'stat-icon-' + kpi.color"><span>{{ kpi.icon }}</span></div>
-              <div class="stat-info"><p class="stat-label">{{ kpi.label }}</p><p class="stat-value" [class]="'stat-value-' + kpi.color">{{ kpi.value }}</p></div>
+              <div class="stat-info">
+                <p class="stat-label">{{ kpi.label }}</p>
+                <p class="stat-value" [class]="'stat-value-' + kpi.color">{{ kpi.value }}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -57,76 +74,76 @@
         <div class="charts-grid-container" *ngIf="chamados.length > 0">
           <div class="chart-card">
             <h3>Distribuição de Status</h3>
-            <apx-chart 
-              [series]="statusChartOptions.series" 
-              [chart]="statusChartOptions.chart" 
-              [labels]="statusChartOptions.labels" 
-              [colors]="statusChartOptions.colors" 
-              [legend]="statusChartOptions.legend" 
-              [plotOptions]="statusChartOptions.plotOptions"
-              [stroke]="statusChartOptions.stroke"
-              [dataLabels]="statusChartOptions.dataLabels">
+            <apx-chart [series]="statusChartOptions.series" [chart]="statusChartOptions.chart"
+              [labels]="statusChartOptions.labels" [colors]="statusChartOptions.colors"
+              [legend]="statusChartOptions.legend" [plotOptions]="statusChartOptions.plotOptions"
+              [stroke]="statusChartOptions.stroke" [dataLabels]="statusChartOptions.dataLabels">
             </apx-chart>
           </div>
           <div class="chart-card">
             <h3>Volume por Prioridade</h3>
-            <apx-chart 
-              [series]="priorityChartOptions.series" 
-              [chart]="priorityChartOptions.chart" 
-              [xaxis]="priorityChartOptions.xaxis" 
-              [colors]="priorityChartOptions.colors" 
-              [legend]="priorityChartOptions.legend" 
-              [plotOptions]="priorityChartOptions.plotOptions"
-              [tooltip]="priorityChartOptions.tooltip"
-              [dataLabels]="priorityChartOptions.dataLabels">
+            <apx-chart [series]="priorityChartOptions.series" [chart]="priorityChartOptions.chart"
+              [xaxis]="priorityChartOptions.xaxis" [colors]="priorityChartOptions.colors"
+              [legend]="priorityChartOptions.legend" [plotOptions]="priorityChartOptions.plotOptions"
+              [tooltip]="priorityChartOptions.tooltip" [dataLabels]="priorityChartOptions.dataLabels">
             </apx-chart>
           </div>
         </div>
 
         <div class="filters-section">
           <div class="filters-list">
-            <button (click)="setFilter('status', 'todos')" [class.active]="filtros.status === 'todos'" class="filter-btn">Todos</button>
-            <button (click)="setFilter('status', 'aberto')" [class.active]="filtros.status === 'aberto'" class="filter-btn">Abertos</button>
-            <button (click)="setFilter('status', 'em-andamento')" [class.active]="filtros.status === 'em-andamento'" class="filter-btn">Em Andamento</button>
-            <button (click)="setFilter('status', 'fechado')" [class.active]="filtros.status === 'fechado'" class="filter-btn">Concluídos</button>
+            <button (click)="setFilter('status', 'todos')" [class.active]="filtros.status === 'todos'"
+              class="filter-btn">Todos</button>
+            <button (click)="setFilter('status', 'aberto')" [class.active]="filtros.status === 'aberto'"
+              class="filter-btn">Abertos</button>
+            <button (click)="setFilter('status', 'em-andamento')" [class.active]="filtros.status === 'em-andamento'"
+              class="filter-btn">Em Andamento</button>
+            <button (click)="setFilter('status', 'fechado')" [class.active]="filtros.status === 'fechado'"
+              class="filter-btn">Concluídos</button>
           </div>
         </div>
 
         <div class="chamados-grid">
-          <div *ngFor="let chamado of getChamadosFiltrados()" 
-               class="chamado-card"
-               (click)="onSelectChamado(chamado)">
-             
-             <div class="card-header">
-                <div class="card-header-left">
-                    <div class="origin-icon" [title]="chamado.origem === 'whatsapp' ? 'Via WhatsApp' : 'Via E-mail'">
-                        {{ chamado.origem === 'whatsapp' ? '📱' : '📧' }}
-                    </div>
-                    <div class="card-info">
-                         <div class="card-number-priority">
-                             <span class="card-number" *ngIf="chamado.origem === 'whatsapp'">#{{ chamado.numeroProtocolo }}</span>
-                             <span class="card-number system-id" *ngIf="chamado.origem !== 'whatsapp'">VIA SISTEMA</span>
-                             <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass">{{ chamado.slaStatus }}</span>
-                         </div>
-                    </div>
-                </div>
+          <div *ngFor="let chamado of getChamadosFiltrados()" class="chamado-card" (click)="onSelectChamado(chamado)">
 
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span class="status-badge" [class]="getStatusClass(chamado.status)">{{ getStatusLabel(chamado.status) }}</span>
-                    
-                    </div>
-             </div>
-
-             <div class="card-content">
-                <h3 class="card-title">{{ chamado.cliente }}</h3>
-                <p class="card-description">{{ chamado.descricao }}</p>
+            <div class="card-header">
+              <div class="card-header-left">
+                <div class="origin-icon" [title]="chamado.origem === 'whatsapp' ? 'Via WhatsApp' : 'Via E-mail'">
+                  {{ chamado.origem === 'whatsapp' ? '📱' : '📧' }}
                 </div>
-             <div class="card-footer"><span class="card-meta">📅 {{ chamado.dataAbertura | date: 'dd/MM/yyyy' }} às {{ chamado.horaAbertura }}</span><a class="details-btn">Ver detalhes →</a></div>
+                <div class="card-info">
+                  <div class="card-number-priority">
+                    <span class="card-number" *ngIf="chamado.origem === 'whatsapp'">#{{ chamado.numeroProtocolo
+                      }}</span>
+                    <span class="card-number system-id" *ngIf="chamado.origem !== 'whatsapp'">VIA SISTEMA</span>
+                    <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass">{{ chamado.slaStatus
+                      }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="status-badge" [class]="getStatusClass(chamado.status)">{{ getStatusLabel(chamado.status)
+                  }}</span>
+
+              </div>
+            </div>
+
+            <div class="card-content">
+              <h3 class="card-title" title="{{ chamado.cliente }}">
+                {{ getClienteIcon(chamado.cliente) }} {{ chamado.nomeCliente ? (chamado.nomeCliente + ' - ' + chamado.cliente) : chamado.cliente }}
+              </h3>
+              <p class="card-description">{{ chamado.descricao }}</p>
+            </div>
+            <div class="card-footer"><span class="card-meta">📅 {{ chamado.dataAbertura | date: 'dd/MM/yyyy' }} às {{
+                chamado.horaAbertura }}</span><a class="details-btn">Ver detalhes →</a></div>
           </div>
         </div>
-        
+
         <div *ngIf="getChamadosFiltrados().length === 0" class="empty-state">
-            <div class="empty-icon">📥</div><h3>Nenhum chamado encontrado</h3><p>Não há chamados para exibir.</p>
+          <div class="empty-icon">📥</div>
+          <h3>Nenhum chamado encontrado</h3>
+          <p>Não há chamados para exibir.</p>
         </div>
       </div>
     </ng-container>
@@ -134,11 +151,14 @@
     <ng-container *ngIf="viewMode === 'usuarios'">
       <header class="header">
         <div class="header-content">
+          <button class="menu-toggle" (click)="toggleMenu()" aria-label="Menu">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
           <div class="header-title-row" style="display: flex; align-items: center; gap: 15px;">
             <button class="btn-back" (click)="mudarVista('dashboard')">← Voltar</button>
             <div>
-                <h1>Gerenciar Equipe</h1>
-                <p>Controle de acesso e usuários do sistema</p>
+              <h1>Gerenciar Equipe</h1>
+              <p>Controle de acesso e usuários do sistema</p>
             </div>
           </div>
         </div>
@@ -148,92 +168,79 @@
       </header>
 
       <div class="content">
-        <div class="users-table-container" style="background: white; border-radius: 12px; padding: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;">
-          <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr style="text-align: left; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
-                <th style="padding: 16px 24px; font-size: 14px; color: #6b7280; font-weight: 600;">Nome</th>
-                <th style="padding: 16px 24px; font-size: 14px; color: #6b7280; font-weight: 600;">Email</th>
-                <th style="padding: 16px 24px; font-size: 14px; color: #6b7280; font-weight: 600;">Perfil / Área</th>
-                <th style="padding: 16px 24px; text-align: right; font-size: 14px; color: #6b7280; font-weight: 600;">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let user of listaUsuarios" style="border-bottom: 1px solid #f3f4f6; transition: background 0.2s;" class="user-row">
-                <td style="padding: 16px 24px; color: #111827; font-weight: 500;">{{ user.nome }}</td>
-                <td style="padding: 16px 24px; color: #4b5563;">{{ user.email }}</td>
-                <td style="padding: 16px 24px;">
-                  <span style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;"
-                        [style.background-color]="user.perfil === 'supervisor' ? '#e0e7ff' : '#f3f4f6'"
-                        [style.color]="user.perfil === 'supervisor' ? '#4338ca' : '#374151'">
-                    {{ user.perfil }}
-                  </span>
-                </td>
-                <td style="padding: 16px 24px; text-align: right;">
-                  <button (click)="excluirUsuario(user)" 
-                          style="background: #fee2e2; border: 1px solid #fecaca; color: #dc2626; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center;"
-                          [disabled]="user.id === usuarioLogado?.id"
-                          title="Excluir Usuário">
-                    🗑️
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div *ngIf="listaUsuarios.length === 0" style="padding: 40px; text-align: center; color: #6b7280;">
-            Nenhum usuário encontrado.
+        <div class="table-scroll-wrapper">
+          <div class="users-table-container"
+            style="background: white; border-radius: 12px; padding: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse; min-width: 560px;">
+              <thead>
+                <tr style="text-align: left; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+                  <th style="padding: 16px 24px; font-size: 14px; color: #6b7280; font-weight: 600;">Nome</th>
+                  <th style="padding: 16px 24px; font-size: 14px; color: #6b7280; font-weight: 600;">Email</th>
+                  <th style="padding: 16px 24px; font-size: 14px; color: #6b7280; font-weight: 600;">Perfil / Área</th>
+                  <th style="padding: 16px 24px; text-align: right; font-size: 14px; color: #6b7280; font-weight: 600;">
+                    Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let user of listaUsuarios"
+                  style="border-bottom: 1px solid #f3f4f6; transition: background 0.2s;" class="user-row">
+                  <td style="padding: 16px 24px; color: #111827; font-weight: 500;">{{ user.nome }}</td>
+                  <td style="padding: 16px 24px; color: #4b5563;">{{ user.email }}</td>
+                  <td style="padding: 16px 24px;">
+                    <span
+                      style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;"
+                      [style.background-color]="user.perfil === 'supervisor' ? '#e0e7ff' : '#f3f4f6'"
+                      [style.color]="user.perfil === 'supervisor' ? '#4338ca' : '#374151'">
+                      {{ user.perfil }}
+                    </span>
+                  </td>
+                  <td style="padding: 16px 24px; text-align: right;">
+                    <button (click)="excluirUsuario(user)"
+                      style="background: #fee2e2; border: 1px solid #fecaca; color: #dc2626; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center;"
+                      [disabled]="user.id === usuarioLogado?.id" title="Excluir Usuário">
+                      🗑️
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div *ngIf="listaUsuarios.length === 0" style="padding: 40px; text-align: center; color: #6b7280;">
+              Nenhum usuário encontrado.
+            </div>
           </div>
         </div>
       </div>
     </ng-container>
 
-    <app-ticket-detail
-        *ngIf="showDetailScreen && chamadoDetalhe"
-        [chamado]="chamadoDetalhe"
-        [usuarioLogado]="usuarioLogado"
-        (close)="fecharTelaDetalhes()"
-        (edit)="onEditarAPartirDoDetalhe($event)"
-        (deleteTicket)="excluirChamadoDoDetalhe($event)"> </app-ticket-detail>
+    <app-ticket-detail *ngIf="showDetailScreen && chamadoDetalhe" [chamado]="chamadoDetalhe"
+      [usuarioLogado]="usuarioLogado" (close)="fecharTelaDetalhes()" (edit)="onEditarAPartirDoDetalhe($event)"
+      (deleteTicket)="excluirChamadoDoDetalhe($event)"> </app-ticket-detail>
 
-    <app-relatorio-screen 
-        *ngIf="showRelatorioScreen" 
-        [chamados]="relatorioChamados" 
-        (closeReportScreen)="fecharRelatorioScreen()"
-        (chamadoSelecionado)="onSelectChamado($event)"
-        (chamadoSelecionado)="onSelectChamadoDoRelatorio($event)"> </app-relatorio-screen>
+    <app-relatorio-screen *ngIf="showRelatorioScreen" [chamados]="relatorioChamados"
+      (closeReportScreen)="fecharRelatorioScreen()" (chamadoSelecionado)="onSelectChamado($event)"
+      (chamadoSelecionado)="onSelectChamadoDoRelatorio($event)"> </app-relatorio-screen>
 
   </main>
 </div>
 
-<app-create-ticket-modal
-  [isVisible]="showTicketModal"
-  [chamadoParaEditar]="$any(chamadoSelecionado)"
+<app-create-ticket-modal [isVisible]="showTicketModal" [chamadoParaEditar]="$any(chamadoSelecionado)"
   [perfilUsuario]="authService.getUsuarioLogado()?.perfil || 'supervisor'"
-  [usuarioLogadoNome]="usuarioLogado?.nome || ''"
-  (closeModal)="fecharTicketModal()"
-  (chamadoCriado)="onChamadoCriado($event)"
-  (chamadoAtualizado)="onChamadoAtualizado($event)">
+  [usuarioLogadoNome]="usuarioLogado?.nome || ''" (closeModal)="fecharTicketModal()"
+  (chamadoCriado)="onChamadoCriado($event)" (chamadoAtualizado)="onChamadoAtualizado($event)">
 </app-create-ticket-modal>
 
-<app-criar-usuario-modal
-    [isVisible]="showCriarUsuarioModal"
-    (closeModal)="fecharModalCriarUsuario()"
-    (usuarioCriado)="onUsuarioCriado($event)">
+<app-criar-usuario-modal [isVisible]="showCriarUsuarioModal" (closeModal)="fecharModalCriarUsuario()"
+  (usuarioCriado)="onUsuarioCriado($event)">
 </app-criar-usuario-modal>
 
-<app-relatorio-filtro-modal 
-    [isVisible]="showRelatorioFiltrosModal" 
-    [filtrosSalvos]="null"
-    (closeModal)="fecharModalRelatorioFiltros()" 
-    (gerarRelatorioEvent)="onGerarRelatorio($event)">
+<app-relatorio-filtro-modal [isVisible]="showRelatorioFiltrosModal" [filtrosSalvos]="null"
+  (closeModal)="fecharModalRelatorioFiltros()" (gerarRelatorioEvent)="onGerarRelatorio($event)">
 </app-relatorio-filtro-modal>
 
-<app-search-protocol-modal
-  [isVisible]="showSearchModal"
-  (close)="fecharModalBusca()"
+<app-search-protocol-modal [isVisible]="showSearchModal" (close)="fecharModalBusca()"
   (search)="onBuscarProtocolo($event)">
 </app-search-protocol-modal>
-    
+
 <div class="toast-container" [class.show]="toast.visible" *ngIf="toast.visible">
   <div class="toast" [class]="'toast-' + toast.type">{{ toast.message }}</div>
 </div>

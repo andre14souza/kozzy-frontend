@@ -1,5 +1,6 @@
 <div class="app-container">
-  <aside class="sidebar" [class.collapsed]="menuCollapsed">
+  <div class="sidebar-overlay" *ngIf="isMobileMenuOpen" (click)="toggleMenu()"></div>
+  <aside class="sidebar" [class.collapsed]="menuCollapsed" [class.mobile-open]="isMobileMenuOpen">
     <div class="logo-area" style="padding: 20px; display: flex; align-items: center; justify-content: space-between;">
       <div class="logo-box" *ngIf="!menuCollapsed" style="display: flex; align-items: center; gap: 10px;">
         <span class="logo-icon"
@@ -44,6 +45,9 @@
     <ng-container *ngIf="!showRelatorioScreen && !showDetailScreen">
       <header class="header">
         <div class="header-content">
+          <button class="menu-toggle" (click)="toggleMenu()" aria-label="Menu">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
           <div class="header-title">
             <h2>Central de Atendimento</h2>
             <p>Gerencie todos os chamados e solicitações</p>
@@ -62,24 +66,35 @@
           <div class="filters-section">
             <h3 class="filters-title">Filtros</h3>
             <div class="filters-list">
-              <button *ngFor="let filter of statusFilters"
-                      (click)="setFilter(filter.value)"
-                      [class]="filter.active ? 'filter-btn active' : 'filter-btn'">
+              <button *ngFor="let filter of statusFilters" (click)="setFilter(filter.value)"
+                [class]="filter.active ? 'filter-btn active' : 'filter-btn'">
                 {{ filter.label }}
                 <span class="filter-count">{{ filter.count }}</span>
               </button>
             </div>
           </div>
-          
+
           <div class="view-toggle-container">
             <span class="view-label">Exibir como:</span>
             <div class="toggle-group">
               <button (click)="viewMode = 'kanban'" [class.active]="viewMode === 'kanban'" class="toggle-btn">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                  <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
                 Kanban
               </button>
               <button (click)="viewMode = 'list'" [class.active]="viewMode === 'list'" class="toggle-btn">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12"></line>
+                  <line x1="8" y1="18" x2="21" y2="18"></line>
+                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
                 Lista
               </button>
             </div>
@@ -113,9 +128,11 @@
                       }}</span>
                     <span class="card-number system-id" *ngIf="chamado.origem !== 'whatsapp'">VIA SISTEMA</span>
                     <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
-                    <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass">{{ chamado.slaStatus }}</span>
-                  </div>
-                  <h3 class="card-title">{{ chamado.cliente }}</h3>
+                    <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass">{{ chamado.slaStatus
+                      }}</span>
+                  <h3 class="card-title" title="{{ chamado.cliente }}">
+                    {{ getClienteIcon(chamado.cliente) }} {{ chamado.nomeCliente ? (chamado.nomeCliente + ' - ' + chamado.cliente) : chamado.cliente }}
+                  </h3>
                 </div>
               </div>
               <span class="status-badge" [class]="'status-' + chamado.status">{{ getStatusLabel(chamado.status)
@@ -137,33 +154,38 @@
                   chamado.horaAbertura }}</span></div>
             </div>
           </div>
-          </div>
+        </div>
 
         <!-- KANBAN BOARD -->
         <div class="kanban-board" *ngIf="viewMode === 'kanban'" cdkDropListGroup>
-          
+
           <!-- Coluna Abertos -->
           <div class="kanban-column">
             <h3 class="kanban-column-title">
-               <span class="status-indicator status-aberto"></span> 
-               Abertos 
-               <span class="k-badge">{{ chamadosAbertos.length }}</span>
+              <span class="status-indicator status-aberto"></span>
+              Abertos
+              <span class="k-badge">{{ chamadosAbertos.length }}</span>
             </h3>
-            <div cdkDropList id="listaAbertos" [cdkDropListData]="chamadosAbertos"
-                 (cdkDropListDropped)="drop($event)" class="kanban-list">
-              <div class="kanban-card" *ngFor="let chamado of chamadosAbertos" cdkDrag (click)="onSelectChamado(chamado)">
+            <div cdkDropList id="listaAbertos" [cdkDropListData]="chamadosAbertos" (cdkDropListDropped)="drop($event)"
+              class="kanban-list">
+              <div class="kanban-card" *ngFor="let chamado of chamadosAbertos" cdkDrag
+                (click)="onSelectChamado(chamado)">
                 <div class="k-card-header">
-                   <span class="k-protocolo">#{{ chamado.numeroProtocolo }}</span>
-                   <div style="display: flex; align-items: center;">
-                     <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass" style="margin-right: 8px;">{{ chamado.slaStatus }}</span>
-                     <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
-                   </div>
+                  <span class="k-protocolo">#{{ chamado.numeroProtocolo }}</span>
+                  <div style="display: flex; align-items: center;">
+                    <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass"
+                      style="margin-right: 8px;">{{ chamado.slaStatus }}</span>
+                    <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
+                  </div>
                 </div>
-                <h4 class="k-card-title">{{ chamado.cliente }}</h4>
+                <h4 class="k-card-title" title="{{ chamado.cliente }}">
+                  {{ getClienteIcon(chamado.cliente) }} {{ chamado.nomeCliente ? (chamado.nomeCliente + ' - ' + chamado.cliente) : chamado.cliente }}
+                </h4>
                 <p class="k-card-desc" *ngIf="chamado.descricao">{{ chamado.descricao | slice:0:60 }}...</p>
                 <div class="k-card-footer">
-                   <span class="k-atendente">{{ chamado.atendente?.nomeCompleto || chamado.atendente?.nome || chamado.atendente || 'Sem atribuição' }}</span>
-                   <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
+                  <span class="k-atendente">{{ chamado.atendente?.nomeCompleto || chamado.atendente?.nome ||
+                    chamado.atendente || 'Sem atribuição' }}</span>
+                  <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
                 </div>
               </div>
             </div>
@@ -172,25 +194,30 @@
           <!-- Coluna Em Andamento -->
           <div class="kanban-column">
             <h3 class="kanban-column-title">
-               <span class="status-indicator status-em-andamento"></span> 
-               Em Andamento 
-               <span class="k-badge">{{ chamadosEmAndamento.length }}</span>
+              <span class="status-indicator status-em-andamento"></span>
+              Em Andamento
+              <span class="k-badge">{{ chamadosEmAndamento.length }}</span>
             </h3>
             <div cdkDropList id="listaEmAndamento" [cdkDropListData]="chamadosEmAndamento"
-                 (cdkDropListDropped)="drop($event)" class="kanban-list">
-              <div class="kanban-card" *ngFor="let chamado of chamadosEmAndamento" cdkDrag (click)="onSelectChamado(chamado)">
+              (cdkDropListDropped)="drop($event)" class="kanban-list">
+              <div class="kanban-card" *ngFor="let chamado of chamadosEmAndamento" cdkDrag
+                (click)="onSelectChamado(chamado)">
                 <div class="k-card-header">
-                   <span class="k-protocolo">#{{ chamado.numeroProtocolo }}</span>
-                   <div style="display: flex; align-items: center;">
-                     <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass" style="margin-right: 8px;">{{ chamado.slaStatus }}</span>
-                     <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
-                   </div>
+                  <span class="k-protocolo">#{{ chamado.numeroProtocolo }}</span>
+                  <div style="display: flex; align-items: center;">
+                    <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass"
+                      style="margin-right: 8px;">{{ chamado.slaStatus }}</span>
+                    <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
+                  </div>
                 </div>
-                <h4 class="k-card-title">{{ chamado.cliente }}</h4>
+                <h4 class="k-card-title" title="{{ chamado.cliente }}">
+                  {{ getClienteIcon(chamado.cliente) }} {{ chamado.nomeCliente ? (chamado.nomeCliente + ' - ' + chamado.cliente) : chamado.cliente }}
+                </h4>
                 <p class="k-card-desc" *ngIf="chamado.descricao">{{ chamado.descricao | slice:0:60 }}...</p>
                 <div class="k-card-footer">
-                   <span class="k-atendente">{{ chamado.atendente?.nomeCompleto || chamado.atendente?.nome || chamado.atendente || 'Sem atribuição' }}</span>
-                   <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
+                  <span class="k-atendente">{{ chamado.atendente?.nomeCompleto || chamado.atendente?.nome ||
+                    chamado.atendente || 'Sem atribuição' }}</span>
+                  <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
                 </div>
               </div>
             </div>
@@ -199,25 +226,30 @@
           <!-- Coluna Concluídos -->
           <div class="kanban-column">
             <h3 class="kanban-column-title">
-               <span class="status-indicator status-concluido"></span> 
-               Concluídos 
-               <span class="k-badge">{{ chamadosConcluidos.length }}</span>
+              <span class="status-indicator status-concluido"></span>
+              Concluídos
+              <span class="k-badge">{{ chamadosConcluidos.length }}</span>
             </h3>
             <div cdkDropList id="listaConcluidos" [cdkDropListData]="chamadosConcluidos"
-                 (cdkDropListDropped)="drop($event)" class="kanban-list">
-              <div class="kanban-card" *ngFor="let chamado of chamadosConcluidos" cdkDrag (click)="onSelectChamado(chamado)">
+              (cdkDropListDropped)="drop($event)" class="kanban-list">
+              <div class="kanban-card" *ngFor="let chamado of chamadosConcluidos" cdkDrag
+                (click)="onSelectChamado(chamado)">
                 <div class="k-card-header">
-                   <span class="k-protocolo">#{{ chamado.numeroProtocolo }}</span>
-                   <div style="display: flex; align-items: center;">
-                     <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass" style="margin-right: 8px;">{{ chamado.slaStatus }}</span>
-                     <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
-                   </div>
+                  <span class="k-protocolo">#{{ chamado.numeroProtocolo }}</span>
+                  <div style="display: flex; align-items: center;">
+                    <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass"
+                      style="margin-right: 8px;">{{ chamado.slaStatus }}</span>
+                    <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
+                  </div>
                 </div>
-                <h4 class="k-card-title">{{ chamado.cliente }}</h4>
+                <h4 class="k-card-title" title="{{ chamado.cliente }}">
+                  {{ getClienteIcon(chamado.cliente) }} {{ chamado.nomeCliente ? (chamado.nomeCliente + ' - ' + chamado.cliente) : chamado.cliente }}
+                </h4>
                 <p class="k-card-desc" *ngIf="chamado.descricao">{{ chamado.descricao | slice:0:60 }}...</p>
                 <div class="k-card-footer">
-                   <span class="k-atendente">{{ chamado.atendente?.nomeCompleto || chamado.atendente?.nome || chamado.atendente || 'Sem atribuição' }}</span>
-                   <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
+                  <span class="k-atendente">{{ chamado.atendente?.nomeCompleto || chamado.atendente?.nome ||
+                    chamado.atendente || 'Sem atribuição' }}</span>
+                  <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
                 </div>
               </div>
             </div>
@@ -226,37 +258,42 @@
           <!-- Coluna Encerrados -->
           <div class="kanban-column">
             <h3 class="kanban-column-title">
-               <span class="status-indicator status-encerrado"></span> 
-               Encerrados 
-               <span class="k-badge">{{ chamadosEncerrados.length }}</span>
+              <span class="status-indicator status-encerrado"></span>
+              Encerrados
+              <span class="k-badge">{{ chamadosEncerrados.length }}</span>
             </h3>
             <div cdkDropList id="listaEncerrados" [cdkDropListData]="chamadosEncerrados"
-                 (cdkDropListDropped)="drop($event)" class="kanban-list">
-              <div class="kanban-card" *ngFor="let chamado of chamadosEncerrados" cdkDrag (click)="onSelectChamado(chamado)">
+              (cdkDropListDropped)="drop($event)" class="kanban-list">
+              <div class="kanban-card" *ngFor="let chamado of chamadosEncerrados" cdkDrag
+                (click)="onSelectChamado(chamado)">
                 <div class="k-card-header">
-                   <span class="k-protocolo">#{{ chamado.numeroProtocolo }}</span>
-                   <div style="display: flex; align-items: center;">
-                     <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass" style="margin-right: 8px;">{{ chamado.slaStatus }}</span>
-                     <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
-                   </div>
+                  <span class="k-protocolo">#{{ chamado.numeroProtocolo }}</span>
+                  <div style="display: flex; align-items: center;">
+                    <span class="sla-badge" *ngIf="chamado.slaStatus" [class]="chamado.slaClass"
+                      style="margin-right: 8px;">{{ chamado.slaStatus }}</span>
+                    <div class="priority-indicator" [class]="'priority-' + chamado.prioridade"></div>
+                  </div>
                 </div>
-                <h4 class="k-card-title">{{ chamado.cliente }}</h4>
+                <h4 class="k-card-title" title="{{ chamado.cliente }}">
+                  {{ getClienteIcon(chamado.cliente) }} {{ chamado.nomeCliente ? (chamado.nomeCliente + ' - ' + chamado.cliente) : chamado.cliente }}
+                </h4>
                 <p class="k-card-desc" *ngIf="chamado.descricao">{{ chamado.descricao | slice:0:60 }}...</p>
                 <div class="k-card-footer">
-                   <span class="k-atendente">{{ chamado.atendente?.nomeCompleto || chamado.atendente?.nome || chamado.atendente || 'Sem atribuição' }}</span>
-                   <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
+                  <span class="k-atendente">{{ chamado.atendente?.nomeCompleto || chamado.atendente?.nome ||
+                    chamado.atendente || 'Sem atribuição' }}</span>
+                  <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
                 </div>
               </div>
             </div>
           </div>
-          
+
         </div>
 
         <div *ngIf="getFilteredChamados().length === 0" class="empty-state">
-            <div class="empty-icon">📭</div>
-            <h3>Nenhum chamado encontrado</h3>
-          </div>
+          <div class="empty-icon">📭</div>
+          <h3>Nenhum chamado encontrado</h3>
         </div>
+      </div>
     </ng-container>
 
     <app-ticket-detail *ngIf="showDetailScreen && chamadoDetalhe" [chamado]="chamadoDetalhe"

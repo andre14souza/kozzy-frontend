@@ -67,16 +67,16 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
     { value: 'interno', label: '🏢 Interno' }
   ];
 
-  prioridadeOptions: SelectOption[] = [ 
+  prioridadeOptions: SelectOption[] = [
     { value: 'Baixa Prioridade', label: '🟢 Baixa' },
-    { value: 'Média Prioridade', label: '🟡 Média' }, 
-    { value: 'Alta Prioridade', label: '🟠 Alta' }, 
-    { value: 'Urgente', label: '🔴 Urgente' } 
+    { value: 'Média Prioridade', label: '🟡 Média' },
+    { value: 'Alta Prioridade', label: '🟠 Alta' },
+    { value: 'Urgente', label: '🔴 Urgente' }
   ];
 
   atendenteOptions: any[] = [];
 
-  constructor(private fb: FormBuilder, private authService: AuthService) {}
+  constructor(private fb: FormBuilder, private authService: AuthService) { }
 
   ngOnInit() {
     this.initializeForm();
@@ -86,9 +86,9 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isVisible'] && this.isVisible) {
       this.isEditMode = !!this.chamadoParaEditar;
-      this.showPreview = false; 
+      this.showPreview = false;
       this.selectedFile = null;
-      this.initializeForm(); 
+      this.initializeForm();
       if (this.isEditMode) this.populateFormForEdit();
     }
   }
@@ -99,9 +99,10 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
       status: ['aberto', Validators.required],
       numeroProtocolo: [{ value: '', disabled: true }],
       cliente: ['', Validators.required],
+      nomeCliente: [''],
       area: ['', Validators.required],
       assunto: ['', Validators.required],
-      atendente: [''], 
+      atendente: [''],
       prioridade: ['Média Prioridade'],
       descricao: ['', Validators.maxLength(500)],
       solucao: [''], // ✅ CORREÇÃO: Campo solução adicionado ao FormGroup
@@ -111,7 +112,7 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
 
     this.ticketForm.get('origem')?.valueChanges.subscribe(val => {
       const prot = this.ticketForm.get('numeroProtocolo');
-      if (val === 'whatsapp') { prot?.enable(); prot?.setValidators([Validators.required]); } 
+      if (val === 'whatsapp') { prot?.enable(); prot?.setValidators([Validators.required]); }
       else { prot?.disable(); prot?.clearValidators(); }
       prot?.updateValueAndValidity();
     });
@@ -142,12 +143,13 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
     if (!this.chamadoParaEditar) return;
     const a = this.chamadoParaEditar.atendente;
     const idAtendente = (a && typeof a === 'object') ? (a.id || a._id) : a;
-    
+
     this.ticketForm.patchValue({
       origem: this.chamadoParaEditar.origem,
       status: this.chamadoParaEditar.status,
       numeroProtocolo: this.chamadoParaEditar.numeroProtocolo,
       cliente: this.chamadoParaEditar.cliente,
+      nomeCliente: this.chamadoParaEditar.nomeCliente || '',
       area: this.chamadoParaEditar.area,
       assunto: this.chamadoParaEditar.categoria,
       atendente: idAtendente || '',
@@ -179,7 +181,7 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
       this.ticketForm.markAllAsTouched();
       return;
     }
-    
+
     this.isLoading = true;
     const val = this.ticketForm.getRawValue();
     const user = this.authService.getUsuarioLogado();
@@ -193,8 +195,8 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
       atendenteFinal = { _id: user?.id, nomeCompleto: user?.nome };
     }
 
-    const dados = { 
-      ...val, 
+    const dados = {
+      ...val,
       atendente: atendenteFinal,
       ...(this.selectedFile && !this.isEditMode ? { arquivo: this.selectedFile } : {})
     };
