@@ -264,9 +264,16 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
 
   fecharModalRelatorioFiltros() { this.showRelatorioFiltrosModal = false; }
   onGerarRelatorio(filtros: RelatorioFilters) {
-    this.relatorioChamados = this.chamadosService.buscarChamadosPorFiltros(filtros);
     this.showRelatorioFiltrosModal = false;
-    setTimeout(() => { this.showRelatorioScreen = true; }, 100);
+    this.chamadosService.buscarChamadosPorFiltros(filtros).subscribe({
+      next: (dados) => {
+        this.relatorioChamados = dados;
+        setTimeout(() => { this.showRelatorioScreen = true; }, 100);
+      },
+      error: () => {
+        this.showToast('Erro ao gerar relatório. Tente novamente.', 'error');
+      }
+    });
   }
   fecharRelatorioScreen() { this.showRelatorioScreen = false; this.relatorioChamados = []; }
 
