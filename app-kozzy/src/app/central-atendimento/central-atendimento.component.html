@@ -317,6 +317,7 @@
 </app-create-ticket-modal>
 
 <app-relatorio-filtro-modal [isVisible]="showRelatorioFiltrosModal" [filtrosSalvos]="filtrosRelatorioSalvos"
+  [listaAtendentes]="listaAtendentes"
   (closeModal)="fecharModalRelatorioFiltros()" (gerarRelatorioEvent)="onGerarRelatorio($event)">
 </app-relatorio-filtro-modal>
 

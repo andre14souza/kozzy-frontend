@@ -1,5 +1,5 @@
-<div class="modal-overlay" *ngIf="isVisible" (click)="onOverlayClick($event)" [@fadeIn]>
-  <div class="modal-container" [@slideIn]>
+<div class="modal-overlay" *ngIf="isVisible" (click)="onOverlayClick($event)">
+  <div class="modal-container">
     <div class="modal-header">
       <h2 class="modal-title">📊 Filtros de Relatório</h2>
       <button class="close-button" (click)="closeModalHandler()" aria-label="Fechar modal" type="button">✕</button>
@@ -7,37 +7,37 @@
 
     <div class="modal-body">
       <form [formGroup]="filterForm" (ngSubmit)="gerarRelatorio()">
-        <!-- Campos de Data em Grid -->
+
+        <!-- PERÍODO -->
+        <p class="section-label">Período *</p>
         <div class="form-row">
           <div class="form-group">
-            <label for="dataInicio">Período de Início <span class="required">*</span></label>
-            <input type="date" id="dataInicio" formControlName="dataInicio" class="form-control" [class.is-invalid]="hasFieldError('dataInicio')">
-            <div *ngIf="hasFieldError('dataInicio')" class="invalid-feedback">
-              {{ getFieldError('dataInicio') }}
-            </div>
+            <label for="dataInicio">Data Início</label>
+            <input type="date" id="dataInicio" formControlName="dataInicio" class="form-control"
+              [class.is-invalid]="hasFieldError('dataInicio')">
+            <div *ngIf="hasFieldError('dataInicio')" class="invalid-feedback">{{ getFieldError('dataInicio') }}</div>
           </div>
-
           <div class="form-group">
-            <label for="dataFim">Período de Fim <span class="required">*</span></label>
-            <input type="date" id="dataFim" formControlName="dataFim" class="form-control" [class.is-invalid]="hasFieldError('dataFim')">
-            <div *ngIf="hasFieldError('dataFim')" class="invalid-feedback">
-              {{ getFieldError('dataFim') }}
-            </div>
+            <label for="dataFim">Data Fim</label>
+            <input type="date" id="dataFim" formControlName="dataFim" class="form-control"
+              [class.is-invalid]="hasFieldError('dataFim')">
+            <div *ngIf="hasFieldError('dataFim')" class="invalid-feedback">{{ getFieldError('dataFim') }}</div>
           </div>
         </div>
 
-        <!-- Campos de Filtro em Grid -->
+        <!-- STATUS + PRIORIDADE -->
+        <p class="section-label">Status e Prioridade</p>
         <div class="form-row">
           <div class="form-group">
             <label for="status">Status</label>
             <select id="status" formControlName="status" class="form-control">
               <option value="">Todos</option>
               <option value="aberto">Aberto</option>
-              <option value="em-andamento">Em Andamento</option>
-              <option value="fechado">Fechado</option>
+              <option value="em andamento">Em Andamento</option>
+              <option value="concluido">Concluído</option>
+              <option value="encerrado">Encerrado</option>
             </select>
           </div>
-
           <div class="form-group">
             <label for="prioridade">Prioridade</label>
             <select id="prioridade" formControlName="prioridade" class="form-control">
@@ -50,29 +50,61 @@
           </div>
         </div>
 
-        <!-- Campos de Texto -->
-        <div class="form-group">
-          <label for="atendente">Atendente</label>
-          <input type="text" id="atendente" formControlName="atendente" class="form-control" placeholder="Nome do atendente">
+        <!-- ÁREA + ORIGEM -->
+        <p class="section-label">Área e Origem</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="area">Área / Departamento</label>
+            <select id="area" formControlName="area" class="form-control">
+              <option value="">Todas</option>
+              <option *ngFor="let a of areas" [value]="a">{{ a }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="origem">Origem</label>
+            <select id="origem" formControlName="origem" class="form-control">
+              <option value="">Todas</option>
+              <option value="whatsapp">📱 WhatsApp</option>
+              <option value="email">📧 E-mail</option>
+            </select>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="cliente">Cliente</label>
-          <input type="text" id="cliente" formControlName="cliente" class="form-control" placeholder="Nome ou parte do nome do cliente">
+        <!-- ATENDENTE + CLIENTE -->
+        <p class="section-label">Atendente e Cliente</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="atendente">Atendente</label>
+            <select id="atendente" formControlName="atendente" class="form-control"
+              *ngIf="listaAtendentes.length > 0; else atendenteTexto">
+              <option value="">Todos</option>
+              <option *ngFor="let u of listaAtendentes" [value]="u.id">{{ u.nome }}</option>
+            </select>
+            <ng-template #atendenteTexto>
+              <input type="text" id="atendenteTexto" formControlName="atendente" class="form-control"
+                placeholder="Nome do atendente">
+            </ng-template>
+          </div>
+          <div class="form-group">
+            <label for="cliente">Cliente</label>
+            <input type="text" id="cliente" formControlName="cliente" class="form-control"
+              placeholder="Nome ou parte do nome">
+          </div>
         </div>
 
-        <!-- Botões de Ação para Limpar Filtros -->
+        <!-- ACTIONS CLEAR -->
         <div class="filter-actions">
-          <button type="button" class="btn-clear-optional" (click)="limparFiltrosOpcionais()" title="Limpar apenas filtros opcionais (manter datas)">
-            <svg viewBox="0 0 24 24">
+          <button type="button" class="btn-clear-optional" (click)="limparFiltrosOpcionais()"
+            title="Limpar apenas filtros opcionais">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M3 6h18"/>
               <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
               <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/>
             </svg>
-            Limpar Filtros Opcionais
+            Limpar Opcionais
           </button>
           <button type="button" class="btn-clear-all" (click)="limparTodosFiltros()" title="Limpar todos os filtros">
-            <svg viewBox="0 0 24 24">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M3 6h18"/>
               <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
               <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/>
@@ -83,12 +115,15 @@
           </button>
         </div>
 
+        <!-- FOOTER -->
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" (click)="closeModalHandler()">Cancelar</button>
-          <button type="submit" class="btn btn-primary" [disabled]="filterForm.invalid">Gerar Relatório</button>
+          <button type="submit" class="btn btn-primary" [disabled]="filterForm.invalid">
+            📊 Gerar Relatório
+          </button>
         </div>
+
       </form>
     </div>
   </div>
 </div>
-

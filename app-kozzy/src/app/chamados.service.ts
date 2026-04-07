@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 
-// Interfaces
+// ============================================================
+// HELPERS
+// ============================================================
 export function getSLADetails(dataLimiteISO: string | undefined, statusAtual: string): { label: string, cssClass: string } {
   if (statusAtual === 'concluido' || statusAtual === 'encerrado') {
     return { label: 'Resolvido', cssClass: 'sla-resolvido' };
@@ -12,27 +14,20 @@ export function getSLADetails(dataLimiteISO: string | undefined, statusAtual: st
   if (!dataLimiteISO) {
     return { label: 'No Prazo', cssClass: 'sla-no-prazo' };
   }
-
   const limite = new Date(dataLimiteISO);
   const hoje = new Date();
-
-  // Verifica se é o mesmo dia
   const isMesmoDia =
     limite.getDate() === hoje.getDate() &&
     limite.getMonth() === hoje.getMonth() &&
     limite.getFullYear() === hoje.getFullYear();
-
-  if (hoje.getTime() > limite.getTime()) {
-    return { label: 'Atrasado', cssClass: 'sla-atrasado' };
-  }
-
-  if (isMesmoDia) {
-    return { label: 'Vence Hoje', cssClass: 'sla-vence-hoje' };
-  }
-
+  if (hoje.getTime() > limite.getTime()) return { label: 'Atrasado', cssClass: 'sla-atrasado' };
+  if (isMesmoDia) return { label: 'Vence Hoje', cssClass: 'sla-vence-hoje' };
   return { label: 'No Prazo', cssClass: 'sla-no-prazo' };
 }
 
+// ============================================================
+// INTERFACES
+// ============================================================
 export interface NovoChamado {
   numeroProtocolo?: string;
   cliente: string;
@@ -47,7 +42,7 @@ export interface NovoChamado {
   hora: string;
   dataHoraCriacao: string;
   origem?: 'whatsapp' | 'email';
-  arquivo?: File; // Campo para o anexo real no frontend
+  arquivo?: File;
 }
 
 export interface Chamado {
@@ -85,11 +80,14 @@ export interface RelatorioFilters {
   prioridade: string;
   atendente: string;
   cliente?: string;
+  area?: string;      // NOVO
+  origem?: string;    // NOVO
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+// ============================================================
+// SERVICE
+// ============================================================
+@Injectable({ providedIn: 'root' })
 export class ChamadosService {
   private readonly API_URL = `${environment.apiUrl}/atendimentos`;
 
@@ -98,51 +96,45 @@ export class ChamadosService {
 
   constructor(private http: HttpClient) { }
 
-  // 1. GET (Listar)
+  // ---- Mapeamento centralizado (reutilizado em getChamados e buscarChamadosPorFiltros) ----
+  private mapItem(item: any): Chamado {
+    let iconeVisual = '📄';
+    const area = (item.categoriaAssunto || '').toString();
+    if (area.includes('Financeiro')) iconeVisual = '💰';
+    else if (area.includes('Logistica') || area.includes('Entrega')) iconeVisual = '📦';
+    else if (area.includes('Técnico') || area.includes('T.I')) iconeVisual = '🔧';
+    else if (area.includes('Comercial') || area.includes('Vendas')) iconeVisual = '📞';
+    else if (area.includes('RH')) iconeVisual = '👥';
+
+    return {
+      id: item._id,
+      numeroProtocolo: item.numeroProtocolo,
+      cliente: item.tipoCliente,
+      nomeCliente: item.nomeCliente,
+      area: item.categoriaAssunto,
+      categoria: item.assuntoEspecifico || '',
+      origem: item.origem || 'email',
+      atendente: item.atendente,
+      prioridade: item.nivelPrioridade,
+      status: item.avanco,
+      descricao: item.descricaoDetalhada,
+      solucao: item.solucao,
+      dataAbertura: item.dataAtendimento ? item.dataAtendimento.split('T')[0] : '',
+      horaAbertura: item.hora,
+      icone: iconeVisual,
+      isNovo: false,
+      comentarios: item.comentarios || [],
+      dataLimite: item.dataLimite,
+      slaStatus: getSLADetails(item.dataLimite, item.avanco).label,
+      slaClass: getSLADetails(item.dataLimite, item.avanco).cssClass,
+      anexo: item.anexo || undefined
+    } as Chamado;
+  }
+
+  // 1. GET (Listar todos)
   getChamados(): Observable<Chamado[]> {
     return this.http.get<any[]>(this.API_URL, { withCredentials: true }).pipe(
-      map(listaDoBackend => {
-        return listaDoBackend.map(item => {
-
-          let iconeVisual = '📄';
-          const area = (item.categoriaAssunto || '').toString();
-
-          if (area.includes('Financeiro')) iconeVisual = '💰';
-          else if (area.includes('Logistica') || area.includes('Entrega')) iconeVisual = '📦';
-          else if (area.includes('Técnico') || area.includes('T.I')) iconeVisual = '🔧';
-          else if (area.includes('Comercial') || area.includes('Vendas')) iconeVisual = '📞';
-          else if (area.includes('RH')) iconeVisual = '👥';
-
-          return {
-            id: item._id,
-            numeroProtocolo: item.numeroProtocolo,
-            cliente: item.tipoCliente,
-            nomeCliente: item.nomeCliente,
-
-            // ✅ CORREÇÃO: 'area' no front recebe 'categoriaAssunto' do banco
-            area: item.categoriaAssunto,
-
-            // ✅ CORREÇÃO: 'categoria' no front (que é o Assunto) recebe 'assuntoEspecifico' do banco
-            categoria: item.assuntoEspecifico || '',
-
-            origem: item.origem || 'email',
-            atendente: item.atendente,
-            prioridade: item.nivelPrioridade,
-            status: item.avanco,
-            descricao: item.descricaoDetalhada,
-            solucao: item.solucao,
-            dataAbertura: item.dataAtendimento ? item.dataAtendimento.split('T')[0] : '',
-            horaAbertura: item.hora,
-            icone: iconeVisual,
-            isNovo: false,
-            comentarios: item.comentarios || [],
-            dataLimite: item.dataLimite,
-            slaStatus: getSLADetails(item.dataLimite, item.avanco).label,
-            slaClass: getSLADetails(item.dataLimite, item.avanco).cssClass,
-            anexo: item.anexo || undefined
-          } as Chamado;
-        });
-      }),
+      map(lista => lista.map(item => this.mapItem(item))),
       tap(chamados => this.chamadosSubject.next(chamados))
     );
   }
@@ -152,7 +144,6 @@ export class ChamadosService {
     const idAtendente = (chamado.atendente && typeof chamado.atendente === 'object')
       ? chamado.atendente._id : chamado.atendente;
 
-    // Se tiver arquivo, montamos um FormData
     if (chamado.arquivo) {
       const formData = new FormData();
       if (chamado.numeroProtocolo) formData.append('numeroProtocolo', chamado.numeroProtocolo);
@@ -167,14 +158,10 @@ export class ChamadosService {
       if (idAtendente) formData.append('atendente', idAtendente);
       formData.append('avanco', 'aberto');
       if (chamado.origem) formData.append('origem', chamado.origem);
-
-      // O campo para arquivo é 'anexo'
       formData.append('anexo', chamado.arquivo);
-
       return this.http.post(this.API_URL, formData, { withCredentials: true });
     }
 
-    // Comportamento normal de fallback para JSON caso não haja anexo
     const payload = {
       numeroProtocolo: chamado.numeroProtocolo,
       tipoCliente: chamado.cliente,
@@ -195,9 +182,7 @@ export class ChamadosService {
   // 3. PUT (Atualização)
   atualizarChamado(chamado: Chamado): Observable<any> {
     const idAtendente = (chamado.atendente && typeof chamado.atendente === 'object')
-      ? chamado.atendente._id
-      : chamado.atendente;
-
+      ? chamado.atendente._id : chamado.atendente;
     const payload = {
       tipoCliente: chamado.cliente,
       nomeCliente: chamado.nomeCliente,
@@ -206,17 +191,15 @@ export class ChamadosService {
       descricaoDetalhada: chamado.descricao,
       nivelPrioridade: chamado.prioridade,
       solucao: chamado.solucao,
-      atendente: idAtendente || null, // ✅ Apenas ID ou null
+      atendente: idAtendente || null,
       avanco: chamado.status
     };
-    const url = `${this.API_URL}/${chamado.id}`;
-    return this.http.put(url, payload, { withCredentials: true });
+    return this.http.put(`${this.API_URL}/${chamado.id}`, payload, { withCredentials: true });
   }
 
   // 4. DELETE
   deletarChamado(id: string): Observable<any> {
-    const url = `${this.API_URL}/${id}`;
-    return this.http.delete(url, { withCredentials: true });
+    return this.http.delete(`${this.API_URL}/${id}`, { withCredentials: true });
   }
 
   buscarPorProtocolo(protocolo: string): Chamado | undefined {
@@ -233,26 +216,26 @@ export class ChamadosService {
     return this.http.post(`${this.API_URL}/${id}/comentarios`, { mensagem }, { withCredentials: true });
   }
 
-  buscarChamadosPorFiltros(filtros: RelatorioFilters): Chamado[] {
-    let lista = this.chamadosSubject.value;
+  // 5. RELATÓRIO — query params para o servidor
+  buscarChamadosPorFiltros(filtros: RelatorioFilters): Observable<Chamado[]> {
+    let params = new HttpParams();
 
-    if (filtros.status && filtros.status !== 'todos') {
-      lista = lista.filter(c => c.status === filtros.status);
-    }
-    if (filtros.prioridade && filtros.prioridade !== 'todos') {
-      lista = lista.filter(c => c.prioridade === filtros.prioridade);
-    }
-    if (filtros.cliente && filtros.cliente !== 'todos') {
-      lista = lista.filter(c => c.cliente === filtros.cliente);
-    }
-    // Lógica simples de data (Pode ser melhorada comparando Timestamps reais)
-    if (filtros.dataInicio) {
-      lista = lista.filter(c => c.dataAbertura >= filtros.dataInicio);
-    }
-    if (filtros.dataFim) {
-      lista = lista.filter(c => c.dataAbertura <= filtros.dataFim);
-    }
+    const set = (key: string, val: string | undefined) => {
+      if (val && val.trim() !== '' && val !== 'todos') params = params.set(key, val);
+    };
 
-    return lista;
+    set('avanco',           filtros.status);
+    set('nivelPrioridade',  filtros.prioridade);
+    set('tipoCliente',      filtros.cliente);
+    set('categoriaAssunto', filtros.area);
+    set('origem',           filtros.origem);
+    set('atendente',        filtros.atendente);
+
+    if (filtros.dataInicio) params = params.set('dataInicio', filtros.dataInicio);
+    if (filtros.dataFim)    params = params.set('dataFim', filtros.dataFim);
+
+    return this.http.get<any[]>(this.API_URL, { params, withCredentials: true }).pipe(
+      map(lista => lista.map(item => this.mapItem(item)))
+    );
   }
 }

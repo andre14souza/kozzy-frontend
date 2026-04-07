@@ -1,24 +1,34 @@
 <div class="relatorio-screen-container">
-  <div class="relatorio-header">
+
+  <!-- HEADER -->
+  <div class="relatorio-header no-print">
     <div class="header-left">
       <h2 class="relatorio-title">📊 Relatório de Chamados</h2>
-      <p class="relatorio-subtitle">Visualize e analise os dados dos chamados</p>
+      <p class="relatorio-subtitle">{{ total }} resultado(s) encontrado(s)</p>
     </div>
     <div class="header-actions">
-      <button class="btn btn-filter" (click)="openFilterModal.emit()">
-        <svg viewBox="0 0 24 24">
+      <button class="btn btn-filter" (click)="onEditarFiltros()">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707L13 14v6a1 1 0 01-.553.894l-4 2A1 1 0 017 22v-8L.293 7.293A1 1 0 010 6.586V4a1 1 0 011-1z"/>
         </svg>
-        Filtrar Relatório
+        Editar Filtros
       </button>
       <button class="btn btn-export" (click)="exportarRelatorio()">
-        <svg viewBox="0 0 24 24">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>
-        Exportar
+        Exportar XLSX
       </button>
-      <button class="btn btn-close" (click)="closeReportScreen.emit()">
-        <svg viewBox="0 0 24 24">
+      <button class="btn btn-print" (click)="imprimirRelatorio()">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 6 2 18 2 18 9"/>
+          <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+          <polyline points="6 14 6 22 18 22 18 14"/>
+        </svg>
+        Imprimir
+      </button>
+      <button class="btn btn-close" (click)="onVoltar()">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M6 18L18 6M6 6l12 12"/>
         </svg>
         Voltar
@@ -26,20 +36,55 @@
     </div>
   </div>
 
-  <app-relatorio-tabela 
-      [chamados]="chamados"
-      (rowClick)="chamadoSelecionado.emit($event)">
+  <!-- PAINEL DE INDICADORES -->
+  <div class="painel-indicadores" *ngIf="total > 0">
+
+    <div class="indicador-card indicador-total">
+      <div class="indicador-valor">{{ total }}</div>
+      <div class="indicador-label">Total de Chamados</div>
+    </div>
+
+    <div class="indicador-card indicador-conclusao">
+      <div class="indicador-valor">{{ percentualConclusao }}%</div>
+      <div class="indicador-label">Taxa de Conclusão</div>
+      <div class="progress-bar-wrapper">
+        <div class="progress-bar" [style.width.%]="percentualConclusao"></div>
+      </div>
+    </div>
+
+    <div class="indicador-card indicador-tempo">
+      <div class="indicador-valor">{{ tempoMedioResolucao }}</div>
+      <div class="indicador-label">Tempo Médio</div>
+    </div>
+
+    <div class="indicador-card indicador-distribuicao">
+      <div class="indicador-label" style="margin-bottom: 10px;">Distribuição por Status</div>
+      <div class="status-tags">
+        <span *ngFor="let d of distribuicao" class="status-tag" [class]="'status-tag-' + d.css">
+          {{ d.label }}: <strong>{{ d.count }}</strong>
+        </span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TABELA -->
+  <app-relatorio-tabela
+    [chamados]="chamados"
+    (rowClick)="chamadoSelecionado.emit($event)">
   </app-relatorio-tabela>
 
-  <div *ngIf="!chamados || chamados.length === 0" class="empty-state">
+  <!-- EMPTY STATE -->
+  <div *ngIf="!chamados || chamados.length === 0" class="empty-state no-print">
     <div class="empty-icon">🤷‍♂️</div>
     <h3>Nenhum chamado encontrado</h3>
-    <p>Tente ajustar os critérios de busca ou crie novos chamados.</p>
-    <button class="btn btn-filter" (click)="openFilterModal.emit()">
-      <svg viewBox="0 0 24 24">
+    <p>Tente ajustar os critérios de busca.</p>
+    <button class="btn btn-filter" (click)="onEditarFiltros()">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707L13 14v6a1 1 0 01-.553.894l-4 2A1 1 0 017 22v-8L.293 7.293A1 1 0 010 6.586V4a1 1 0 011-1z"/>
       </svg>
       Ajustar Filtros
     </button>
   </div>
+
 </div>

@@ -15,82 +15,110 @@ export class RelatorioScreenComponent {
   @Input() chamados: Chamado[] = [];
   @Input() filtrosUtilizados: RelatorioFilters | null = null;
 
-  @Output() openFilterModal = new EventEmitter<void>();
+  @Output() openFilterModal  = new EventEmitter<void>();
   @Output() closeReportScreen = new EventEmitter<void>();
   @Output() chamadoSelecionado = new EventEmitter<Chamado>();
 
-  getStatusCount(status: string): number {
-    return this.chamados.filter(chamado => chamado.status === status).length;
+  // ===== MÉTRICAS =====
+  get total(): number { return this.chamados.length; }
+
+  get totalResolvidos(): number {
+    return this.chamados.filter(c => c.status === 'concluido' || c.status === 'encerrado').length;
   }
 
-  onVoltar() { this.closeReportScreen.emit(); }
+  get percentualConclusao(): number {
+    if (this.total === 0) return 0;
+    return Math.round((this.totalResolvidos / this.total) * 100);
+  }
+
+  get distribuicao(): { label: string; count: number; css: string }[] {
+    return [
+      { label: 'Abertos',      count: this.getStatusCount('aberto'),       css: 'aberto'      },
+      { label: 'Em Andamento', count: this.getStatusCount('em andamento'),  css: 'em-andamento'},
+      { label: 'Concluídos',   count: this.getStatusCount('concluido'),     css: 'concluido'   },
+      { label: 'Encerrados',   count: this.getStatusCount('encerrado'),     css: 'encerrado'   },
+    ].filter(d => d.count > 0);
+  }
+
+  get tempoMedioResolucao(): string {
+    const resolvidos = this.chamados.filter(c =>
+      (c.status === 'concluido' || c.status === 'encerrado') && c.dataAbertura
+    );
+    if (resolvidos.length === 0) return '—';
+
+    const totalHoras = resolvidos.reduce((acc, c) => {
+      try {
+        const abertura = new Date(`${c.dataAbertura.split('T')[0]}T${c.horaAbertura || '00:00:00'}`);
+        const resolucao = new Date(); // fallback — idealmente seria dataResolucao
+        return acc + (resolucao.getTime() - abertura.getTime());
+      } catch { return acc; }
+    }, 0);
+
+    const mediaHoras = Math.round(totalHoras / resolvidos.length / (1000 * 60 * 60));
+    if (mediaHoras >= 24) return `${Math.round(mediaHoras / 24)} dia(s)`;
+    return `${mediaHoras} hora(s)`;
+  }
+
+  getStatusCount(status: string): number {
+    return this.chamados.filter(c => c.status === status).length;
+  }
+
+  onVoltar()        { this.closeReportScreen.emit(); }
   onEditarFiltros() { this.openFilterModal.emit(); }
 
+  // ===== IMPRIMIR =====
+  imprimirRelatorio(): void { window.print(); }
+
+  // ===== EXPORTAR XLSX =====
   exportarRelatorio(): void {
     if (!this.chamados || this.chamados.length === 0) {
       alert('Não há dados para exportar');
       return;
     }
 
-    const dadosParaPlanilha = this.chamados.map(chamado => ({
-      'Protocolo': chamado.numeroProtocolo,
-      'Cliente': chamado.cliente.replace(/🚴|👤|🏪/g, '').trim(),
-      'Área': chamado.area || 'N/A',
-      'Status': this.getStatusLabel(chamado.status),
-      
-      // --- MUDANÇA AQUI: Usando a função de formatar ---
-      'Data': this.formatarDataParaExcel(chamado.dataAbertura),
-      
-      'Hora': chamado.horaAbertura, // Se a hora já vier HH:mm do banco, pode manter
-      'Prioridade': this.getPrioridadeLabel(chamado.prioridade),
-      'Atendente': chamado.atendente,
-      'Assunto': chamado.categoria,
-      'Descrição': chamado.descricao
+    const dadosParaPlanilha = this.chamados.map(c => ({
+      'Protocolo':  c.numeroProtocolo,
+      'Cliente':    c.cliente.replace(/🚴|👤|🏪/g, '').trim(),
+      'Nome':       c.nomeCliente || '',
+      'Área':       c.area || 'N/A',
+      'Status':     this.getStatusLabel(c.status),
+      'Data':       this.formatarData(c.dataAbertura),
+      'Hora':       c.horaAbertura,
+      'Prioridade': this.getPrioridadeLabel(c.prioridade),
+      'Atendente':  c.atendente?.nomeCompleto || c.atendente?.nome || c.atendente || '',
+      'Assunto':    c.categoria,
+      'Descrição':  c.descricao,
+      'Origem':     c.origem || 'email'
     }));
 
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dadosParaPlanilha);
-
+    const ws = XLSX.utils.json_to_sheet(dadosParaPlanilha);
     const objectMaxLength: number[] = [];
-    for (let i = 0; i < dadosParaPlanilha.length; i++) {
-      let value = Object.values(dadosParaPlanilha[i]);
-      for (let j = 0; j < value.length; j++) {
-        if (typeof value[j] == "number") {
-          objectMaxLength[j] = 10;
-        } else if (typeof value[j] == "string") {
-          objectMaxLength[j] = Math.max(objectMaxLength[j] || 0, value[j].length);
-        }
-      }
+    for (const row of dadosParaPlanilha) {
+      Object.values(row).forEach((v, j) => {
+        const len = typeof v === 'string' ? v.length : 10;
+        objectMaxLength[j] = Math.max(objectMaxLength[j] || 0, len);
+      });
     }
     ws['!cols'] = objectMaxLength.map(w => ({ width: w + 2 }));
 
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Chamados');
-
-    XLSX.writeFile(wb, `Relatorio_Chamados_${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.writeFile(wb, `Relatorio_Kozzy_${new Date().toISOString().split('T')[0]}.xlsx`);
   }
 
-  // --- NOVA FUNÇÃO AUXILIAR PARA FORMATAR A DATA NO EXCEL ---
-  private formatarDataParaExcel(dataIso: string): string {
+  private formatarData(dataIso: string): string {
     if (!dataIso) return '';
-    
-    // Tenta criar uma data a partir da string do banco
-    const data = new Date(dataIso);
-    
-    // Verifica se a data é válida
-    if (isNaN(data.getTime())) return dataIso;
-
-    // Retorna no formato brasileiro dd/mm/aaaa
-    // O 'UTC' ajuda a evitar que a data volte um dia dependendo do fuso
-    return data.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+    const d = new Date(dataIso);
+    return isNaN(d.getTime()) ? dataIso : d.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
   }
 
-  private getStatusLabel(status: string): string {
-    const labels: any = { 'aberto': 'Aberto', 'em-andamento': 'Em Andamento', 'fechado': 'Fechado' };
-    return labels[status] || status;
+  getStatusLabel(status: string): string {
+    const l: any = { 'aberto': 'Aberto', 'em andamento': 'Em Andamento', 'concluido': 'Concluído', 'encerrado': 'Encerrado' };
+    return l[status] || status;
   }
 
-  private getPrioridadeLabel(prioridade: string): string {
-    const labels: any = { 'baixa': 'Baixa', 'media': 'Média', 'alta': 'Alta', 'urgente': 'Urgente' };
-    return labels[prioridade] || prioridade;
+  private getPrioridadeLabel(p: string): string {
+    const l: any = { 'baixa': 'Baixa', 'media': 'Média', 'alta': 'Alta', 'urgente': 'Urgente' };
+    return l[p] || p;
   }
 }

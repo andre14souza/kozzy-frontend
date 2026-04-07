@@ -65,6 +65,7 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   menuCollapsed: boolean = false;
   isMobileMenuOpen: boolean = false;
   filtrosRelatorioSalvos: RelatorioFilters | null = null;
+  listaAtendentes: { id: string; nome: string }[] = [];
   toast: ToastMessage = { message: '', type: 'info', visible: false };
 
   constructor(
@@ -88,11 +89,21 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
       { label: 'Configurações', icon: '⚙️', route: '/configuracoes' },
       { label: 'Design System', icon: '🎨', route: '/design-system' }
     ];
+    this.carregarAtendentes();
   }
 
   ngOnDestroy(): void {
     if (this.chamadosSubscription) this.chamadosSubscription.unsubscribe();
     window.removeEventListener('resize', this.checkScreenSize.bind(this));
+  }
+
+  carregarAtendentes(): void {
+    this.authService.getTodosUsuarios().subscribe({
+      next: (users) => {
+        this.listaAtendentes = users.map(u => ({ id: u.id, nome: u.nome }));
+      },
+      error: () => { /* silencioso: o campo fica como texto */ }
+    });
   }
 
   checkScreenSize() {
@@ -245,10 +256,19 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
 
   onGerarRelatorio(filtros: RelatorioFilters) {
     this.filtrosRelatorioSalvos = { ...filtros };
-    // ✅ Agora o serviço realmente filtra os dados
-    this.relatorioChamados = this.chamadosService.buscarChamadosPorFiltros(filtros);
     this.showRelatorioFiltrosModal = false;
-    setTimeout(() => { this.showRelatorioScreen = true; }, 100);
+    this.loadingService.show();
+    this.chamadosService.buscarChamadosPorFiltros(filtros).subscribe({
+      next: (dados) => {
+        this.relatorioChamados = dados;
+        this.loadingService.hide();
+        setTimeout(() => { this.showRelatorioScreen = true; }, 100);
+      },
+      error: () => {
+        this.loadingService.hide();
+        this.showToast('Erro ao gerar relatório. Tente novamente.', 'error');
+      }
+    });
   }
 
   fecharRelatorioScreen() {
