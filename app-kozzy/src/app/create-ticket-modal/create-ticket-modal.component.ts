@@ -18,6 +18,7 @@ interface SelectOption { value: string; label: string; }
 export class CreateTicketModalComponent implements OnInit, OnChanges {
   @Input() isVisible: boolean = false;
   @Input() chamadoParaEditar?: Chamado | null;
+  @Input() chamadoPaiContext?: Chamado | null;
   @Input() perfilUsuario: string = 'atendente';
   @Input() usuarioLogadoNome: string = '';
 
@@ -89,7 +90,11 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
       this.showPreview = false;
       this.selectedFile = null;
       this.initializeForm();
-      if (this.isEditMode) this.populateFormForEdit();
+      if (this.isEditMode) {
+        this.populateFormForEdit();
+      } else if (this.chamadoPaiContext) {
+        this.populateFormForSubtask();
+      }
     }
   }
 
@@ -156,6 +161,15 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
       prioridade: this.chamadoParaEditar.prioridade,
       descricao: this.chamadoParaEditar.descricao,
       solucao: this.chamadoParaEditar.solucao || '' // ✅ Preenche a solução anterior
+    });
+  }
+
+  populateFormForSubtask() {
+    if (!this.chamadoPaiContext) return;
+    this.ticketForm.patchValue({
+      cliente: this.chamadoPaiContext.cliente,
+      nomeCliente: this.chamadoPaiContext.nomeCliente || '',
+      area: this.chamadoPaiContext.area
     });
   }
 

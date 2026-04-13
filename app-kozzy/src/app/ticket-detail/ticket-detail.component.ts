@@ -1,14 +1,15 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Chamado, ChamadosService } from '../chamados.service';
+import { Chamado, ChamadosService, NovoChamado } from '../chamados.service';
 import { UsuarioLogado } from '../auth.service';
+import { CreateTicketModalComponent } from '../create-ticket-modal/create-ticket-modal.component';
 import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-ticket-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CreateTicketModalComponent],
   templateUrl: './ticket-detail.component.html',
   styleUrls: ['./ticket-detail.component.css']
 })
@@ -23,6 +24,8 @@ export class TicketDetailComponent {
   novoComentario: string = '';
   isSubmittingComment: boolean = false;
   comentarioFile: File | null = null;
+  
+  isSubTicketModalVisible = false;
 
   constructor(private chamadosService: ChamadosService) { }
 
@@ -57,6 +60,29 @@ export class TicketDetailComponent {
     } else {
       alert(`⛔ ACESSO NEGADO\n\nEste chamado está encerrado ou você não tem permissão para editá-lo.`);
     }
+  }
+
+  openSubTicketModal() {
+    this.isSubTicketModalVisible = true;
+  }
+
+  closeSubTicketModal() {
+    this.isSubTicketModalVisible = false;
+  }
+
+  onSubTicketCreated(dados: NovoChamado) {
+    this.chamadosService.adicionarSubChamado(this.chamado.id, dados).subscribe({
+      next: () => {
+        alert('Sub-tarefa criada com sucesso!');
+        this.isSubTicketModalVisible = false;
+        // Atualiza chamados
+        this.chamadosService.getChamados().subscribe();
+      },
+      error: (err) => {
+        console.error('Erro ao criar sub-tarefa:', err);
+        alert('Erro ao criar sub-tarefa. Verifique os dados e tente novamente.');
+      }
+    });
   }
 
   // ✅ CORREÇÃO: Mapeamento de status atualizado

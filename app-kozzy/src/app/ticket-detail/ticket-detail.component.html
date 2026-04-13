@@ -1,4 +1,11 @@
 <div class="detail-container">
+
+  <!-- Parent Link -->
+  <div *ngIf="chamado.chamadoPai" class="parent-reference" style="margin-bottom: 15px;">
+    <span style="background-color: #e2e8f0; color: #475569; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+      ↳ Sub-tarefa do Protocolo #{{ chamado.chamadoPai.numeroProtocolo || chamado.chamadoPai }}
+    </span>
+  </div>
   <header class="detail-header">
     <div class="header-left">
       <button class="btn-back" (click)="onClose()">← Voltar</button>
@@ -10,7 +17,12 @@
       </div>
     </div>
 
-    <div class="header-right" style="display: flex; gap: 10px;">
+    <div class="header-right" style="display: flex; gap: 10px; align-items: center;">
+      <!-- Botão Criar Sub-tarefa -->
+      <button *ngIf="chamado.status !== 'encerrado'" class="btn-primary" (click)="openSubTicketModal()" style="padding: 8px 12px; font-size: 13px; background-color: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">
+        ➕ Criar Sub-tarefa
+      </button>
+
       <button *ngIf="isSupervisor()" class="btn-delete" (click)="onDelete()">
         🗑️ Excluir
       </button>
@@ -35,6 +47,22 @@
             <span class="attachment-icon">📁</span>
             <span class="attachment-name">{{ chamado.anexo.nomeOriginal }}</span>
           </a>
+        </div>
+      </div>
+
+      <!-- Sub-tarefas (Composite) -->
+      <div class="info-card" *ngIf="chamado.subChamados && chamado.subChamados.length > 0">
+        <h3>📋 Sub-tarefas associadas</h3>
+        <div class="subtickets-list" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+          <div *ngFor="let sub of chamado.subChamados" class="subticket-item" style="border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; background-color: #f8fafc;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <strong style="color: #0f172a; font-size: 13px;">#{{ sub.numeroProtocolo }}</strong>
+              <span style="font-size: 13px; color: #475569;">{{ sub.categoria || sub.assuntoEspecifico }}</span>
+            </div>
+            <span class="status-badge" [class]="'status-' + (sub.avanco || sub.status)" style="font-size: 11px; padding: 4px 8px;">
+              {{ getStatusLabel(sub.avanco || sub.status) }}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -147,3 +175,13 @@
     </div>
   </div>
 </div>
+
+<app-create-ticket-modal
+  *ngIf="isSubTicketModalVisible"
+  [isVisible]="isSubTicketModalVisible"
+  [chamadoPaiContext]="chamado"
+  [perfilUsuario]="usuarioLogado?.perfil || 'atendente'"
+  [usuarioLogadoNome]="usuarioLogado?.nome || ''"
+  (closeModal)="closeSubTicketModal()"
+  (chamadoCriado)="onSubTicketCreated($event)">
+</app-create-ticket-modal>

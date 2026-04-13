@@ -43,6 +43,7 @@ export interface NovoChamado {
   dataHoraCriacao: string;
   origem?: 'whatsapp' | 'email';
   arquivo?: File;
+  chamadoPai?: string;
 }
 
 export interface Chamado {
@@ -71,6 +72,8 @@ export interface Chamado {
     url: string;
     caminho?: string;
   };
+  chamadoPai?: string | any;
+  subChamados?: Chamado[] | any[];
 }
 
 export interface RelatorioFilters {
@@ -127,7 +130,9 @@ export class ChamadosService {
       dataLimite: item.dataLimite,
       slaStatus: getSLADetails(item.dataLimite, item.avanco).label,
       slaClass: getSLADetails(item.dataLimite, item.avanco).cssClass,
-      anexo: item.anexo || undefined
+      anexo: item.anexo || undefined,
+      chamadoPai: item.chamadoPai,
+      subChamados: item.subChamados || []
     } as Chamado;
   }
 
@@ -175,6 +180,47 @@ export class ChamadosService {
       atendente: idAtendente || null,
       avanco: 'aberto',
       origem: chamado.origem
+    };
+    return this.http.post(this.API_URL, payload, { withCredentials: true });
+  }
+
+  adicionarSubChamado(idChamadoPai: string, chamado: NovoChamado): Observable<any> {
+    const idAtendente = (chamado.atendente && typeof chamado.atendente === 'object')
+      ? chamado.atendente._id : chamado.atendente;
+
+    if (chamado.arquivo) {
+      const formData = new FormData();
+      if (chamado.numeroProtocolo) formData.append('numeroProtocolo', chamado.numeroProtocolo);
+      formData.append('tipoCliente', chamado.cliente);
+      if (chamado.nomeCliente) formData.append('nomeCliente', chamado.nomeCliente);
+      formData.append('categoriaAssunto', chamado.area);
+      formData.append('assuntoEspecifico', chamado.assunto);
+      formData.append('hora', chamado.hora);
+      formData.append('dataAtendimento', chamado.data);
+      if (chamado.descricao) formData.append('descricaoDetalhada', chamado.descricao);
+      formData.append('nivelPrioridade', chamado.prioridade);
+      if (idAtendente) formData.append('atendente', idAtendente);
+      formData.append('avanco', 'aberto');
+      if (chamado.origem) formData.append('origem', chamado.origem);
+      formData.append('chamadoPai', idChamadoPai);
+      formData.append('anexo', chamado.arquivo);
+      return this.http.post(this.API_URL, formData, { withCredentials: true });
+    }
+
+    const payload = {
+      numeroProtocolo: chamado.numeroProtocolo,
+      tipoCliente: chamado.cliente,
+      nomeCliente: chamado.nomeCliente,
+      categoriaAssunto: chamado.area,
+      assuntoEspecifico: chamado.assunto,
+      hora: chamado.hora,
+      dataAtendimento: chamado.data,
+      descricaoDetalhada: chamado.descricao,
+      nivelPrioridade: chamado.prioridade,
+      atendente: idAtendente || null,
+      avanco: 'aberto',
+      origem: chamado.origem,
+      chamadoPai: idChamadoPai
     };
     return this.http.post(this.API_URL, payload, { withCredentials: true });
   }
