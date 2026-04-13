@@ -75,8 +75,13 @@ export class TicketDetailComponent {
       next: () => {
         alert('Sub-tarefa criada com sucesso!');
         this.isSubTicketModalVisible = false;
-        // Atualiza chamados
-        this.chamadosService.getChamados().subscribe();
+        // Atualiza a lista e a referência local do detalhe
+        this.chamadosService.getChamados().subscribe(lista => {
+          const atualizado = lista.find(c => c.id === this.chamado.id);
+          if (atualizado) {
+            this.chamado = atualizado;
+          }
+        });
       },
       error: (err) => {
         console.error('Erro ao criar sub-tarefa:', err);
