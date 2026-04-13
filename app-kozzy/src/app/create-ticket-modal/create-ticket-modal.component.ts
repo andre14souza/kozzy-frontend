@@ -80,7 +80,9 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
   constructor(private fb: FormBuilder, private authService: AuthService) { }
 
   ngOnInit() {
-    this.initializeForm();
+    if (!this.ticketForm) {
+      this.initializeForm();
+    }
     this.carregarAtendentes();
   }
 
