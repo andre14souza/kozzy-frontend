@@ -225,6 +225,6 @@ export class RelatorioTabelaComponent implements OnInit, OnChanges {
   }
 
   trackByChamado(index: number, chamado: Chamado): string {
-    return chamado.numeroProtocolo;
+    return chamado.id;
   }
-}
+}

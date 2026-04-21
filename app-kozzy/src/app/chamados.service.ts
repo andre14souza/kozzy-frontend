@@ -130,10 +130,32 @@ export class ChamadosService {
       dataLimite: item.dataLimite,
       slaStatus: getSLADetails(item.dataLimite, item.avanco).label,
       slaClass: getSLADetails(item.dataLimite, item.avanco).cssClass,
-      anexo: item.anexo || undefined,
+      anexo: item.anexo ? {
+        nomeOriginal: item.anexo.nomeOriginal,
+        url: this.getAnexoAbsoluto(item.anexo.url || item.anexo.caminho),
+        caminho: item.anexo.caminho
+      } : undefined,
       chamadoPai: item.chamadoPai,
       subChamados: item.subChamados || []
     } as Chamado;
+  }
+
+  // Método Centralizador para Construir URL Absoluta
+  public getAnexoAbsoluto(caminho: string | undefined): string {
+    if (!caminho || caminho === '#') return '#';
+    if (caminho.startsWith('http') || caminho.startsWith('blob:')) return caminho;
+    
+    // Obtém a URL base (removendo '/api' para pegar a raiz do servidor de uploads)
+    const baseUrl = environment.apiUrl.replace(/\/api$/, '');
+    const pathNormalizado = caminho.replace(/\\/g, '/');
+    const prefixo = pathNormalizado.startsWith('/') ? '' : '/';
+    
+    return `${baseUrl}${prefixo}${pathNormalizado}`;
+  }
+
+  // Novo Endpoint de Estatísticas do Dashboard
+  getEstatisticasDashboard(): Observable<any> {
+    return this.http.get<any>(`${this.API_URL}/estatisticas`, { withCredentials: true });
   }
 
   // 1. GET (Listar todos)

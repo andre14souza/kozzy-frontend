@@ -99,11 +99,46 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
         this.chamados = dados;
         this.calcularKPIs();
         this.updateCharts();
+
+        // NOVO: Consumir endpoint de estatísticas separadamente do backend
+        this.chamadosService.getEstatisticasDashboard().subscribe({
+           next: (estatisticas) => {
+             this.atualizarGraficosComDadosBackend(estatisticas);
+           },
+           error: (err) => {
+             console.log('Utilizando estatísticas embutidas locais de fallback');
+           }
+        });
       },
       error: (err) => {
         console.error(err);
       }
     });
+  }
+
+  atualizarGraficosComDadosBackend(est: any) {
+     if (est && est.chamadosPorStatus) {
+         this.statusChartOptions = {
+             ...this.statusChartOptions,
+             series: [
+                 est.chamadosPorStatus.aberto || 0,
+                 (est.chamadosPorStatus['em andamento'] || 0) + (est.chamadosPorStatus['em-andamento'] || 0),
+                 est.chamadosPorStatus.concluido || 0,
+                 est.chamadosPorStatus.encerrado || 0
+             ]
+         };
+     }
+     
+     if (est && est.chamadosPorArea) {
+         const categoriasArea = Object.keys(est.chamadosPorArea);
+         const valoresArea = Object.values(est.chamadosPorArea) as number[];
+         
+         this.priorityChartOptions = {
+             ...this.priorityChartOptions,
+             xaxis: { categories: categoriasArea },
+             series: [{ name: 'Chamados', data: valoresArea }]
+         };
+     }
   }
 
   ngOnDestroy() {
@@ -313,12 +348,12 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
     };
 
     this.priorityChartOptions = {
-      series: [{ name: 'Chamados', data: [0, 0, 0, 0] }],
+      series: [{ name: 'Chamados', data: [] }],
       chart: { type: 'bar', height: 280, fontFamily: 'Inter, sans-serif', toolbar: { show: false } },
       plotOptions: { bar: { horizontal: false, columnWidth: '50%', borderRadius: 4, distributed: true } },
       dataLabels: { enabled: false },
-      xaxis: { categories: ['Urgente', 'Alta', 'Média', 'Baixa'] },
-      colors: ['#ef4444', '#f59e0b', '#facc15', '#22c55e'],
+      xaxis: { categories: [] },
+      colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f59e0b', '#ef4444', '#10b981'],
       legend: { show: false },
       tooltip: { theme: 'light' }
     };
@@ -335,13 +370,21 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
 
     this.statusChartOptions = { ...this.statusChartOptions, series: [abertos, andamento, concluidos, encerrados] };
 
-    // Priority Chart
-    const urgente = list.filter(c => c.prioridade === 'urgente').length;
-    const alta = list.filter(c => c.prioridade === 'alta').length;
-    const media = list.filter(c => c.prioridade === 'media').length;
-    const baixa = list.filter(c => c.prioridade === 'baixa').length;
+    // Gráfico de Área (Substituindo o antigo prioridade)
+    const areas = list.reduce((acc: any, c) => {
+      const area = c.area || 'Geral';
+      acc[area] = (acc[area] || 0) + 1;
+      return acc;
+    }, {});
 
-    this.priorityChartOptions = { ...this.priorityChartOptions, series: [{ name: 'Chamados', data: [urgente, alta, media, baixa] }] };
+    const categoriasArea = Object.keys(areas);
+    const valoresArea = Object.values(areas) as number[];
+
+    this.priorityChartOptions = { 
+      ...this.priorityChartOptions, 
+      xaxis: { categories: categoriasArea.length > 0 ? categoriasArea : ['Nenhum'] }, 
+      series: [{ name: 'Chamados', data: valoresArea.length > 0 ? valoresArea : [0] }] 
+    };
   }
 
   setFilter(key: any, value: any) { this.filtros[key as keyof FilterOptions] = value; this.updateCharts(); }
