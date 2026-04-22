@@ -224,7 +224,8 @@ export class RelatorioTabelaComponent implements OnInit, OnChanges {
     return icones[tipoCliente?.toLowerCase()] || '👤';
   }
 
-  trackByChamado(index: number, chamado: Chamado): string {
-    return chamado.id;
+  trackByChamado(index: number, chamado: Chamado): any {
+    return index;
   }
-}
+}
+

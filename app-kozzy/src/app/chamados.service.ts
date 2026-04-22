@@ -110,7 +110,7 @@ export class ChamadosService {
     else if (area.includes('RH')) iconeVisual = '👥';
 
     return {
-      id: item._id,
+      id: item._id || item.id,
       numeroProtocolo: item.numeroProtocolo,
       cliente: item.tipoCliente,
       nomeCliente: item.nomeCliente,

@@ -300,6 +300,7 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
   fecharModalRelatorioFiltros() { this.showRelatorioFiltrosModal = false; }
   onGerarRelatorio(filtros: RelatorioFilters) {
     this.showRelatorioFiltrosModal = false;
+    this.relatorioChamados = []; // Limpa o estado anterior
     this.chamadosService.buscarChamadosPorFiltros(filtros).subscribe({
       next: (dados) => {
         this.relatorioChamados = dados;
