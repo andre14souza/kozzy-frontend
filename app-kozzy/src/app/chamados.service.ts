@@ -117,7 +117,7 @@ export class ChamadosService {
       area: item.categoriaAssunto,
       categoria: item.assuntoEspecifico || '',
       origem: item.origem || 'email',
-      atendente: item.atendente,
+      atendente: item.atendente?.nomeCompleto || item.atendente?.nome || item.atendente || 'Não Atribuído',
       prioridade: item.nivelPrioridade,
       status: item.avanco,
       descricao: item.descricaoDetalhada,

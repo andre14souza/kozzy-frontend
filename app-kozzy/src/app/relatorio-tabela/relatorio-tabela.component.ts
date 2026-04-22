@@ -152,8 +152,10 @@ export class RelatorioTabelaComponent implements OnInit, OnChanges {
     return `${this.formatDate(date)} ${time}`;
   }
 
-  getInitials(name: string): string {
-    return name
+  getInitials(name: any): string {
+    if (!name) return '❔';
+    const n = typeof name === 'string' ? name : (name.nomeCompleto || name.nome || '❔');
+    return String(n)
       .split(' ')
       .map(word => word.charAt(0))
       .join('')
