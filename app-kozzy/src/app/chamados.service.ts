@@ -130,11 +130,15 @@ export class ChamadosService {
       dataLimite: item.dataLimite,
       slaStatus: getSLADetails(item.dataLimite, item.avanco).label,
       slaClass: getSLADetails(item.dataLimite, item.avanco).cssClass,
-      anexo: item.anexo ? {
-        nomeOriginal: item.anexo.nomeOriginal,
-        url: this.getAnexoAbsoluto(item.anexo.url || item.anexo.caminho),
-        caminho: item.anexo.caminho
-      } : undefined,
+      anexo: item.anexo ? (
+        typeof item.anexo === 'string' 
+          ? { nomeOriginal: 'Anexo', url: this.getAnexoAbsoluto(item.anexo), caminho: item.anexo }
+          : {
+              nomeOriginal: item.anexo.nomeOriginal || 'Arquivo Anexo',
+              url: this.getAnexoAbsoluto(item.anexo.url || item.anexo.caminho),
+              caminho: item.anexo.caminho
+            }
+      ) : undefined,
       chamadoPai: item.chamadoPai,
       subChamados: item.subChamados || []
     } as Chamado;
@@ -288,8 +292,10 @@ export class ChamadosService {
   buscarChamadosPorFiltros(filtros: RelatorioFilters): Observable<Chamado[]> {
     let params = new HttpParams();
 
-    const set = (key: string, val: string | undefined) => {
-      if (val && val.trim() !== '' && val !== 'todos') params = params.set(key, val);
+    const set = (key: string, val: any) => {
+      if (val && typeof val === 'string' && val.trim() !== '' && val !== 'todos') {
+        params = params.set(key, val);
+      }
     };
 
     set('avanco',           filtros.status);
