@@ -62,6 +62,9 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   ];
   currentFilter: string = 'todos';
   filtroOrigem: 'todos' | 'whatsapp' | 'email' = 'todos';
+  termoBuscaGlobal: string = '';
+  prioridadeUrgenteAtiva: boolean = true;
+  
   menuCollapsed: boolean = false;
   isMobileMenuOpen: boolean = false;
   filtrosRelatorioSalvos: RelatorioFilters | null = null;
@@ -84,6 +87,7 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
     this.menuItems = [
       { label: 'Chamados', icon: '📞', action: () => this.voltarParaLista(), active: true, badge: 0 },
       { label: 'Novo Atendimento', icon: '➕', action: () => this.abrirModalCriarChamado() },
+      { label: 'Chamados do Dia', icon: '📅', route: '/hoje' },
       { label: 'Buscar Protocolo', icon: '🔍', action: () => this.abrirModalBuscaProtocolo() },
       { label: 'Relatórios', icon: '📊', action: () => this.abrirModalRelatorios() },
       { label: 'Configurações', icon: '⚙️', route: '/configuracoes' },
@@ -153,9 +157,35 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
 
   getFilteredChamados(): Chamado[] {
     let lista = this.chamados;
+
+    if (this.prioridadeUrgenteAtiva) {
+      lista = lista.filter(c => c.prioridade === 'alta' || c.prioridade === 'urgente');
+    }
+
     if (this.currentFilter !== 'todos') lista = lista.filter(c => c.status === this.currentFilter);
     if (this.filtroOrigem !== 'todos') lista = lista.filter(c => (c.origem || 'email') === this.filtroOrigem);
+
+    if (this.termoBuscaGlobal && this.termoBuscaGlobal.trim() !== '') {
+      const termo = this.termoBuscaGlobal.toLowerCase();
+      lista = lista.filter(c => 
+        (c.nomeCliente && c.nomeCliente.toLowerCase().includes(termo)) ||
+        (c.cliente && c.cliente.toLowerCase().includes(termo)) ||
+        (c.numeroProtocolo && c.numeroProtocolo.includes(termo))
+      );
+    }
+
     return lista;
+  }
+
+  onBuscaGlobalChange() {
+    this.updateKanbanColumns();
+    this.updateStatusCounts();
+  }
+
+  togglePrioridadeUrgente() {
+    this.prioridadeUrgenteAtiva = !this.prioridadeUrgenteAtiva;
+    this.updateKanbanColumns();
+    this.updateStatusCounts();
   }
 
   onChamadoCriado(n: NovoChamado) {

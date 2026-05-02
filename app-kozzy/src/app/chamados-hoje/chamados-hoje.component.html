@@ -1,0 +1,20 @@
+<div class="hoje-container" *ngIf="!showDetailScreen">
+  <div class="hoje-header">
+    <h2>Chamados do Dia</h2>
+    <p>Visualizando todos os chamados abertos hoje.</p>
+  </div>
+  
+  <div *ngIf="isLoading" class="loading">
+    Carregando chamados do dia...
+  </div>
+  
+  <div *ngIf="!isLoading">
+    <app-relatorio-tabela [chamados]="chamadosHoje" (rowClick)="onRowClick($event)"></app-relatorio-tabela>
+  </div>
+</div>
+
+<app-ticket-detail *ngIf="showDetailScreen && chamadoDetalhe" 
+  [chamado]="chamadoDetalhe"
+  [usuarioLogado]="usuarioLogado" 
+  (close)="fecharTelaDetalhes()">
+</app-ticket-detail>

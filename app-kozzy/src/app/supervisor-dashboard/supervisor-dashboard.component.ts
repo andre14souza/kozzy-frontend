@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AuthService, UsuarioLogado } from '../auth.service';
 import { ChamadosService, Chamado, NovoChamado, RelatorioFilters } from '../chamados.service';
-import { NgApexchartsModule } from 'ng-apexcharts';
+import { Chart } from 'chart.js/auto';
 
 import { CreateTicketModalComponent } from '../create-ticket-modal/create-ticket-modal.component';
 import { CriarUsuarioModalComponent } from '../criar-usuario-modal/criar-usuario-modal.component';
@@ -29,8 +29,7 @@ interface MenuItem { label: string; icon: string; route?: string; action?: () =>
     RelatorioFiltroModalComponent,
     RelatorioScreenComponent,
     TicketDetailComponent,
-    SearchProtocolModalComponent,
-    NgApexchartsModule
+    SearchProtocolModalComponent
   ],
   templateUrl: './supervisor-dashboard.component.html',
   styleUrl: './supervisor-dashboard.component.css'
@@ -65,9 +64,9 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
   viewMode: 'dashboard' | 'usuarios' = 'dashboard';
   listaUsuarios: any[] = [];
 
-  // ApexCharts
-  statusChartOptions: { series?: any; chart?: any; labels?: any; colors?: any; legend?: any; plotOptions?: any; stroke?: any; dataLabels?: any; xaxis?: any; tooltip?: any; } = {};
-  priorityChartOptions: { series?: any; chart?: any; labels?: any; colors?: any; legend?: any; plotOptions?: any; stroke?: any; dataLabels?: any; xaxis?: any; tooltip?: any; } = {};
+  // Chart.js
+  statusChart: any;
+  areaChart: any;
 
   constructor(
     private router: Router,
@@ -117,27 +116,19 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
   }
 
   atualizarGraficosComDadosBackend(est: any) {
-     if (est && est.chamadosPorStatus) {
-         this.statusChartOptions = {
-             ...this.statusChartOptions,
-             series: [
-                 est.chamadosPorStatus.aberto || 0,
-                 (est.chamadosPorStatus['em andamento'] || 0) + (est.chamadosPorStatus['em-andamento'] || 0),
-                 est.chamadosPorStatus.concluido || 0,
-                 est.chamadosPorStatus.encerrado || 0
-             ]
-         };
-     }
-     
-     if (est && est.chamadosPorArea) {
+     if (est && est.chamadosPorStatus && est.chamadosPorArea) {
+         const statusData = [
+             est.chamadosPorStatus.aberto || 0,
+             (est.chamadosPorStatus['em andamento'] || 0) + (est.chamadosPorStatus['em-andamento'] || 0),
+             est.chamadosPorStatus.concluido || 0,
+             est.chamadosPorStatus.encerrado || 0
+         ];
          const categoriasArea = Object.keys(est.chamadosPorArea);
          const valoresArea = Object.values(est.chamadosPorArea) as number[];
          
-         this.priorityChartOptions = {
-             ...this.priorityChartOptions,
-             xaxis: { categories: categoriasArea },
-             series: [{ name: 'Chamados', data: valoresArea }]
-         };
+         setTimeout(() => {
+           this.renderCharts(statusData, categoriasArea, valoresArea);
+         }, 100);
      }
   }
 
@@ -335,43 +326,18 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
 
   calcularKPIs() { const abertos = this.chamados.filter(c => c.status === 'aberto').length; const emAndamento = this.chamados.filter(c => c.status === 'em-andamento' || c.status === 'em andamento').length; const concluidos = this.chamados.filter(c => c.status === 'fechado' || c.status === 'concluido').length; const urgentes = this.chamados.filter(c => c.prioridade === 'urgente' || c.prioridade === 'alta').length; this.kpis[0].value = abertos; this.kpis[1].value = emAndamento; this.kpis[2].value = concluidos; this.kpis[3].value = urgentes; }
 
-  // === CHARTS LOGIC ===
   initCharts() {
-    this.statusChartOptions = {
-      series: [0, 0, 0, 0],
-      chart: { type: 'donut', height: 280, fontFamily: 'Inter, sans-serif' },
-      labels: ['Abertos', 'Em Andamento', 'Concluídos', 'Encerrados'],
-      colors: ['#ef4444', '#f59e0b', '#10b981', '#6b7280'],
-      plotOptions: { pie: { donut: { size: '60%' } } },
-      dataLabels: { enabled: false },
-      legend: { position: 'bottom' },
-      stroke: { width: 0 }
-    };
-
-    this.priorityChartOptions = {
-      series: [{ name: 'Chamados', data: [] }],
-      chart: { type: 'bar', height: 280, fontFamily: 'Inter, sans-serif', toolbar: { show: false } },
-      plotOptions: { bar: { horizontal: false, columnWidth: '50%', borderRadius: 4, distributed: true } },
-      dataLabels: { enabled: false },
-      xaxis: { categories: [] },
-      colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f59e0b', '#ef4444', '#10b981'],
-      legend: { show: false },
-      tooltip: { theme: 'light' }
-    };
+    // Initialized in updateCharts
   }
 
   updateCharts() {
     const list = this.getChamadosFiltrados();
 
-    // Status Chart
     const abertos = list.filter(c => c.status === 'aberto').length;
     const andamento = list.filter(c => c.status === 'em-andamento' || c.status === 'em andamento').length;
     const concluidos = list.filter(c => c.status === 'fechado' || c.status === 'concluido').length;
     const encerrados = list.filter(c => c.status === 'encerrado').length;
 
-    this.statusChartOptions = { ...this.statusChartOptions, series: [abertos, andamento, concluidos, encerrados] };
-
-    // Gráfico de Área (Substituindo o antigo prioridade)
     const areas = list.reduce((acc: any, c) => {
       const area = c.area || 'Geral';
       acc[area] = (acc[area] || 0) + 1;
@@ -381,11 +347,63 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
     const categoriasArea = Object.keys(areas);
     const valoresArea = Object.values(areas) as number[];
 
-    this.priorityChartOptions = { 
-      ...this.priorityChartOptions, 
-      xaxis: { categories: categoriasArea.length > 0 ? categoriasArea : ['Nenhum'] }, 
-      series: [{ name: 'Chamados', data: valoresArea.length > 0 ? valoresArea : [0] }] 
-    };
+    setTimeout(() => {
+      this.renderCharts(
+        [abertos, andamento, concluidos, encerrados],
+        categoriasArea.length > 0 ? categoriasArea : ['Nenhum'],
+        valoresArea.length > 0 ? valoresArea : [0]
+      );
+    }, 100);
+  }
+
+  renderCharts(statusData: number[], areaLabels: string[], areaData: number[]) {
+    if (this.statusChart) this.statusChart.destroy();
+    if (this.areaChart) this.areaChart.destroy();
+
+    const statusCtx = document.getElementById('statusChart') as HTMLCanvasElement;
+    if (statusCtx) {
+      this.statusChart = new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Abertos', 'Em Andamento', 'Concluídos', 'Encerrados'],
+          datasets: [{
+            data: statusData,
+            backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#6b7280'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      });
+    }
+
+    const areaCtx = document.getElementById('areaChart') as HTMLCanvasElement;
+    if (areaCtx) {
+      this.areaChart = new Chart(areaCtx, {
+        type: 'bar',
+        data: {
+          labels: areaLabels,
+          datasets: [{
+            label: 'Chamados',
+            data: areaData,
+            backgroundColor: ['#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f59e0b', '#ef4444', '#10b981'],
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+    }
   }
 
   setFilter(key: any, value: any) { this.filtros[key as keyof FilterOptions] = value; this.updateCharts(); }

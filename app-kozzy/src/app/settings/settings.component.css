@@ -1,0 +1,26 @@
+.settings-container {
+  padding: 30px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.settings-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  padding: 30px;
+}
+.settings-header h2 { margin: 0 0 10px; font-size: 1.5rem; color: #1e293b; }
+.settings-header p { color: #64748b; margin: 0 0 25px; }
+.settings-form { display: flex; flex-direction: column; gap: 15px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group label { font-size: 0.875rem; font-weight: 600; color: #475569; }
+.form-control { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; transition: border-color 0.2s; }
+.form-control:focus { border-color: #3b82f6; outline: none; }
+.form-row { display: flex; gap: 15px; flex-wrap: wrap; }
+.form-group.half { flex: 1; min-width: 200px; }
+.form-actions { display: flex; justify-content: flex-end; }
+.btn-save { padding: 12px 24px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: transform 0.2s; }
+.btn-save:hover { transform: translateY(-2px); }
+.btn-save:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; }
+.alert-message { padding: 15px; border-radius: 8px; background: #d1fae5; color: #065f46; font-weight: 500; }
+.alert-message.error { background: #fee2e2; color: #b91c1c; }

@@ -1,0 +1,49 @@
+<div class="settings-container">
+  <div class="settings-card">
+    <div class="settings-header">
+      <h2>⚙️ Configurações de Perfil</h2>
+      <p>Gerencie suas informações pessoais e segurança</p>
+    </div>
+
+    <form (ngSubmit)="salvarPerfil()" #settingsForm="ngForm" class="settings-form">
+      <div class="form-group">
+        <label>Nome Completo</label>
+        <input type="text" name="nome" [(ngModel)]="formData.nome" required class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" name="email" [(ngModel)]="formData.email" required class="form-control" [readonly]="true" style="background-color: #f1f5f9; cursor: not-allowed;">
+        <small style="color:#64748b">O e-mail não pode ser alterado diretamente.</small>
+      </div>
+
+      <h3 style="margin-top: 30px; font-size: 1.1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Alterar Senha</h3>
+
+      <div class="form-group">
+        <label>Senha Atual</label>
+        <input type="password" name="senhaAntiga" [(ngModel)]="formData.senhaAntiga" class="form-control" placeholder="Digite a senha atual">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group half">
+          <label>Nova Senha</label>
+          <input type="password" name="novaSenha" [(ngModel)]="formData.novaSenha" class="form-control" placeholder="Digite a nova senha">
+        </div>
+        <div class="form-group half">
+          <label>Confirmar Nova Senha</label>
+          <input type="password" name="confirmarSenha" [(ngModel)]="formData.confirmarSenha" class="form-control" placeholder="Confirme a nova senha">
+        </div>
+      </div>
+
+      <div *ngIf="message" class="alert-message" [class.error]="isError">
+        {{ message }}
+      </div>
+
+      <div class="form-actions" style="margin-top: 20px;">
+        <button type="submit" class="btn-save" [disabled]="!settingsForm.form.valid">
+          💾 Salvar Alterações
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

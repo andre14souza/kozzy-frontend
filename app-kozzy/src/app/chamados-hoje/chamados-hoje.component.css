@@ -1,0 +1,21 @@
+.hoje-container {
+  padding: 20px;
+}
+.hoje-header {
+  margin-bottom: 20px;
+}
+.hoje-header h2 {
+  font-size: 1.5rem;
+  color: #333;
+  margin: 0;
+}
+.hoje-header p {
+  color: #777;
+  margin: 5px 0 0;
+}
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
+  font-size: 1.1rem;
+}

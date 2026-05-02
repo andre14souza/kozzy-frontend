@@ -278,14 +278,15 @@ export class ChamadosService {
     return this.chamadosSubject.value.find(c => c.numeroProtocolo === protocolo);
   }
 
-  adicionarComentario(id: string, mensagem: string, arquivo?: File): Observable<any> {
+  adicionarComentario(id: string, mensagem: string, arquivo?: File, isPrivado: boolean = false): Observable<any> {
     if (arquivo) {
       const formData = new FormData();
       formData.append('mensagem', mensagem);
+      formData.append('isPrivado', String(isPrivado));
       formData.append('anexo', arquivo);
       return this.http.post(`${this.API_URL}/${id}/comentarios`, formData, { withCredentials: true });
     }
-    return this.http.post(`${this.API_URL}/${id}/comentarios`, { mensagem }, { withCredentials: true });
+    return this.http.post(`${this.API_URL}/${id}/comentarios`, { mensagem, isPrivado }, { withCredentials: true });
   }
 
   // 5. RELATÓRIO — query params para o servidor

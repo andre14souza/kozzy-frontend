@@ -4,8 +4,9 @@ import { CentralAtendimentoComponent } from './central-atendimento/central-atend
 import { RecuperarComponent } from './recuperar/recuperar.component';
 import { SupervisorDashboardComponent } from './supervisor-dashboard/supervisor-dashboard.component';
 import { SupervisorGuard, AtendenteGuard } from './auth.guard';
-import { DesignSystemComponent } from './design-system/design-system.component'; // Importe
-
+import { DesignSystemComponent } from './design-system/design-system.component';
+import { ChamadosHojeComponent } from './chamados-hoje/chamados-hoje.component';
+import { SettingsComponent } from './settings/settings.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -21,9 +22,17 @@ export const routes: Routes = [
     component: CentralAtendimentoComponent,
     canActivate: [AtendenteGuard]
   },
+  {
+    path: 'hoje',
+    component: ChamadosHojeComponent,
+    canActivate: [AtendenteGuard]
+  },
+  {
+    path: 'configuracoes',
+    component: SettingsComponent,
+    canActivate: [AtendenteGuard]
+  },
   
   { path: '**', redirectTo: '/login' },
-
-  
 ];
 export class AppRoutingModule { }

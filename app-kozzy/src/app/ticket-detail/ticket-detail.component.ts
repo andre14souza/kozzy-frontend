@@ -24,6 +24,7 @@ export class TicketDetailComponent {
   novoComentario: string = '';
   isSubmittingComment: boolean = false;
   comentarioFile: File | null = null;
+  isComentarioPrivado: boolean = false;
   
   isSubTicketModalVisible = false;
 
@@ -52,6 +53,13 @@ export class TicketDetailComponent {
     const ehResponsavel = this.usuarioLogado.id === atendenteId;
 
     return this.usuarioLogado.perfil === 'atendente' && ehResponsavel;
+  }
+
+  ehResponsavel(): boolean {
+    if (!this.usuarioLogado || !this.chamado) return false;
+    const atendente = this.chamado.atendente;
+    const atendenteId = (atendente && typeof atendente === 'object') ? (atendente.id || atendente._id) : atendente;
+    return this.usuarioLogado.id === atendenteId;
   }
 
   onEdit() {
@@ -111,7 +119,7 @@ export class TicketDetailComponent {
 
     this.isSubmittingComment = true;
 
-    this.chamadosService.adicionarComentario(this.chamado.id, this.novoComentario, this.comentarioFile || undefined).subscribe({
+    this.chamadosService.adicionarComentario(this.chamado.id, this.novoComentario, this.comentarioFile || undefined, this.isComentarioPrivado).subscribe({
       next: (res) => {
         const comentarioSalvo = res.comentario || {
           mensagem: this.novoComentario,
@@ -132,6 +140,7 @@ export class TicketDetailComponent {
         this.chamado.comentarios.push(comentarioSalvo);
         this.novoComentario = '';
         this.comentarioFile = null;
+        this.isComentarioPrivado = false;
         this.isSubmittingComment = false;
       },
       error: (err) => {

@@ -56,6 +56,12 @@
             <h2>Central de Atendimento</h2>
             <p>Gerencie todos os chamados e solicitações</p>
           </div>
+          <div class="header-search" style="flex: 1; max-width: 400px; margin: 0 20px;">
+            <div style="position: relative;">
+              <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;">🔍</span>
+              <input type="text" [(ngModel)]="termoBuscaGlobal" (ngModelChange)="onBuscaGlobalChange()" placeholder="Buscar por cliente ou protocolo..." style="width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s;">
+            </div>
+          </div>
           <div class="header-actions">
             <button class="btn btn-primary" *ngIf="authService.podeGerenciarChamados()"
               (click)="abrirModalCriarChamado()">
@@ -104,7 +110,12 @@
             </div>
           </div>
         </div>
-        <div class="filters-origin" style="display: flex; gap: 10px;">
+        <div class="filters-origin" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 15px;">
+          <button class="filter-btn small urgency-toggle" [class.active]="prioridadeUrgenteAtiva" (click)="togglePrioridadeUrgente()">
+            <span *ngIf="prioridadeUrgenteAtiva">🚨 Apenas Alta/Urgente</span>
+            <span *ngIf="!prioridadeUrgenteAtiva">⚠️ Mostrar Todas Prioridades</span>
+          </button>
+          <div style="width: 1px; height: 20px; background-color: #cbd5e1; margin: 0 5px; display: inline-block;"></div>
           <button class="filter-btn small" [class.active]="filtroOrigem === 'todos'"
             (click)="setFiltroOrigem('todos')">🌐 Todos</button>
           <button class="filter-btn small" [class.active]="filtroOrigem === 'whatsapp'"

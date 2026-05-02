@@ -111,7 +111,10 @@
         <div class="comments-list" *ngIf="chamado.comentarios && chamado.comentarios.length > 0; else noComments">
           <div class="comment-item" *ngFor="let com of chamado.comentarios">
             <div class="comment-header">
-              <span class="comment-author">{{ com.usuario?.nomeCompleto || 'Desconhecido' }}</span>
+              <span class="comment-author">
+                {{ com.usuario?.nomeCompleto || 'Desconhecido' }}
+                <span *ngIf="com.isPrivado" title="Comentário Privado" style="font-size: 12px; margin-left: 5px;">🔒</span>
+              </span>
               <span class="comment-date">{{ com.data | date:'dd/MM/yyyy HH:mm' }}</span>
             </div>
             <p class="comment-text" *ngIf="com.mensagem">{{ com.mensagem }}</p>
@@ -148,7 +151,10 @@
               </div>
             </div>
 
-            <div class="comment-actions">
+            <div class="comment-actions" style="display: flex; align-items: center; gap: 15px;">
+              <label *ngIf="ehResponsavel()" style="display: flex; align-items: center; gap: 5px; font-size: 13px; color: #475569; cursor: pointer;">
+                <input type="checkbox" [(ngModel)]="isComentarioPrivado" style="cursor: pointer;"> Privado 🔒
+              </label>
               <button class="btn-submit-comment"
                 [disabled]="isSubmittingComment || (!novoComentario.trim() && !comentarioFile)"
                 (click)="enviarComentario()">
