@@ -5,32 +5,32 @@
   backdrop-filter: blur(2px);
 }
 .modal-container {
-  background: white; width: 400px; border-radius: 12px;
+  background: var(--bg-card); width: 400px; border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.2); overflow: hidden;
   animation: slideDown 0.3s ease;
 }
 @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 .modal-header {
-  padding: 16px 24px; border-bottom: 1px solid #eee;
+  padding: 16px 24px; border-bottom: 1px solid var(--border-color);
   display: flex; justify-content: space-between; align-items: center;
   background: #f9fafb;
 }
-.modal-header h3 { margin: 0; font-size: 18px; color: #333; }
-.close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #666; }
+.modal-header h3 { margin: 0; font-size: 18px; color: var(--text-primary); }
+.close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-secondary); }
 .modal-body { padding: 24px; }
 .search-input {
   width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px;
   font-size: 16px; outline: none; transition: border-color 0.2s; box-sizing: border-box;
 }
 .search-input:focus { border-color: #dc2626; }
-.hint { margin: 8px 0 0; font-size: 12px; color: #888; text-align: right; }
+.hint { margin: 8px 0 0; font-size: 12px; color: var(--text-secondary); text-align: right; }
 .modal-footer {
-  padding: 16px 24px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 10px;
+  padding: 16px 24px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px;
 }
 .btn-cancel {
-  padding: 8px 16px; border-radius: 6px; border: 1px solid #ddd; background: white; cursor: pointer;
+  padding: 8px 16px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); cursor: pointer;
 }
 .btn-confirm {
-  padding: 8px 16px; border-radius: 6px; border: none; background: #dc2626; color: white; cursor: pointer; font-weight: bold;
+  padding: 8px 16px; border-radius: 6px; border: none; background: #dc2626; color: white; cursor: pointer; font-weight: 600;
 }
 .btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; }

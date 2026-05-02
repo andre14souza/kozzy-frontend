@@ -6,16 +6,16 @@
 }
 .hoje-header h2 {
   font-size: 1.5rem;
-  color: #333;
+  color: var(--text-primary);
   margin: 0;
 }
 .hoje-header p {
-  color: #777;
+  color: var(--text-secondary);
   margin: 5px 0 0;
 }
 .loading {
   text-align: center;
   padding: 40px;
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 1.1rem;
 }

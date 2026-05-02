@@ -16,7 +16,7 @@
 
 /* Modal Container */
 .modal-container {
-  background: white;
+  background: var(--bg-card);
   border-radius: 16px;
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
   width: 100%;
@@ -34,7 +34,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 24px 32px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-color);
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
 }
@@ -60,7 +60,7 @@
   cursor: pointer;
   color: white;
   font-size: 18px;
-  font-weight: bold;
+  font-weight: 600;
   transition: all 0.2s ease;
 }
 
@@ -92,7 +92,7 @@
   border-radius: 8px;
   font-size: 16px;
   transition: all 0.2s ease;
-  background: white;
+  background: var(--bg-card);
   font-family: inherit;
 }
 
@@ -138,8 +138,8 @@
 }
 
 .chamado-item {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 15px 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
@@ -215,8 +215,8 @@
 /* Modal Footer */
 .modal-footer {
   padding: 24px 32px;
-  border-top: 1px solid #e2e8f0;
-  background: white;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-card);
   display: flex;
   justify-content: flex-end;
 }

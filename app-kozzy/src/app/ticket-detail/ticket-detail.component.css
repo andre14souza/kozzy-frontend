@@ -1,5 +1,5 @@
 .detail-container {
-  background-color: #f4f7f6;
+  background-color: var(--bg-main);
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -8,9 +8,9 @@
 
 /* Header */
 .detail-header {
-  background: white;
+  background: var(--bg-card);
   padding: 20px 30px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -25,7 +25,7 @@
 .btn-back {
   background: none;
   border: none;
-  color: #64748b;
+  color: var(--text-secondary);
   font-weight: 600;
   cursor: pointer;
   font-size: 14px;
@@ -36,7 +36,7 @@
 .protocol-info h1 {
   margin: 0;
   font-size: 24px;
-  color: #1e293b;
+  color: var(--text-primary);
   display: inline-block;
   margin-right: 15px;
 }
@@ -63,7 +63,7 @@
 }
 
 .info-card, .meta-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -72,7 +72,7 @@
 
 .info-card h3, .meta-card h3 {
   margin-top: 0;
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -84,7 +84,7 @@
 .description-text {
   font-size: 16px;
   line-height: 1.6;
-  color: #334155;
+  color: var(--text-secondary);
   white-space: pre-wrap;
 }
 
@@ -103,13 +103,13 @@
 
 .info-item label {
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-weight: 600;
 }
 
 .info-item span {
   font-size: 15px;
-  color: #1e293b;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
@@ -118,13 +118,13 @@
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 12px;
-  font-weight: bold;
+  font-weight: 600;
   text-transform: uppercase;
   vertical-align: middle;
 }
-.status-aberto { background: #fee2e2; color: #dc2626; }
-.status-em-andamento { background: #fef3c7; color: #d97706; }
-.status-fechado { background: #dcfce7; color: #166534; }
+.status-aberto { background: var(--badge-aberto-bg); color: var(--badge-aberto-text); }
+.status-em-andamento { background: var(--badge-andamento-bg); color: var(--badge-andamento-text); }
+.status-fechado { background: var(--badge-fechado-bg); color: var(--badge-fechado-text); }
 
 .priority-badge {
   display: inline-block;
@@ -146,8 +146,8 @@
   font-size: 14px;
 }
 .meta-row:last-child { border-bottom: none; }
-.meta-label { color: #64748b; }
-.meta-value { font-weight: 600; color: #334155; }
+.meta-label { color: var(--text-secondary); }
+.meta-value { font-weight: 600; color: var(--text-secondary); }
 .header-right {
   display: flex;
   align-items: center;
@@ -199,8 +199,8 @@
 }
 
 .comment-item {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 16px;
 }
@@ -214,25 +214,25 @@
 
 .comment-author {
   font-weight: 600;
-  color: #334155;
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
 .comment-date {
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 12px;
 }
 
 .comment-text {
   font-size: 14px;
-  color: #475569;
+  color: var(--text-secondary);
   line-height: 1.5;
   white-space: pre-wrap;
   margin: 0;
 }
 
 .no-comments-text {
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-style: italic;
   font-size: 14px;
   margin-bottom: 20px;
@@ -250,7 +250,7 @@
 .comment-input {
   width: 100%;
   padding: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   resize: vertical;
   min-height: 80px;
@@ -286,7 +286,7 @@
 }
 
 .btn-submit-comment:disabled {
-  background-color: #94a3b8;
+  background-color: var(--text-secondary);
   cursor: not-allowed;
   opacity: 0.7;
 }
@@ -297,14 +297,14 @@
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background-color: #f1f5f9;
+  background-color: var(--bg-card);
   border-radius: 6px;
   text-decoration: none;
   color: #3b82f6;
   font-size: 14px;
   font-weight: 500;
   transition: background 0.2s;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
 }
 
 .attachment-link:hover {
@@ -318,17 +318,17 @@
 }
 
 .btn-attach-comment {
-  background: #f1f5f9;
+  background: var(--bg-card);
   border: 1px dashed #cbd5e1;
   border-radius: 6px;
   padding: 6px 10px;
   font-size: 13px;
-  color: #475569;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .btn-attach-comment:hover {
   background: #e2e8f0;
-  border-color: #94a3b8;
+  border-color: var(--text-secondary);
 }

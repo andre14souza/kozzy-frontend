@@ -2,7 +2,7 @@
 
 .relatorio-screen-container {
   padding: 1.5rem;
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   min-height: calc(100vh - 100px);
@@ -184,7 +184,7 @@
   }
 
   .indicador-card {
-    border: 1px solid #ccc;
+    border: 1px solid var(--border-color);
     box-shadow: none;
     break-inside: avoid;
   }

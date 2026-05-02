@@ -4,9 +4,9 @@
     <div class="logo-area" style="padding: 20px; display: flex; align-items: center; justify-content: space-between;">
       <div class="logo-box" *ngIf="!menuCollapsed" style="display: flex; align-items: center; gap: 10px;">
         <span class="logo-icon"
-          style="background: #dc2626; color: white; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold;">K</span>
+          style="background: #dc2626; color: white; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 600;">K</span>
         <div class="logo-text">
-          <h1 style="font-size: 18px; margin: 0; color: #333;">KOZZY</h1>
+          <h1 style="font-size: 18px; margin: 0; color: var(--text-primary);">KOZZY</h1>
         </div>
       </div>
       <button class="toggle-btn" (click)="toggleMenu()"
@@ -33,7 +33,7 @@
       </ul>
     </nav>
 
-    <div class="user-profile" *ngIf="usuarioLogado" style="padding: 20px; border-top: 1px solid #eee;">
+    <div class="user-profile" *ngIf="usuarioLogado" style="padding: 20px; border-top: 1px solid var(--border-color);">
       <div class="user-info" *ngIf="!menuCollapsed"><strong>{{ usuarioLogado.nome }}</strong><br><small>{{
           usuarioLogado.perfil }}</small></div>
       <button class="logout-btn" (click)="logout()" title="Sair" style="margin-top: 10px; width: 100%;">↪ Sair</button>
@@ -58,12 +58,12 @@
           </div>
           <div class="header-search" style="flex: 1; max-width: 400px; margin: 0 20px;">
             <div style="position: relative;">
-              <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;">🔍</span>
-              <input type="text" [(ngModel)]="termoBuscaGlobal" (ngModelChange)="onBuscaGlobalChange()" placeholder="Buscar por cliente ou protocolo..." style="width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s;">
+              <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary);">🔍</span>
+              <input type="text" [(ngModel)]="termoBuscaGlobal" (ngModelChange)="onBuscaGlobalChange()" placeholder="Buscar por cliente ou protocolo..." style="width: 100%; padding: 10px 10px 10px 35px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s;">
             </div>
           </div>
           <div class="header-actions" style="display: flex; align-items: center; gap: 15px;">
-            <button class="theme-toggle-btn" (click)="toggleTheme()" [title]="isDarkTheme ? 'Modo Claro' : 'Modo Escuro'" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: var(--text-muted);">
+            <button class="theme-toggle-btn" (click)="toggleTheme()" [title]="isDarkTheme ? 'Modo Claro' : 'Modo Escuro'" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: var(--text-secondary);">
               <span *ngIf="isDarkTheme">☀️</span>
               <span *ngIf="!isDarkTheme">🌙</span>
             </button>
@@ -168,8 +168,10 @@
                     atribuído' }}</span>
                 </div>
               </div>
-              <div class="card-footer"><span class="card-meta">📅 {{ chamado.dataAbertura | date: 'dd/MM/yyyy' }} às {{
-                  chamado.horaAbertura }}</span></div>
+              <div class="card-footer">
+                <span class="card-meta">📅 {{ chamado.dataAbertura | date: 'dd/MM/yyyy' }} às {{ chamado.horaAbertura }}</span>
+                <a *ngIf="chamado.anexo" [href]="chamadosService.getAnexoUrl(chamado.anexo.url || chamado.anexo.caminho)" target="_blank" rel="noopener noreferrer" class="details-btn" title="Visualizar Anexo" (click)="$event.stopPropagation()">📎 Anexo</a>
+              </div>
             </div>
           </div>
         </div>
@@ -203,7 +205,10 @@
                 <div class="k-card-footer">
                   <span class="k-atendente">{{ chamado.atendente?.nomeCompleto || chamado.atendente?.nome ||
                     chamado.atendente || 'Sem atribuição' }}</span>
-                  <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                    <a *ngIf="chamado.anexo" [href]="chamadosService.getAnexoUrl(chamado.anexo.url || chamado.anexo.caminho)" target="_blank" rel="noopener noreferrer" title="Anexo" style="text-decoration: none; font-size: 14px;" (click)="$event.stopPropagation()">📎</a>
+                    <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -235,7 +240,10 @@
                 <div class="k-card-footer">
                   <span class="k-atendente">{{ chamado.atendente?.nomeCompleto || chamado.atendente?.nome ||
                     chamado.atendente || 'Sem atribuição' }}</span>
-                  <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                    <a *ngIf="chamado.anexo" [href]="chamadosService.getAnexoUrl(chamado.anexo.url || chamado.anexo.caminho)" target="_blank" rel="noopener noreferrer" title="Anexo" style="text-decoration: none; font-size: 14px;" (click)="$event.stopPropagation()">📎</a>
+                    <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -267,7 +275,10 @@
                 <div class="k-card-footer">
                   <span class="k-atendente">{{ chamado.atendente?.nomeCompleto || chamado.atendente?.nome ||
                     chamado.atendente || 'Sem atribuição' }}</span>
-                  <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                    <a *ngIf="chamado.anexo" [href]="chamadosService.getAnexoUrl(chamado.anexo.url || chamado.anexo.caminho)" target="_blank" rel="noopener noreferrer" title="Anexo" style="text-decoration: none; font-size: 14px;" (click)="$event.stopPropagation()">📎</a>
+                    <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -299,7 +310,10 @@
                 <div class="k-card-footer">
                   <span class="k-atendente">{{ chamado.atendente?.nomeCompleto || chamado.atendente?.nome ||
                     chamado.atendente || 'Sem atribuição' }}</span>
-                  <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                    <a *ngIf="chamado.anexo" [href]="chamadosService.getAnexoUrl(chamado.anexo.url || chamado.anexo.caminho)" target="_blank" rel="noopener noreferrer" title="Anexo" style="text-decoration: none; font-size: 14px;" (click)="$event.stopPropagation()">📎</a>
+                    <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
+                  </div>
                 </div>
               </div>
             </div>

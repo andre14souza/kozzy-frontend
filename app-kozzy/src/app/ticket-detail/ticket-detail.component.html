@@ -2,7 +2,7 @@
 
   <!-- Parent Link -->
   <div *ngIf="chamado.chamadoPai" class="parent-reference" style="margin-bottom: 15px;">
-    <span style="background-color: #e2e8f0; color: #475569; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+    <span style="background-color: #e2e8f0; color: var(--text-secondary); padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600;">
       ↳ Sub-tarefa do Protocolo #{{ chamado.chamadoPai.numeroProtocolo || chamado.chamadoPai }}
     </span>
   </div>
@@ -41,7 +41,7 @@
 
         <div *ngIf="chamado.anexo" class="attachment-section"
           style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #e2e8f0;">
-          <h4 style="margin:0 0 10px 0; font-size:13px; color:#64748b;">📎 Anexo</h4>
+          <h4 style="margin:0 0 10px 0; font-size:13px; color: var(--text-secondary);">📎 Anexo</h4>
           <a [href]="getAnexoUrl(chamado.anexo.url || chamado.anexo.caminho)" target="_blank" rel="noopener noreferrer"
             class="attachment-link">
             <span class="attachment-icon">📁</span>
@@ -54,10 +54,10 @@
       <div class="info-card" *ngIf="chamado.subChamados && chamado.subChamados.length > 0">
         <h3>📋 Sub-tarefas associadas</h3>
         <div class="subtickets-list" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
-          <div *ngFor="let sub of chamado.subChamados" class="subticket-item" style="border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; background-color: #f8fafc;">
+          <div *ngFor="let sub of chamado.subChamados" class="subticket-item" style="border: 1px solid var(--border-color); padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; background-color: var(--bg-main);">
             <div style="display: flex; align-items: center; gap: 8px;">
               <strong style="color: #0f172a; font-size: 13px;">#{{ sub.numeroProtocolo }}</strong>
-              <span style="font-size: 13px; color: #475569;">{{ sub.categoria || sub.assuntoEspecifico }}</span>
+              <span style="font-size: 13px; color: var(--text-secondary);">{{ sub.categoria || sub.assuntoEspecifico }}</span>
             </div>
             <span class="status-badge" [class]="'status-' + (sub.avanco || sub.status)" style="font-size: 11px; padding: 4px 8px;">
               {{ getStatusLabel(sub.avanco || sub.status) }}
@@ -144,7 +144,7 @@
               <button type="button" class="btn-attach-comment" (click)="commentFileInput.click()"
                 title="Anexar arquivo">📎 Anexar</button>
               <div *ngIf="comentarioFile" class="comment-file-preview"
-                style="display: flex; align-items: center; gap: 5px; margin-top: 5px; font-size: 12px; color: #475569;">
+                style="display: flex; align-items: center; gap: 5px; margin-top: 5px; font-size: 12px; color: var(--text-secondary);">
                 <span>{{ comentarioFile.name }}</span>
                 <button type="button" (click)="removeCommentFile()"
                   style="background:none; border:none; color:#ef4444; font-size:10px; cursor:pointer;">✖</button>
@@ -152,7 +152,7 @@
             </div>
 
             <div class="comment-actions" style="display: flex; align-items: center; gap: 15px;">
-              <label *ngIf="ehResponsavel()" style="display: flex; align-items: center; gap: 5px; font-size: 13px; color: #475569; cursor: pointer;">
+              <label *ngIf="ehResponsavel()" style="display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--text-secondary); cursor: pointer;">
                 <input type="checkbox" [(ngModel)]="isComentarioPrivado" style="cursor: pointer;"> Privado 🔒
               </label>
               <button class="btn-submit-comment"

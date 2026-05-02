@@ -134,10 +134,10 @@ export class ChamadosService {
       slaClass: getSLADetails(item.dataLimite, item.avanco).cssClass,
       anexo: item.anexo ? (
         typeof item.anexo === 'string' 
-          ? { nomeOriginal: 'Anexo', url: this.getAnexoAbsoluto(item.anexo), caminho: item.anexo }
+          ? { nomeOriginal: 'Anexo', url: this.getAnexoUrl(item.anexo), caminho: item.anexo }
           : {
               nomeOriginal: item.anexo.nomeOriginal || 'Arquivo Anexo',
-              url: this.getAnexoAbsoluto(item.anexo.url || item.anexo.caminho),
+              url: this.getAnexoUrl(item.anexo.url || item.anexo.caminho),
               caminho: item.anexo.caminho
             }
       ) : undefined,
@@ -147,13 +147,13 @@ export class ChamadosService {
   }
 
   // Método Centralizador para Construir URL Absoluta
-  public getAnexoAbsoluto(caminho: string | undefined): string {
-    if (!caminho || caminho === '#') return '#';
-    if (caminho.startsWith('http') || caminho.startsWith('blob:')) return caminho;
+  public getAnexoUrl(caminhoRelativo: string | undefined): string {
+    if (!caminhoRelativo || caminhoRelativo === '#') return '#';
+    if (caminhoRelativo.startsWith('http') || caminhoRelativo.startsWith('blob:')) return caminhoRelativo;
     
     // Obtém a URL base (removendo '/api' para pegar a raiz do servidor de uploads)
     const baseUrl = environment.apiUrl.replace(/\/api$/, '');
-    const pathNormalizado = caminho.replace(/\\/g, '/');
+    const pathNormalizado = caminhoRelativo.replace(/\\/g, '/');
     const prefixo = pathNormalizado.startsWith('/') ? '' : '/';
     
     return `${baseUrl}${prefixo}${pathNormalizado}`;

@@ -2,23 +2,41 @@
   --bg-main: #f8fafc;
   --bg-sidebar: #ffffff;
   --bg-card: #ffffff;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
   --border-color: #e2e8f0;
+  --accent-color: #2563eb;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   --card-radius: 12px;
+  
+  /* Badges - Light Mode */
+  --badge-aberto-bg: #fee2e2;
+  --badge-aberto-text: #ef4444;
+  --badge-andamento-bg: #fffbeb;
+  --badge-andamento-text: #f59e0b;
+  --badge-fechado-bg: #d1fae5;
+  --badge-fechado-text: #10b981;
 }
 
 .dark-theme {
   --bg-main: #0f172a;
   --bg-sidebar: #1e293b;
   --bg-card: #1e293b;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
   --border-color: #334155;
+  --accent-color: #3b82f6;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+
+  /* Badges - Dark Mode (low opacity background, bright text) */
+  --badge-aberto-bg: rgba(239, 68, 68, 0.15);
+  --badge-aberto-text: #fca5a5;
+  --badge-andamento-bg: rgba(245, 158, 11, 0.15);
+  --badge-andamento-text: #fcd34d;
+  --badge-fechado-bg: rgba(16, 185, 129, 0.15);
+  --badge-fechado-text: #6ee7b7;
 }
 
 html, body {
@@ -26,10 +44,22 @@ html, body {
   margin: 0;
   font-family: 'Inter', sans-serif; /* Mantenha a fonte padrão que você usa */
   background-color: var(--bg-main);
-  color: var(--text-main);
+  color: var(--text-primary);
   transition: background-color 0.3s, color 0.3s;
   /* Isso desativa a barra de rolagem do navegador para a página inteira. */
   overflow: hidden;
+}
+
+input, select, textarea {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent-color);
+  outline: none;
 }
 
 @media print {
