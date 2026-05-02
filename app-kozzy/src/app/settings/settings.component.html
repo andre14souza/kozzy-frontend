@@ -13,11 +13,22 @@
       
       <div class="form-group">
         <label>E-mail</label>
-        <input type="email" name="email" [(ngModel)]="formData.email" required class="form-control" [readonly]="true" style="background-color: #f1f5f9; cursor: not-allowed;">
-        <small style="color:#64748b">O e-mail não pode ser alterado diretamente.</small>
+        <input type="email" name="email" [(ngModel)]="formData.email" required class="form-control" [readonly]="true" style="background-color: var(--bg-main); cursor: not-allowed; border-color: var(--border-color);">
+        <small style="color: var(--text-muted)">O e-mail não pode ser alterado diretamente.</small>
       </div>
 
-      <h3 style="margin-top: 30px; font-size: 1.1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Alterar Senha</h3>
+      <div class="form-group" style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
+        <div>
+          <label style="margin-bottom: 0;">Modo Escuro</label>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0;">Ativar o tema escuro na aplicação</p>
+        </div>
+        <label class="theme-switch">
+          <input type="checkbox" [(ngModel)]="isDarkMode" name="isDarkMode" (change)="toggleTheme()">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <h3 style="margin-top: 15px; font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; color: var(--text-main);">Alterar Senha</h3>
 
       <div class="form-group">
         <label>Senha Atual</label>

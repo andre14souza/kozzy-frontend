@@ -8,6 +8,8 @@ import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from 
 import { ChamadosService, Chamado, NovoChamado, RelatorioFilters } from '../chamados.service';
 import { AuthService, UsuarioLogado } from '../auth.service';
 import { LoadingService } from '../loading.service';
+import { ReportExportService } from '../report-export.service';
+import { ThemeService } from '../theme.service';
 
 import { CreateTicketModalComponent } from '../create-ticket-modal/create-ticket-modal.component';
 import { RelatorioFiltroModalComponent } from '../relatorio-filtro-modal/relatorio-filtro-modal.component';
@@ -64,6 +66,7 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   filtroOrigem: 'todos' | 'whatsapp' | 'email' = 'todos';
   termoBuscaGlobal: string = '';
   prioridadeUrgenteAtiva: boolean = true;
+  isDarkTheme: boolean = false;
   
   menuCollapsed: boolean = false;
   isMobileMenuOpen: boolean = false;
@@ -74,11 +77,14 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   constructor(
     public chamadosService: ChamadosService,
     public authService: AuthService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private reportExportService: ReportExportService,
+    private themeService: ThemeService
   ) { }
 
   ngOnInit(): void {
     this.usuarioLogado = this.authService.getUsuarioLogado();
+    this.isDarkTheme = this.themeService.isDarkTheme();
     this.carregarDados();
     this.checkScreenSize();
 
@@ -159,7 +165,10 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
     let lista = this.chamados;
 
     if (this.prioridadeUrgenteAtiva) {
-      lista = lista.filter(c => c.prioridade === 'alta' || c.prioridade === 'urgente');
+      lista = lista.filter(c => {
+        const p = c.prioridade?.toLowerCase() || '';
+        return p.includes('alta') || p.includes('urgente');
+      });
     }
 
     if (this.currentFilter !== 'todos') lista = lista.filter(c => c.status === this.currentFilter);
@@ -180,6 +189,11 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   onBuscaGlobalChange() {
     this.updateKanbanColumns();
     this.updateStatusCounts();
+  }
+
+  toggleTheme() {
+    this.themeService.toggleTheme();
+    this.isDarkTheme = this.themeService.isDarkTheme();
   }
 
   togglePrioridadeUrgente() {

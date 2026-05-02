@@ -91,6 +91,7 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
       this.isEditMode = !!this.chamadoParaEditar;
       this.showPreview = false;
       this.selectedFile = null;
+      this.carregarAtendentes();
       this.initializeForm();
       if (this.isEditMode) {
         this.populateFormForEdit();
@@ -137,12 +138,11 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
   }
 
   carregarAtendentes() {
-    this.authService.getTodosUsuarios().subscribe({
-      next: (usuarios: any[]) => {
-        this.atendenteOptions = usuarios
-          .filter(u => u.perfil === 'atendente')
-          .map(u => ({ value: u.id || u._id, label: u.nome }));
-      }
+    this.authService.getAtendentes().subscribe({
+      next: (atendentes: any[]) => {
+        this.atendenteOptions = atendentes.map(u => ({ value: u._id, label: u.nomeCompleto }));
+      },
+      error: (err) => console.error('Erro ao carregar atendentes', err)
     });
   }
 

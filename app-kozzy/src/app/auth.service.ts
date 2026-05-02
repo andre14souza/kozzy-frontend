@@ -87,6 +87,11 @@ export class AuthService {
     );
   }
 
+  // --- GET APENAS ATENDENTES ---
+  getAtendentes(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API_USUARIOS}/atendentes`, { withCredentials: true });
+  }
+
   // --- CRIAR USUÁRIO ---
   criarUsuario(dados: any): Observable<any> {
     const payload = {

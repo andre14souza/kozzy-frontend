@@ -48,8 +48,7 @@ export class TicketDetailComponent {
 
     if (this.usuarioLogado.perfil === 'supervisor') return true;
 
-    const atendente = this.chamado.atendente;
-    const atendenteId = (atendente && typeof atendente === 'object') ? (atendente.id || atendente._id) : atendente;
+    const atendenteId = this.chamado.atendenteId;
     const ehResponsavel = this.usuarioLogado.id === atendenteId;
 
     return this.usuarioLogado.perfil === 'atendente' && ehResponsavel;
@@ -57,8 +56,7 @@ export class TicketDetailComponent {
 
   ehResponsavel(): boolean {
     if (!this.usuarioLogado || !this.chamado) return false;
-    const atendente = this.chamado.atendente;
-    const atendenteId = (atendente && typeof atendente === 'object') ? (atendente.id || atendente._id) : atendente;
+    const atendenteId = this.chamado.atendenteId;
     return this.usuarioLogado.id === atendenteId;
   }
 

@@ -54,6 +54,7 @@ export interface Chamado {
   area: string;
   categoria: string;
   atendente?: any;
+  atendenteId?: string;
   prioridade: string;
   status: string;
   descricao: string;
@@ -118,6 +119,7 @@ export class ChamadosService {
       categoria: item.assuntoEspecifico || '',
       origem: item.origem || 'email',
       atendente: item.atendente?.nomeCompleto || item.atendente?.nome || item.atendente || 'Não Atribuído',
+      atendenteId: typeof item.atendente === 'object' && item.atendente ? item.atendente._id || item.atendente.id : item.atendente,
       prioridade: item.nivelPrioridade,
       status: item.avanco,
       descricao: item.descricaoDetalhada,

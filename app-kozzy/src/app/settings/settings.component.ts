@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { AuthService, UsuarioLogado } from '../auth.service';
 import { environment } from '../../environments/environment';
+import { ThemeService } from '../theme.service';
 
 @Component({
   selector: 'app-settings',
@@ -25,8 +26,13 @@ export class SettingsComponent implements OnInit {
 
   message = '';
   isError = false;
+  isDarkMode = false;
 
-  constructor(private authService: AuthService, private http: HttpClient) {}
+  constructor(
+    private authService: AuthService, 
+    private http: HttpClient,
+    private themeService: ThemeService
+  ) {}
 
   ngOnInit() {
     this.usuarioLogado = this.authService.getUsuarioLogado();
@@ -34,6 +40,12 @@ export class SettingsComponent implements OnInit {
       this.formData.nome = this.usuarioLogado.nome;
       this.formData.email = this.usuarioLogado.email;
     }
+    this.isDarkMode = this.themeService.isDarkTheme();
+  }
+
+  toggleTheme() {
+    this.themeService.toggleTheme();
+    this.isDarkMode = this.themeService.isDarkTheme();
   }
 
   salvarPerfil() {
@@ -46,7 +58,8 @@ export class SettingsComponent implements OnInit {
       nome: this.formData.nome,
       email: this.formData.email,
       senhaAntiga: this.formData.senhaAntiga,
-      novaSenha: this.formData.novaSenha
+      novaSenha: this.formData.novaSenha,
+      preferenciaTema: this.isDarkMode ? 'dark' : 'light'
     };
 
     // Chamada pro backend usando API de perfil

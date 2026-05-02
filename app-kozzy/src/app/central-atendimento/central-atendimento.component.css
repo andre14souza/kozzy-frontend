@@ -10,7 +10,7 @@
 .app-container {
   display: flex;
   height: 100%;
-  background-color: #f8f9fa;
+  background-color: var(--bg-main);
 }
 
 /* ===================================
@@ -18,11 +18,11 @@
 =================================== */
 .sidebar {
   width: 16.25rem;
-  background-color: #ffffff;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+  background-color: var(--bg-sidebar);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
-  transition: width 0.3s ease-in-out;
+  transition: width 0.3s ease-in-out, background-color 0.3s, box-shadow 0.3s;
   overflow: hidden;
   position: relative;
   z-index: 1000;
@@ -35,7 +35,7 @@
 
 .logo-section {
   padding: 20px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -79,14 +79,14 @@
 .logo-text h1 {
   font-size: 1.375rem;
   font-weight: 700;
-  color: #333;
+  color: var(--text-main);
   margin: 0;
   line-height: 1;
 }
 
 .logo-text p {
   font-size: 0.75rem;
-  color: #777;
+  color: var(--text-muted);
   margin: 0;
   line-height: 1;
 }
@@ -123,7 +123,7 @@
   display: flex;
   align-items: center;
   padding: 12px 20px;
-  color: #555;
+  color: var(--text-muted);
   text-decoration: none;
   font-size: 0.9375rem;
   font-weight: 500;
@@ -180,7 +180,7 @@
 
 .user-section {
   padding: 20px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -223,7 +223,7 @@
 
 .user-name {
   font-weight: 600;
-  color: #333;
+  color: var(--text-main);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -232,7 +232,7 @@
 
 .user-email {
   font-size: 0.75rem;
-  color: #777;
+  color: var(--text-muted);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -269,16 +269,16 @@
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  background-color: #f4f7f6;
+  background-color: var(--bg-main);
   min-width: 0;
   overflow-y: auto;
 }
 
 .header {
-  background-color: #ffffff;
+  background-color: var(--bg-card);
   padding: 1.25rem 1.875rem;
-  border-bottom: 1px solid #e0e0e0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
   flex-shrink: 0;
 }
 
@@ -292,13 +292,13 @@
 .header-title h2 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #333;
+  color: var(--text-main);
   margin: 0;
 }
 
 .header-title p {
   font-size: 0.875rem;
-  color: #777;
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -366,7 +366,7 @@
 .filters-title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #333;
+  color: var(--text-main);
   margin-bottom: 15px;
 }
 
@@ -377,12 +377,12 @@
 }
 
 .filter-btn {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 20px;
   padding: 8px 15px;
   font-size: 0.875rem;
-  color: #555;
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -424,9 +424,9 @@
 }
 
 .chamado-card {
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background-color: var(--bg-card);
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
@@ -455,8 +455,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  border-bottom: 1px solid #f0f0f0;
-  background-color: #f9f9f9;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-main);
   flex-wrap: wrap;
   gap: 8px;
 }
@@ -501,8 +501,8 @@
 
 .card-title {
   font-size: 1rem;
-  font-weight: 600;
-  color: #333;
+  font-weight: 700;
+  color: var(--text-main);
   margin: 0;
 }
 
@@ -536,7 +536,7 @@
 
 .card-description {
   font-size: 0.875rem;
-  color: #555;
+  color: var(--text-muted);
   margin-bottom: 15px;
   line-height: 1.5;
   flex-grow: 1;
@@ -561,7 +561,7 @@
 
 .detail-value {
   font-size: 0.875rem;
-  color: #333;
+  color: var(--text-main);
   font-weight: 500;
 }
 
