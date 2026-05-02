@@ -8,7 +8,6 @@ import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from 
 import { ChamadosService, Chamado, NovoChamado, RelatorioFilters } from '../chamados.service';
 import { AuthService, UsuarioLogado } from '../auth.service';
 import { LoadingService } from '../loading.service';
-import { ReportExportService } from '../report-export.service';
 import { ThemeService } from '../theme.service';
 
 import { CreateTicketModalComponent } from '../create-ticket-modal/create-ticket-modal.component';
@@ -78,7 +77,6 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
     public chamadosService: ChamadosService,
     public authService: AuthService,
     private loadingService: LoadingService,
-    private reportExportService: ReportExportService,
     private themeService: ThemeService
   ) { }
 
