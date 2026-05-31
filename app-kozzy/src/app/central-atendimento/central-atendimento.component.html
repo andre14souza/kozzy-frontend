@@ -71,9 +71,9 @@
             </div>
           </div>
           <div class="header-actions" style="display: flex; align-items: center; gap: 15px;">
-            <button class="theme-toggle-btn" (click)="toggleTheme()" [title]="isDarkTheme ? 'Modo Claro' : 'Modo Escuro'" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: var(--text-secondary);">
-              <span *ngIf="isDarkTheme">☀️</span>
-              <span *ngIf="!isDarkTheme">🌙</span>
+            <button class="theme-toggle-btn" (click)="themeService.toggleTheme()" [title]="themeService.isDarkTheme() ? 'Modo Claro' : 'Modo Escuro'" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: var(--text-secondary);">
+              <span *ngIf="themeService.isDarkTheme()">☀️</span>
+              <span *ngIf="!themeService.isDarkTheme()">🌙</span>
             </button>
             <button class="btn btn-primary" *ngIf="authService.podeGerenciarChamados()"
               (click)="abrirModalCriarChamado()">

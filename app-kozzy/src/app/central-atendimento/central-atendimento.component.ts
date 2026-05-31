@@ -81,7 +81,7 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
     public chamadosService: ChamadosService,
     public authService: AuthService,
     private loadingService: LoadingService,
-    private themeService: ThemeService
+    public themeService: ThemeService
   ) { }
 
   ngOnInit(): void {

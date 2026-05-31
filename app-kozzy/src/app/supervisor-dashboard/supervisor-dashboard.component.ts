@@ -78,7 +78,7 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
     private router: Router,
     public authService: AuthService,
     private chamadosService: ChamadosService,
-    private themeService: ThemeService
+    public themeService: ThemeService
   ) { }
 
   ngOnInit() {
