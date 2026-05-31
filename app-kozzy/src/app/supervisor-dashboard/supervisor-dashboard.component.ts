@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 import { AuthService, UsuarioLogado } from '../auth.service';
 import { ChamadosService, Chamado, NovoChamado, RelatorioFilters } from '../chamados.service';
 import { Chart } from 'chart.js/auto';
+import { environment } from '../../environments/environment';
 
 import { CreateTicketModalComponent } from '../create-ticket-modal/create-ticket-modal.component';
 import { CriarUsuarioModalComponent } from '../criar-usuario-modal/criar-usuario-modal.component';
@@ -35,6 +36,7 @@ interface MenuItem { label: string; icon: string; route?: string; action?: () =>
   styleUrl: './supervisor-dashboard.component.css'
 })
 export class SupervisorDashboardComponent implements OnInit, OnDestroy {
+  env = environment;
   showTicketModal: boolean = false;
   showCriarUsuarioModal: boolean = false;
   showRelatorioFiltrosModal: boolean = false;
@@ -322,6 +324,14 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
   }
 
   logout() { if (confirm('Tem certeza?')) { this.authService.logout(); } }
+
+  getFullUrl(path: string | undefined): string {
+    if (!path || path === '#') return '';
+    if (path.startsWith('http') || path.startsWith('blob:')) return path;
+    const baseUrl = environment.apiUrl.replace(/\/api$/, '');
+    const prefix = path.startsWith('/') ? '' : '/';
+    return `${baseUrl}${prefix}${path}`;
+  }
   showToast(message: string, type: any) { this.toast = { message, type, visible: true }; setTimeout(() => { this.toast.visible = false; }, 3000); }
 
   calcularKPIs() { const abertos = this.chamados.filter(c => c.status === 'aberto').length; const emAndamento = this.chamados.filter(c => c.status === 'em-andamento' || c.status === 'em andamento').length; const concluidos = this.chamados.filter(c => c.status === 'fechado' || c.status === 'concluido').length; const urgentes = this.chamados.filter(c => c.prioridade === 'urgente' || c.prioridade === 'alta').length; this.kpis[0].value = abertos; this.kpis[1].value = emAndamento; this.kpis[2].value = concluidos; this.kpis[3].value = urgentes; }

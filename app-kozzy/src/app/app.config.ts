@@ -10,6 +10,8 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { routes } from './app.routes';
 import { AuthService } from './auth.service';
 import { loadingInterceptor } from './loading.interceptor';
+import { APP_INITIALIZER } from '@angular/core';
+import { ThemeService } from './theme.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -23,6 +25,13 @@ export const appConfig: ApplicationConfig = {
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor, // 💥 MUDAR PARA AuthInterceptor
+      multi: true
+    },
+    
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (themeService: ThemeService) => () => themeService.initTheme(),
+      deps: [ThemeService],
       multi: true
     },
     

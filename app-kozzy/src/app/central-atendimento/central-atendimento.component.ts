@@ -9,6 +9,7 @@ import { ChamadosService, Chamado, NovoChamado, RelatorioFilters } from '../cham
 import { AuthService, UsuarioLogado } from '../auth.service';
 import { LoadingService } from '../loading.service';
 import { ThemeService } from '../theme.service';
+import { environment } from '../../environments/environment';
 
 import { CreateTicketModalComponent } from '../create-ticket-modal/create-ticket-modal.component';
 import { RelatorioFiltroModalComponent } from '../relatorio-filtro-modal/relatorio-filtro-modal.component';
@@ -31,6 +32,7 @@ interface ToastMessage { message: string; type: 'success' | 'info' | 'warning' |
   styleUrls: ['./central-atendimento.component.css'],
 })
 export class CentralAtendimentoComponent implements OnInit, OnDestroy {
+  env = environment;
   viewMode: 'kanban' | 'list' = 'kanban';
   chamadosAbertos: Chamado[] = [];
   chamadosEmAndamento: Chamado[] = [];
@@ -393,6 +395,14 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   }
 
   logout() { if (confirm('Tem certeza que deseja sair?')) this.authService.logout(); }
+
+  getFullUrl(path: string | undefined): string {
+    if (!path || path === '#') return '';
+    if (path.startsWith('http') || path.startsWith('blob:')) return path;
+    const baseUrl = environment.apiUrl.replace(/\/api$/, '');
+    const prefix = path.startsWith('/') ? '' : '/';
+    return `${baseUrl}${prefix}${path}`;
+  }
 
   // ==== KANBAN LOGIC ====
   updateKanbanColumns() {

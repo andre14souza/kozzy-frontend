@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 // 1. IMPORTE O COMPONENTE DE LOADING
 import { LoadingComponent } from './loading/loading.component'; 
+import { ThemeService } from './theme.service';
 
 @Component({
   selector: 'app-root',
@@ -16,4 +17,6 @@ import { LoadingComponent } from './loading/loading.component';
 })
 export class AppComponent {
   title = 'kozzy-distribuidora';
+
+  constructor(private themeService: ThemeService) {}
 }

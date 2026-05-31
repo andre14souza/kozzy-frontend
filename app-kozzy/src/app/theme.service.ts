@@ -10,39 +10,35 @@ export class ThemeService {
 
   constructor(@Inject(PLATFORM_ID) platformId: Object) {
     this.isBrowser = isPlatformBrowser(platformId);
-    this.loadTheme();
+    this.initTheme();
+  }
+
+  initTheme(): void {
+    if (!this.isBrowser) return;
+    
+    const isDark = localStorage.getItem(this.darkThemeKey) === 'true';
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }
 
   toggleTheme(): void {
     if (!this.isBrowser) return;
     
-    const isDark = document.body.classList.contains('dark-theme');
+    const isDark = document.documentElement.classList.contains('dark');
     if (isDark) {
-      document.body.classList.remove('dark-theme');
-      document.body.classList.add('light-theme');
+      document.documentElement.classList.remove('dark');
       localStorage.setItem(this.darkThemeKey, 'false');
     } else {
-      document.body.classList.remove('light-theme');
-      document.body.classList.add('dark-theme');
+      document.documentElement.classList.add('dark');
       localStorage.setItem(this.darkThemeKey, 'true');
     }
   }
 
   isDarkTheme(): boolean {
     if (!this.isBrowser) return false;
-    return document.body.classList.contains('dark-theme');
-  }
-
-  private loadTheme(): void {
-    if (!this.isBrowser) return;
-    
-    const isDark = localStorage.getItem(this.darkThemeKey) === 'true';
-    if (isDark) {
-      document.body.classList.add('dark-theme');
-      document.body.classList.remove('light-theme');
-    } else {
-      document.body.classList.add('light-theme');
-      document.body.classList.remove('dark-theme');
-    }
+    return document.documentElement.classList.contains('dark');
   }
 }

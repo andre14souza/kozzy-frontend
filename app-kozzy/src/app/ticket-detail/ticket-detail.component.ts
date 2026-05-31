@@ -14,6 +14,7 @@ import { environment } from '../../environments/environment';
   styleUrls: ['./ticket-detail.component.css']
 })
 export class TicketDetailComponent {
+  environment = environment;
   @Input() chamado!: Chamado;
   @Input() usuarioLogado!: UsuarioLogado | null;
 
@@ -162,6 +163,12 @@ export class TicketDetailComponent {
 
   getAnexoUrl(caminho: string | undefined): string {
     return this.chamadosService.getAnexoUrl(caminho);
+  }
+
+  isImageAttachment(caminho: string | undefined): boolean {
+    if (!caminho) return false;
+    const lower = caminho.toLowerCase();
+    return lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.gif') || lower.endsWith('.webp');
   }
 
   getClienteIcon(tipoCliente: string): string {

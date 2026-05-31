@@ -47,6 +47,11 @@
             <span class="attachment-icon">📁</span>
             <span class="attachment-name">{{ chamado.anexo.nomeOriginal }}</span>
           </a>
+
+          <!-- Visualização de Imagem se o anexo for imagem -->
+          <div *ngIf="isImageAttachment(chamado.anexo.url || chamado.anexo.caminho)" style="margin-top: 12px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); max-width: 100%;">
+            <img [src]="environment.apiUrl.replace('/api', '') + (chamado.anexo.url || chamado.anexo.caminho)" alt="Anexo do Chamado" style="max-height: 280px; width: auto; max-width: 100%; display: block; object-fit: contain;">
+          </div>
         </div>
       </div>
 
@@ -125,6 +130,11 @@
                 <span class="attachment-icon">📎</span>
                 <span class="attachment-name">{{ com.anexo.nomeOriginal }}</span>
               </a>
+
+              <!-- Visualização de Imagem se o anexo do comentário for imagem -->
+              <div *ngIf="isImageAttachment(com.anexo.url || com.anexo.caminho)" style="margin-top: 8px; border-radius: 4px; overflow: hidden; border: 1px solid var(--border-color); max-width: 100%;">
+                <img [src]="environment.apiUrl.replace('/api', '') + (com.anexo.url || com.anexo.caminho)" alt="Anexo do comentário" style="max-height: 150px; width: auto; max-width: 100%; display: block; object-fit: contain;">
+              </div>
             </div>
           </div>
         </div>

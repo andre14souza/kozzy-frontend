@@ -13,6 +13,7 @@ export interface UsuarioLogado {
   perfil: string;
   token?: string;
   areas: string[];
+  foto?: string;
 }
 
 @Injectable({

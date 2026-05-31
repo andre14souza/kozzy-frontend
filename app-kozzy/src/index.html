@@ -6,6 +6,18 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script>
+    (function() {
+      try {
+        const isDark = localStorage.getItem('kozzy-dark-theme') === 'true';
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <app-root>
