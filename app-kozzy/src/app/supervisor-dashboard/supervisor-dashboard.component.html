@@ -33,7 +33,7 @@
     <div class="user-section">
       <div class="user-info" [class.hidden]="menuCollapsed" *ngIf="usuarioLogado">
         <div class="user-avatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center;">
-          <img *ngIf="usuarioLogado.foto" [src]="env.apiUrl.replace('/api', '') + usuarioLogado.foto" alt="Foto de perfil" style="width: 100%; height: 100%; object-fit: cover;">
+          <img *ngIf="usuarioLogado.foto" [src]="usuarioLogado.foto | urlAnexo:'avatar'" alt="Foto de perfil" style="width: 100%; height: 100%; object-fit: cover;">
           <span *ngIf="!usuarioLogado.foto">{{ usuarioLogado.nome?.charAt(0)?.toUpperCase() }}</span>
         </div>
         <div class="user-details">
@@ -63,6 +63,12 @@
           <div class="header-title">
             <h1>Visão Geral do Supervisor</h1>
             <p>Monitoramento em tempo real dos chamados da equipe</p>
+          </div>
+          <div class="header-actions" style="display: flex; align-items: center; gap: 15px; margin-left: auto;">
+            <button class="theme-toggle-btn" (click)="toggleTheme()" [title]="isDarkTheme ? 'Modo Claro' : 'Modo Escuro'" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: var(--text-secondary);">
+              <span *ngIf="isDarkTheme">☀️</span>
+              <span *ngIf="!isDarkTheme">🌙</span>
+            </button>
           </div>
         </div>
       </header>

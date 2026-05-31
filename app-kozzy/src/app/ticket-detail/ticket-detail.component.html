@@ -42,7 +42,7 @@
         <div *ngIf="chamado.anexo" class="attachment-section"
           style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #e2e8f0;">
           <h4 style="margin:0 0 10px 0; font-size:13px; color: var(--text-secondary);">📎 Anexo</h4>
-          <a [href]="getAnexoUrl(chamado.anexo.url || chamado.anexo.caminho)" target="_blank" rel="noopener noreferrer"
+          <a [href]="(chamado.anexo.url || chamado.anexo.caminho) | urlAnexo" target="_blank" rel="noopener noreferrer"
             class="attachment-link">
             <span class="attachment-icon">📁</span>
             <span class="attachment-name">{{ chamado.anexo.nomeOriginal }}</span>
@@ -50,7 +50,7 @@
 
           <!-- Visualização de Imagem se o anexo for imagem -->
           <div *ngIf="isImageAttachment(chamado.anexo.url || chamado.anexo.caminho)" style="margin-top: 12px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); max-width: 100%;">
-            <img [src]="environment.apiUrl.replace('/api', '') + (chamado.anexo.url || chamado.anexo.caminho)" alt="Anexo do Chamado" style="max-height: 280px; width: auto; max-width: 100%; display: block; object-fit: contain;">
+            <img [src]="(chamado.anexo.url || chamado.anexo.caminho) | urlAnexo" alt="Anexo do Chamado" style="max-height: 280px; width: auto; max-width: 100%; display: block; object-fit: contain;">
           </div>
         </div>
       </div>
@@ -125,7 +125,7 @@
             <p class="comment-text" *ngIf="com.mensagem">{{ com.mensagem }}</p>
 
             <div *ngIf="com.anexo" class="comment-attachment" style="margin-top: 8px;">
-              <a [href]="getAnexoUrl(com.anexo.url || com.anexo.caminho)" target="_blank" rel="noopener noreferrer"
+              <a [href]="(com.anexo.url || com.anexo.caminho) | urlAnexo" target="_blank" rel="noopener noreferrer"
                 class="attachment-link compact">
                 <span class="attachment-icon">📎</span>
                 <span class="attachment-name">{{ com.anexo.nomeOriginal }}</span>
@@ -133,7 +133,7 @@
 
               <!-- Visualização de Imagem se o anexo do comentário for imagem -->
               <div *ngIf="isImageAttachment(com.anexo.url || com.anexo.caminho)" style="margin-top: 8px; border-radius: 4px; overflow: hidden; border: 1px solid var(--border-color); max-width: 100%;">
-                <img [src]="environment.apiUrl.replace('/api', '') + (com.anexo.url || com.anexo.caminho)" alt="Anexo do comentário" style="max-height: 150px; width: auto; max-width: 100%; display: block; object-fit: contain;">
+                <img [src]="(com.anexo.url || com.anexo.caminho) | urlAnexo" alt="Anexo do comentário" style="max-height: 150px; width: auto; max-width: 100%; display: block; object-fit: contain;">
               </div>
             </div>
           </div>

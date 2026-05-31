@@ -36,7 +36,7 @@
     <div class="user-profile" *ngIf="usuarioLogado" style="padding: 20px; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;">
       <div style="display: flex; align-items: center; gap: 12px;">
         <div class="user-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; overflow: hidden; flex-shrink: 0; border: 2px solid var(--border-color);">
-          <img *ngIf="usuarioLogado.foto" [src]="env.apiUrl.replace('/api', '') + usuarioLogado.foto" alt="Foto de perfil" style="width: 100%; height: 100%; object-fit: cover;">
+          <img *ngIf="usuarioLogado.foto" [src]="usuarioLogado.foto | urlAnexo:'avatar'" alt="Foto de perfil" style="width: 100%; height: 100%; object-fit: cover;">
           <span *ngIf="!usuarioLogado.foto">{{ usuarioLogado.nome?.charAt(0)?.toUpperCase() }}</span>
         </div>
         <div class="user-info" *ngIf="!menuCollapsed" style="display: flex; flex-direction: column; line-height: 1.2;">
@@ -178,7 +178,7 @@
               </div>
               <div class="card-footer">
                 <span class="card-meta">📅 {{ chamado.dataAbertura | date: 'dd/MM/yyyy' }} às {{ chamado.horaAbertura }}</span>
-                <a *ngIf="chamado.anexo" [href]="chamadosService.getAnexoUrl(chamado.anexo.url || chamado.anexo.caminho)" target="_blank" rel="noopener noreferrer" class="details-btn" title="Visualizar Anexo" (click)="$event.stopPropagation()">📎 Anexo</a>
+                <a *ngIf="chamado.anexo" [href]="(chamado.anexo.url || chamado.anexo.caminho) | urlAnexo" target="_blank" rel="noopener noreferrer" class="details-btn" title="Visualizar Anexo" (click)="$event.stopPropagation()">📎 Anexo</a>
               </div>
             </div>
           </div>
@@ -214,7 +214,7 @@
                   <span class="k-atendente">{{ chamado.atendente?.nomeCompleto || chamado.atendente?.nome ||
                     chamado.atendente || 'Sem atribuição' }}</span>
                   <div style="display: flex; gap: 8px; align-items: center;">
-                    <a *ngIf="chamado.anexo" [href]="chamadosService.getAnexoUrl(chamado.anexo.url || chamado.anexo.caminho)" target="_blank" rel="noopener noreferrer" title="Anexo" style="text-decoration: none; font-size: 14px;" (click)="$event.stopPropagation()">📎</a>
+                    <a *ngIf="chamado.anexo" [href]="(chamado.anexo.url || chamado.anexo.caminho) | urlAnexo" target="_blank" rel="noopener noreferrer" title="Anexo" style="text-decoration: none; font-size: 14px;" (click)="$event.stopPropagation()">📎</a>
                     <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
                   </div>
                 </div>
@@ -249,7 +249,7 @@
                   <span class="k-atendente">{{ chamado.atendente?.nomeCompleto || chamado.atendente?.nome ||
                     chamado.atendente || 'Sem atribuição' }}</span>
                   <div style="display: flex; gap: 8px; align-items: center;">
-                    <a *ngIf="chamado.anexo" [href]="chamadosService.getAnexoUrl(chamado.anexo.url || chamado.anexo.caminho)" target="_blank" rel="noopener noreferrer" title="Anexo" style="text-decoration: none; font-size: 14px;" (click)="$event.stopPropagation()">📎</a>
+                    <a *ngIf="chamado.anexo" [href]="(chamado.anexo.url || chamado.anexo.caminho) | urlAnexo" target="_blank" rel="noopener noreferrer" title="Anexo" style="text-decoration: none; font-size: 14px;" (click)="$event.stopPropagation()">📎</a>
                     <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
                   </div>
                 </div>
@@ -284,7 +284,7 @@
                   <span class="k-atendente">{{ chamado.atendente?.nomeCompleto || chamado.atendente?.nome ||
                     chamado.atendente || 'Sem atribuição' }}</span>
                   <div style="display: flex; gap: 8px; align-items: center;">
-                    <a *ngIf="chamado.anexo" [href]="chamadosService.getAnexoUrl(chamado.anexo.url || chamado.anexo.caminho)" target="_blank" rel="noopener noreferrer" title="Anexo" style="text-decoration: none; font-size: 14px;" (click)="$event.stopPropagation()">📎</a>
+                    <a *ngIf="chamado.anexo" [href]="(chamado.anexo.url || chamado.anexo.caminho) | urlAnexo" target="_blank" rel="noopener noreferrer" title="Anexo" style="text-decoration: none; font-size: 14px;" (click)="$event.stopPropagation()">📎</a>
                     <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
                   </div>
                 </div>
@@ -319,7 +319,7 @@
                   <span class="k-atendente">{{ chamado.atendente?.nomeCompleto || chamado.atendente?.nome ||
                     chamado.atendente || 'Sem atribuição' }}</span>
                   <div style="display: flex; gap: 8px; align-items: center;">
-                    <a *ngIf="chamado.anexo" [href]="chamadosService.getAnexoUrl(chamado.anexo.url || chamado.anexo.caminho)" target="_blank" rel="noopener noreferrer" title="Anexo" style="text-decoration: none; font-size: 14px;" (click)="$event.stopPropagation()">📎</a>
+                    <a *ngIf="chamado.anexo" [href]="(chamado.anexo.url || chamado.anexo.caminho) | urlAnexo" target="_blank" rel="noopener noreferrer" title="Anexo" style="text-decoration: none; font-size: 14px;" (click)="$event.stopPropagation()">📎</a>
                     <span class="k-tempo">{{ getTempoDecorrido(chamado.dataAbertura, chamado.horaAbertura) }}</span>
                   </div>
                 </div>

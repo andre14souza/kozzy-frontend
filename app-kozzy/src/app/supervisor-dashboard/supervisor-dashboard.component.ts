@@ -7,6 +7,7 @@ import { AuthService, UsuarioLogado } from '../auth.service';
 import { ChamadosService, Chamado, NovoChamado, RelatorioFilters } from '../chamados.service';
 import { Chart } from 'chart.js/auto';
 import { environment } from '../../environments/environment';
+import { ThemeService } from '../theme.service';
 
 import { CreateTicketModalComponent } from '../create-ticket-modal/create-ticket-modal.component';
 import { CriarUsuarioModalComponent } from '../criar-usuario-modal/criar-usuario-modal.component';
@@ -14,6 +15,7 @@ import { RelatorioFiltroModalComponent } from '../relatorio-filtro-modal/relator
 import { RelatorioScreenComponent } from '../relatorio-screen/relatorio-screen.component';
 import { TicketDetailComponent } from '../ticket-detail/ticket-detail.component';
 import { SearchProtocolModalComponent } from '../search-protocol-modal/search-protocol-modal.component';
+import { UrlAnexoPipe } from '../url-anexo.pipe';
 
 interface KPI { label: string; value: number; color: string; icon: string; }
 interface FilterOptions { busca: string; status: string; prioridade: string; ordenacao: string; }
@@ -30,13 +32,15 @@ interface MenuItem { label: string; icon: string; route?: string; action?: () =>
     RelatorioFiltroModalComponent,
     RelatorioScreenComponent,
     TicketDetailComponent,
-    SearchProtocolModalComponent
+    SearchProtocolModalComponent,
+    UrlAnexoPipe
   ],
   templateUrl: './supervisor-dashboard.component.html',
   styleUrl: './supervisor-dashboard.component.css'
 })
 export class SupervisorDashboardComponent implements OnInit, OnDestroy {
   env = environment;
+  isDarkTheme: boolean = false;
   showTicketModal: boolean = false;
   showCriarUsuarioModal: boolean = false;
   showRelatorioFiltrosModal: boolean = false;
@@ -73,11 +77,13 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     public authService: AuthService,
-    private chamadosService: ChamadosService
+    private chamadosService: ChamadosService,
+    private themeService: ThemeService
   ) { }
 
   ngOnInit() {
     this.usuarioLogado = this.authService.getUsuarioLogado();
+    this.isDarkTheme = this.themeService.isDarkTheme();
     this.initCharts();
     this.carregarDados(); // Carrega os chamados ao iniciar
 
@@ -321,6 +327,11 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
     } else {
       this.menuCollapsed = !this.menuCollapsed;
     }
+  }
+
+  toggleTheme() {
+    this.themeService.toggleTheme();
+    this.isDarkTheme = this.themeService.isDarkTheme();
   }
 
   logout() { if (confirm('Tem certeza?')) { this.authService.logout(); } }

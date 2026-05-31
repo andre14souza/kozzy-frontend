@@ -16,6 +16,7 @@ import { RelatorioFiltroModalComponent } from '../relatorio-filtro-modal/relator
 import { RelatorioScreenComponent } from '../relatorio-screen/relatorio-screen.component';
 import { SearchProtocolModalComponent } from '../search-protocol-modal/search-protocol-modal.component';
 import { TicketDetailComponent } from '../ticket-detail/ticket-detail.component';
+import { UrlAnexoPipe } from '../url-anexo.pipe';
 
 interface MenuItem { label: string; icon: string; route?: string; action?: () => void; badge?: number; active?: boolean; }
 interface ToastMessage { message: string; type: 'success' | 'info' | 'warning' | 'error'; visible: boolean; }
@@ -26,7 +27,8 @@ interface ToastMessage { message: string; type: 'success' | 'info' | 'warning' |
   imports: [
     CommonModule, FormsModule, RouterModule, DragDropModule,
     CreateTicketModalComponent, RelatorioFiltroModalComponent,
-    RelatorioScreenComponent, SearchProtocolModalComponent, TicketDetailComponent
+    RelatorioScreenComponent, SearchProtocolModalComponent, TicketDetailComponent,
+    UrlAnexoPipe
   ],
   templateUrl: './central-atendimento.component.html',
   styleUrls: ['./central-atendimento.component.css'],

@@ -27,14 +27,8 @@ export class ThemeService {
   toggleTheme(): void {
     if (!this.isBrowser) return;
     
-    const isDark = document.documentElement.classList.contains('dark');
-    if (isDark) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem(this.darkThemeKey, 'false');
-    } else {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem(this.darkThemeKey, 'true');
-    }
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem(this.darkThemeKey, isDark ? 'true' : 'false');
   }
 
   isDarkTheme(): boolean {

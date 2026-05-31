@@ -5,11 +5,12 @@ import { Chamado, ChamadosService, NovoChamado } from '../chamados.service';
 import { UsuarioLogado } from '../auth.service';
 import { CreateTicketModalComponent } from '../create-ticket-modal/create-ticket-modal.component';
 import { environment } from '../../environments/environment';
+import { UrlAnexoPipe } from '../url-anexo.pipe';
 
 @Component({
   selector: 'app-ticket-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, CreateTicketModalComponent],
+  imports: [CommonModule, FormsModule, CreateTicketModalComponent, UrlAnexoPipe],
   templateUrl: './ticket-detail.component.html',
   styleUrls: ['./ticket-detail.component.css']
 })
