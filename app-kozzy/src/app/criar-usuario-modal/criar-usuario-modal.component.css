@@ -47,15 +47,16 @@
 }
 
 .form-group { margin-bottom: 16px; }
-.form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #374151; }
+.form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: var(--text-primary); }
 
 .form-group input, .form-group select { 
   width: 100%; 
   padding: 10px 12px; 
-  border: 1px solid #d1d5db; 
+  border: 1px solid var(--border-color); 
   border-radius: 8px; 
   font-size: 14px; 
-  color: #1f2937;
+  color: var(--text-primary);
+  background-color: var(--bg-card);
   box-sizing: border-box; /* CRUCIAL */
 }
 
@@ -67,7 +68,7 @@
 .modal-footer {
   padding: 16px 24px; 
   border-top: 1px solid var(--border-color);
-  background-color: #f9fafb;
+  background-color: var(--bg-card);
   display: flex;
   flex-direction: row; /* Força horizontal */
   justify-content: flex-end; /* Alinha a direita */
@@ -86,9 +87,9 @@
 }
 
 .btn-cancelar { 
-  background-color: var(--bg-card); border: 1px solid #d1d5db; color: #374151; 
+  background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-secondary); 
 }
-.btn-cancelar:hover { background-color: #f3f4f6; }
+.btn-cancelar:hover { background-color: var(--bg-main); }
 
 .btn-criar { 
   background-color: #dc2626; color: white; 

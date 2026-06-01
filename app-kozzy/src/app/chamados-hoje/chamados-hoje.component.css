@@ -1,5 +1,7 @@
+@import '../central-atendimento/central-atendimento.component.css';
+
 .hoje-container {
-  padding: 20px;
+  padding: 0;
 }
 .hoje-header {
   margin-bottom: 20px;

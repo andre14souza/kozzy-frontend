@@ -1,4 +1,4 @@
-/* Os estilos principais foram totalmente migrados para classes utilitárias do Tailwind CSS no template HTML. */
+@import '../central-atendimento/central-atendimento.component.css';
 
 @keyframes fadeIn {
   from {

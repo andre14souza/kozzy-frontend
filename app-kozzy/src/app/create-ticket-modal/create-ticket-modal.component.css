@@ -28,15 +28,15 @@
 
 .modal-header {
   padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
   background: var(--bg-card);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.modal-title { font-size: 18px; font-weight: 700; margin: 0; color: #111827; }
-.close-button { background: transparent; border: none; font-size: 24px; cursor: pointer; color: #9ca3af; }
+.modal-title { font-size: 18px; font-weight: 700; margin: 0; color: var(--text-primary); }
+.close-button { background: transparent; border: none; font-size: 24px; cursor: pointer; color: var(--text-secondary); }
 
 .modal-body {
   padding: 24px;
@@ -46,9 +46,10 @@
 
 /* Estilos de Form */
 .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
-.form-label { font-size: 14px; font-weight: 600; color: #374151; }
+.form-label { font-size: 14px; font-weight: 600; color: var(--text-primary); }
 .form-input, .form-select, .form-textarea {
-  width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;
+  width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px;
+  background-color: var(--bg-card); color: var(--text-primary);
   box-sizing: border-box; /* Importante para não estourar */
 }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -57,8 +58,8 @@
 /* --- CORREÇÃO DOS BOTÕES AQUI --- */
 .modal-footer {
   padding: 20px 24px;
-  background-color: #f9fafb;
-  border-top: 1px solid #e5e7eb;
+  background-color: var(--bg-card);
+  border-top: 1px solid var(--border-color);
   
   /* Flexbox Obrigatório */
   display: flex !important;
@@ -86,10 +87,10 @@
 
 .btn-secondary {
   background-color: var(--bg-card);
-  border-color: #d1d5db;
-  color: #374151;
+  border-color: var(--border-color);
+  color: var(--text-secondary);
 }
-.btn-secondary:hover { background-color: #f3f4f6; }
+.btn-secondary:hover { background-color: var(--bg-main); }
 
 .btn-primary {
   background-color: #dc2626;

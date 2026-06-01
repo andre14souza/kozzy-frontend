@@ -1,20 +1,75 @@
-<div class="hoje-container" *ngIf="!showDetailScreen">
-  <div class="hoje-header">
-    <h2>Chamados do Dia</h2>
-    <p>Visualizando todos os chamados abertos hoje.</p>
-  </div>
-  
-  <div *ngIf="isLoading" class="loading">
-    Carregando chamados do dia...
-  </div>
-  
-  <div *ngIf="!isLoading">
-    <app-relatorio-tabela [chamados]="chamadosHoje" (rowClick)="onRowClick($event)"></app-relatorio-tabela>
-  </div>
-</div>
+<div class="app-container">
+  <div class="sidebar-overlay" *ngIf="isMobileMenuOpen" (click)="toggleMenu()"></div>
+  <aside class="sidebar" [class.collapsed]="menuCollapsed" [class.mobile-open]="isMobileMenuOpen">
+    <div class="logo-area" style="padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+      <div class="logo-box" *ngIf="!menuCollapsed" style="display: flex; align-items: center; gap: 10px;">
+        <span class="logo-icon"
+          style="background: #dc2626; color: white; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 600;">K</span>
+        <div class="logo-text">
+          <h1 style="font-size: 18px; margin: 0; color: var(--text-primary);">KOZZY</h1>
+        </div>
+      </div>
+      <button class="toggle-btn" (click)="toggleMenu()"
+        style="background: none; border: none; font-size: 20px; cursor: pointer;">☰</button>
+    </div>
 
-<app-ticket-detail *ngIf="showDetailScreen && chamadoDetalhe" 
-  [chamado]="chamadoDetalhe"
-  [usuarioLogado]="usuarioLogado" 
-  (close)="fecharTelaDetalhes()">
-</app-ticket-detail>
+    <nav class="menu" style="flex: 1; margin-top: 20px;">
+      <ul class="menu-list">
+        <li *ngFor="let item of menuItems">
+          <ng-container *ngIf="item.action">
+            <button class="menu-item" [class.active]="item.active" (click)="item.action()">
+              <span class="menu-icon">{{ item.icon }}</span>
+              <span class="menu-label" *ngIf="!menuCollapsed">{{ item.label }}</span>
+              <span class="menu-badge" *ngIf="item.badge && !menuCollapsed">{{ item.badge }}</span>
+            </button>
+          </ng-container>
+          <ng-container *ngIf="item.route">
+            <a [routerLink]="item.route" routerLinkActive="active" class="menu-item" style="text-decoration: none;">
+              <span class="menu-icon">{{ item.icon }}</span>
+              <span class="menu-label" *ngIf="!menuCollapsed">{{ item.label }}</span>
+            </a>
+          </ng-container>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="user-profile" *ngIf="usuarioLogado" style="padding: 20px; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="user-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; overflow: hidden; flex-shrink: 0; border: 2px solid var(--border-color);">
+          <img *ngIf="usuarioLogado.foto" [src]="usuarioLogado.foto | urlAnexo:'avatar'" alt="Foto de perfil" style="width: 100%; height: 100%; object-fit: cover;">
+          <span *ngIf="!usuarioLogado.foto">{{ usuarioLogado.nome?.charAt(0)?.toUpperCase() }}</span>
+        </div>
+        <div class="user-info" *ngIf="!menuCollapsed" style="display: flex; flex-direction: column; line-height: 1.2;">
+          <strong style="color: var(--text-primary); font-size: 14px;">{{ usuarioLogado.nome }}</strong>
+          <small style="color: var(--text-secondary); font-size: 12px; text-transform: capitalize;">{{ usuarioLogado.perfil }}</small>
+        </div>
+      </div>
+      <button class="logout-btn" (click)="logout()" title="Sair" style="margin-top: 5px; width: 100%;">↪ Sair</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="hoje-container" *ngIf="!showDetailScreen">
+      <div class="hoje-header" style="padding: 30px 30px 10px;">
+        <h2 style="font-size: 24px; font-weight: 700; margin: 0; color: var(--text-primary);">Chamados do Dia</h2>
+        <p style="color: var(--text-secondary); margin: 5px 0 0;">Visualizando todos os chamados abertos hoje.</p>
+      </div>
+      
+      <div style="padding: 0 30px 30px;">
+        <div *ngIf="isLoading" class="loading">
+          Carregando chamados do dia...
+        </div>
+        
+        <div *ngIf="!isLoading">
+          <app-relatorio-tabela [chamados]="chamadosHoje" (rowClick)="onRowClick($event)"></app-relatorio-tabela>
+        </div>
+      </div>
+    </div>
+
+    <app-ticket-detail *ngIf="showDetailScreen && chamadoDetalhe" 
+      [chamado]="chamadoDetalhe"
+      [usuarioLogado]="usuarioLogado" 
+      (close)="fecharTelaDetalhes()">
+    </app-ticket-detail>
+  </main>
+</div>

@@ -13,14 +13,15 @@
 .modal-header {
   padding: 16px 24px; border-bottom: 1px solid var(--border-color);
   display: flex; justify-content: space-between; align-items: center;
-  background: #f9fafb;
+  background: var(--bg-card);
 }
 .modal-header h3 { margin: 0; font-size: 18px; color: var(--text-primary); }
 .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-secondary); }
 .modal-body { padding: 24px; }
 .search-input {
-  width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px;
+  width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px;
   font-size: 16px; outline: none; transition: border-color 0.2s; box-sizing: border-box;
+  background-color: var(--bg-card); color: var(--text-primary);
 }
 .search-input:focus { border-color: #dc2626; }
 .hint { margin: 8px 0 0; font-size: 12px; color: var(--text-secondary); text-align: right; }

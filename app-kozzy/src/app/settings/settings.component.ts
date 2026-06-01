@@ -2,16 +2,25 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService, UsuarioLogado } from '../auth.service';
 import { environment } from '../../environments/environment';
 import { ThemeService } from '../theme.service';
 import { UrlAnexoPipe } from '../url-anexo.pipe';
 
+interface MenuItem { 
+  label: string; 
+  icon: string; 
+  route?: string; 
+  action?: () => void; 
+  badge?: number; 
+  active?: boolean; 
+}
+
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, UrlAnexoPipe],
+  imports: [CommonModule, FormsModule, RouterModule, UrlAnexoPipe],
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.css']
 })
@@ -33,6 +42,10 @@ export class SettingsComponent implements OnInit {
   selectedFile: File | null = null;
   previewUrl: string | null = null;
 
+  menuCollapsed = false;
+  isMobileMenuOpen = false;
+  menuItems: MenuItem[] = [];
+
   constructor(
     private authService: AuthService, 
     private http: HttpClient,
@@ -49,6 +62,46 @@ export class SettingsComponent implements OnInit {
       }
     });
     this.isDarkMode = this.themeService.isDarkTheme();
+
+    this.menuItems = [
+      { label: 'Chamados', icon: '📞', route: '/central' },
+      { label: 'Novo Atendimento', icon: '➕', route: '/central' },
+      { label: 'Chamados do Dia', icon: '📅', route: '/hoje' },
+      { label: 'Buscar Protocolo', icon: '🔍', route: '/central' },
+      { label: 'Relatórios', icon: '📊', route: '/central' },
+      { label: 'Configurações', icon: '⚙️', route: '/configuracoes', active: true },
+      { label: 'Design System', icon: '🎨', route: '/design-system' }
+    ];
+
+    this.checkScreenSize();
+    window.addEventListener('resize', this.checkScreenSize.bind(this));
+  }
+
+  ngOnDestroy() {
+    window.removeEventListener('resize', this.checkScreenSize.bind(this));
+  }
+
+  checkScreenSize() {
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      this.menuCollapsed = true;
+    } else {
+      this.isMobileMenuOpen = false;
+    }
+  }
+
+  toggleMenu() {
+    if (window.innerWidth <= 768) {
+      this.isMobileMenuOpen = !this.isMobileMenuOpen;
+    } else {
+      this.menuCollapsed = !this.menuCollapsed;
+    }
+  }
+
+  logout() {
+    if (confirm('Tem certeza que deseja sair?')) {
+      this.authService.logout();
+    }
   }
 
   toggleTheme() {
@@ -104,7 +157,7 @@ export class SettingsComponent implements OnInit {
         this.selectedFile = null;
         this.previewUrl = null;
         
-        // Atualiza a sessão de forma reativa globalmente
+        // Sincroniza a sessão de forma reativa globalmente
         if (res.usuario) {
           this.authService.atualizarDadosUsuario({
             nome: res.usuario.nomeCompleto,

@@ -1,166 +1,219 @@
-<div class="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300 py-8 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-4xl mx-auto">
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-8">
-      <div class="flex items-center gap-3">
-        <button (click)="voltar()" class="flex items-center justify-center p-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all border border-slate-200/60 dark:border-slate-700 shadow-sm" title="Voltar">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-          </svg>
-        </button>
-        <div>
-          <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Configurações de Perfil</h1>
-          <p class="text-sm text-slate-500 dark:text-slate-400">Gerencie suas preferências de aparência e dados pessoais</p>
+<div class="app-container">
+  <div class="sidebar-overlay" *ngIf="isMobileMenuOpen" (click)="toggleMenu()"></div>
+  <aside class="sidebar" [class.collapsed]="menuCollapsed" [class.mobile-open]="isMobileMenuOpen">
+    <div class="logo-area" style="padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+      <div class="logo-box" *ngIf="!menuCollapsed" style="display: flex; align-items: center; gap: 10px;">
+        <span class="logo-icon"
+          style="background: #dc2626; color: white; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 600;">K</span>
+        <div class="logo-text">
+          <h1 style="font-size: 18px; margin: 0; color: var(--text-primary);">KOZZY</h1>
         </div>
       </div>
+      <button class="toggle-btn" (click)="toggleMenu()"
+        style="background: none; border: none; font-size: 20px; cursor: pointer;">☰</button>
     </div>
 
-    <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      
-      <!-- Left Column: User Avatar and Info Card -->
-      <div class="md:col-span-1 flex flex-col gap-6">
-        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/60 dark:border-slate-700 shadow-md shadow-slate-100/50 dark:shadow-none flex flex-col items-center text-center relative overflow-hidden group">
-          <!-- Subtle Decorative Background Gradient -->
-          <div class="absolute inset-x-0 top-0 h-24 bg-gradient-to-r from-red-500 to-rose-600 opacity-90 dark:opacity-80"></div>
-          
-          <!-- Avatar Uploader -->
-          <div class="relative z-10 mt-8 mb-4">
-            <div class="w-28 h-28 rounded-full border-4 border-white dark:border-slate-800 shadow-xl overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center relative cursor-pointer group/avatar" (click)="fileInput.click()">
-              <!-- Real user photo from static folder with /uploads/foto.jpg fallback as mock -->
-              <img *ngIf="!previewUrl" [src]="(usuarioLogado?.foto || '/uploads/foto.jpg') | urlAnexo:'avatar'" alt="Foto de perfil" class="w-full h-full object-cover">
-              <!-- Selected preview photo -->
-              <img *ngIf="previewUrl" [src]="previewUrl" alt="Prévia" class="w-full h-full object-cover">
-              
-              <!-- Hover overlay with Camera Icon -->
-              <div class="absolute inset-0 bg-black/50 opacity-0 group-hover/avatar:opacity-100 flex flex-col items-center justify-center text-white text-xs font-semibold transition-opacity duration-300 gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 47.865 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-                </svg>
-                <span>Alterar Foto</span>
-              </div>
-            </div>
-            
-            <!-- Small camera badge outside avatar -->
-            <button (click)="fileInput.click()" class="absolute bottom-1.5 right-1.5 bg-red-600 hover:bg-red-700 text-white rounded-full p-2 shadow-lg hover:scale-110 transition-transform duration-200 z-20" type="button">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    <nav class="menu" style="flex: 1; margin-top: 20px;">
+      <ul class="menu-list">
+        <li *ngFor="let item of menuItems">
+          <ng-container *ngIf="item.action">
+            <button class="menu-item" [class.active]="item.active" (click)="item.action()">
+              <span class="menu-icon">{{ item.icon }}</span>
+              <span class="menu-label" *ngIf="!menuCollapsed">{{ item.label }}</span>
+              <span class="menu-badge" *ngIf="item.badge && !menuCollapsed">{{ item.badge }}</span>
+            </button>
+          </ng-container>
+          <ng-container *ngIf="item.route">
+            <a [routerLink]="item.route" routerLinkActive="active" class="menu-item" style="text-decoration: none;">
+              <span class="menu-icon">{{ item.icon }}</span>
+              <span class="menu-label" *ngIf="!menuCollapsed">{{ item.label }}</span>
+            </a>
+          </ng-container>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="user-profile" *ngIf="usuarioLogado" style="padding: 20px; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="user-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; overflow: hidden; flex-shrink: 0; border: 2px solid var(--border-color);">
+          <img *ngIf="usuarioLogado.foto" [src]="usuarioLogado.foto | urlAnexo:'avatar'" alt="Foto de perfil" style="width: 100%; height: 100%; object-fit: cover;">
+          <span *ngIf="!usuarioLogado.foto">{{ usuarioLogado.nome?.charAt(0)?.toUpperCase() }}</span>
+        </div>
+        <div class="user-info" *ngIf="!menuCollapsed" style="display: flex; flex-direction: column; line-height: 1.2;">
+          <strong style="color: var(--text-primary); font-size: 14px;">{{ usuarioLogado.nome }}</strong>
+          <small style="color: var(--text-secondary); font-size: 12px; text-transform: capitalize;">{{ usuarioLogado.perfil }}</small>
+        </div>
+      </div>
+      <button class="logout-btn" (click)="logout()" title="Sair" style="margin-top: 5px; width: 100%;">↪ Sair</button>
+    </div>
+  </aside>
+
+  <main class="main-content min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
+    <div class="py-8 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+          <div class="flex items-center gap-3">
+            <button (click)="voltar()" class="flex items-center justify-center p-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all border border-slate-200/60 dark:border-slate-700 shadow-sm" title="Voltar">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
               </svg>
             </button>
-            <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="hidden">
+            <div>
+              <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Configurações de Perfil</h1>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Gerencie suas preferências de aparência e dados pessoais</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          
+          <!-- Left Column: User Avatar and Info Card -->
+          <div class="md:col-span-1 flex flex-col gap-6">
+            <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/60 dark:border-slate-700 shadow-md shadow-slate-100/50 dark:shadow-none flex flex-col items-center text-center relative overflow-hidden group">
+              <!-- Subtle Decorative Background Gradient -->
+              <div class="absolute inset-x-0 top-0 h-24 bg-gradient-to-r from-red-500 to-rose-600 opacity-90 dark:opacity-80"></div>
+              
+              <!-- Avatar Uploader -->
+              <div class="relative z-10 mt-8 mb-4">
+                <div class="w-28 h-28 rounded-full border-4 border-white dark:border-slate-800 shadow-xl overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center relative cursor-pointer group/avatar" (click)="fileInput.click()">
+                  <!-- Real user photo from static folder with /uploads/foto.jpg fallback as mock -->
+                  <img *ngIf="!previewUrl" [src]="(usuarioLogado?.foto || '/uploads/foto.jpg') | urlAnexo:'avatar'" alt="Foto de perfil" class="w-full h-full object-cover">
+                  <!-- Selected preview photo -->
+                  <img *ngIf="previewUrl" [src]="previewUrl" alt="Prévia" class="w-full h-full object-cover">
+                  
+                  <!-- Hover overlay with Camera Icon -->
+                  <div class="absolute inset-0 bg-black/50 opacity-0 group-hover/avatar:opacity-100 flex flex-col items-center justify-center text-white text-xs font-semibold transition-opacity duration-300 gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 47.865 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                    </svg>
+                    <span>Alterar Foto</span>
+                  </div>
+                </div>
+                
+                <!-- Small camera badge outside avatar -->
+                <button (click)="fileInput.click()" class="absolute bottom-1.5 right-1.5 bg-red-600 hover:bg-red-700 text-white rounded-full p-2 shadow-lg hover:scale-110 transition-transform duration-200 z-20" type="button">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                </button>
+                <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="hidden">
+              </div>
+
+              <!-- User Name and Profile Info -->
+              <h2 class="text-xl font-bold text-slate-800 dark:text-white line-clamp-1 mt-2">{{ usuarioLogado?.nome }}</h2>
+              <span class="inline-flex items-center px-3 py-1 mt-2.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-red-50 dark:bg-red-500/10 text-red-650 dark:text-red-400 border border-red-200/40 dark:border-red-500/20">
+                {{ usuarioLogado?.perfil }}
+              </span>
+              <p class="text-xs text-slate-450 dark:text-slate-500 mt-4 break-all max-w-full px-2">
+                ID: {{ usuarioLogado?.id || 'N/D' }}
+              </p>
+            </div>
           </div>
 
-          <!-- User Name and Profile Info -->
-          <h2 class="text-xl font-bold text-slate-800 dark:text-white line-clamp-1 mt-2">{{ usuarioLogado?.nome }}</h2>
-          <span class="inline-flex items-center px-3 py-1 mt-2.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-red-50 dark:bg-red-500/10 text-red-650 dark:text-red-400 border border-red-200/40 dark:border-red-500/20">
-            {{ usuarioLogado?.perfil }}
-          </span>
-          <p class="text-xs text-slate-450 dark:text-slate-500 mt-4 break-all max-w-full px-2">
-            ID: {{ usuarioLogado?.id || 'N/D' }}
-          </p>
+          <!-- Right Column: Settings Sections -->
+          <div class="md:col-span-2 flex flex-col gap-6">
+            
+            <!-- Form Container -->
+            <form (ngSubmit)="salvarPerfil()" #settingsForm="ngForm" class="flex flex-col gap-6">
+              
+              <!-- Appearance & Settings Section -->
+              <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/60 dark:border-slate-700 shadow-md shadow-slate-100/50 dark:shadow-none">
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-5 flex items-center gap-2">
+                  <span class="text-xl">🎨</span> Aparência
+                </h3>
+                
+                <div class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-750 transition-colors duration-300">
+                  <div class="flex flex-col gap-1 pr-4">
+                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Modo Escuro</span>
+                    <span class="text-xs text-slate-450 dark:text-slate-400">Ativa tons escuros e economiza bateria em telas OLED</span>
+                  </div>
+                  
+                  <!-- Premium Custom Toggle -->
+                  <label class="relative inline-flex items-center cursor-pointer select-none">
+                    <input type="checkbox" [(ngModel)]="isDarkMode" name="isDarkMode" (change)="toggleTheme()" class="sr-only peer">
+                    <div class="w-14 h-8 bg-slate-250 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-red-650 flex items-center justify-between px-2 text-[10px] select-none transition-colors duration-300 shadow-inner">
+                      <!-- Moon Icon -->
+                      <span class="text-red-200 opacity-0 peer-checked:opacity-100 transition-opacity duration-300 select-none">🌙</span>
+                      <!-- Sun Icon -->
+                      <span class="text-amber-500 opacity-100 peer-checked:opacity-0 transition-opacity duration-300 select-none">☀️</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Personal Data & Security Section -->
+              <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/60 dark:border-slate-700 shadow-md shadow-slate-100/50 dark:shadow-none flex flex-col gap-5">
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                  <span class="text-xl">👤</span> Informações Pessoais
+                </h3>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <!-- Name Input -->
+                  <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nome Completo</label>
+                    <input type="text" name="nome" [(ngModel)]="formData.nome" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-705 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all outline-none text-sm placeholder-slate-400">
+                  </div>
+
+                  <!-- Email Input (Disabled/Readonly) -->
+                  <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">E-mail</label>
+                    <input type="email" name="email" [(ngModel)]="formData.email" [readonly]="true" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-705 bg-slate-100 dark:bg-slate-900/60 text-slate-450 dark:text-slate-500 cursor-not-allowed transition-all outline-none text-sm select-none" title="O email não pode ser editado.">
+                  </div>
+                </div>
+
+                <!-- Password Section -->
+                <div class="border-t border-slate-100 dark:border-slate-750 pt-5 mt-2 flex flex-col gap-4">
+                  <div class="flex flex-col gap-0.5">
+                    <h4 class="text-sm font-bold text-slate-700 dark:text-slate-250">Alteração de Senha</h4>
+                    <p class="text-xs text-slate-450 dark:text-slate-400">Deixe os campos de nova senha vazios se não quiser alterá-la.</p>
+                  </div>
+
+                  <!-- Current Password Input -->
+                  <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Senha Atual</label>
+                    <input type="password" name="senhaAntiga" [(ngModel)]="formData.senhaAntiga" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-705 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all outline-none text-sm placeholder-slate-400" placeholder="Digite a senha atual se for mudar de senha">
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- New Password Input -->
+                    <div class="flex flex-col gap-1.5">
+                      <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nova Senha</label>
+                      <input type="password" name="novaSenha" [(ngModel)]="formData.novaSenha" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-705 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all outline-none text-sm placeholder-slate-400" placeholder="Nova senha">
+                    </div>
+
+                    <!-- Confirm New Password Input -->
+                    <div class="flex flex-col gap-1.5">
+                      <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Confirmar Nova Senha</label>
+                      <input type="password" name="confirmarSenha" [(ngModel)]="formData.confirmarSenha" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-705 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all outline-none text-sm placeholder-slate-400" placeholder="Confirme a nova senha">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Custom Toast / Feedback Messages -->
+              <div *ngIf="message" class="p-4 rounded-2xl flex items-center gap-3 animate-fade-in border transition-all" [class]="isError ? 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200/50 dark:border-red-500/20' : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-500/20'">
+                <span class="text-lg">{{ isError ? '⚠️' : '✅' }}</span>
+                <span class="text-sm font-semibold">{{ message }}</span>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex items-center justify-end gap-3 mt-2">
+                <button type="button" (click)="voltar()" class="px-6 py-3.5 rounded-2xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-all font-bold text-sm">
+                  Cancelar
+                </button>
+                <button type="submit" [disabled]="!settingsForm.form.valid" class="px-7 py-3.5 bg-gradient-to-r from-red-600 to-red-550 hover:from-red-550 hover:to-red-700 text-white font-bold text-sm rounded-2xl shadow-lg shadow-red-500/15 dark:shadow-none hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 transition-all duration-200 disabled:opacity-45 disabled:cursor-not-allowed disabled:transform-none">
+                  💾 Salvar Alterações
+                </button>
+              </div>
+
+            </form>
+          </div>
+
         </div>
       </div>
-
-      <!-- Right Column: Settings Sections -->
-      <div class="md:col-span-2 flex flex-col gap-6">
-        
-        <!-- Form Container -->
-        <form (ngSubmit)="salvarPerfil()" #settingsForm="ngForm" class="flex flex-col gap-6">
-          
-          <!-- Appearance & Settings Section -->
-          <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/60 dark:border-slate-700 shadow-md shadow-slate-100/50 dark:shadow-none">
-            <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-5 flex items-center gap-2">
-              <span class="text-xl">🎨</span> Aparência
-            </h3>
-            
-            <div class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-750 transition-colors duration-300">
-              <div class="flex flex-col gap-1 pr-4">
-                <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Modo Escuro</span>
-                <span class="text-xs text-slate-450 dark:text-slate-400">Ativa tons escuros e economiza bateria em telas OLED</span>
-              </div>
-              
-              <!-- Premium Custom Toggle -->
-              <label class="relative inline-flex items-center cursor-pointer select-none">
-                <input type="checkbox" [(ngModel)]="isDarkMode" name="isDarkMode" (change)="toggleTheme()" class="sr-only peer">
-                <div class="w-14 h-8 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-red-600 flex items-center justify-between px-2 text-[10px] select-none transition-colors duration-300 shadow-inner">
-                  <!-- Moon Icon -->
-                  <span class="text-red-200 opacity-0 peer-checked:opacity-100 transition-opacity duration-300 select-none">🌙</span>
-                  <!-- Sun Icon -->
-                  <span class="text-amber-500 opacity-100 peer-checked:opacity-0 transition-opacity duration-300 select-none">☀️</span>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <!-- Personal Data & Security Section -->
-          <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/60 dark:border-slate-700 shadow-md shadow-slate-100/50 dark:shadow-none flex flex-col gap-5">
-            <h3 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-              <span class="text-xl">👤</span> Informações Pessoais
-            </h3>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <!-- Name Input -->
-              <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nome Completo</label>
-                <input type="text" name="nome" [(ngModel)]="formData.nome" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-705 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all outline-none text-sm placeholder-slate-400">
-              </div>
-
-              <!-- Email Input (Disabled/Readonly) -->
-              <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">E-mail</label>
-                <input type="email" name="email" [(ngModel)]="formData.email" [readonly]="true" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-705 bg-slate-100 dark:bg-slate-900/60 text-slate-450 dark:text-slate-500 cursor-not-allowed transition-all outline-none text-sm select-none" title="O email não pode ser editado.">
-              </div>
-            </div>
-
-            <!-- Password Section -->
-            <div class="border-t border-slate-100 dark:border-slate-750 pt-5 mt-2 flex flex-col gap-4">
-              <div class="flex flex-col gap-0.5">
-                <h4 class="text-sm font-bold text-slate-700 dark:text-slate-250">Alteração de Senha</h4>
-                <p class="text-xs text-slate-450 dark:text-slate-400">Deixe os campos de nova senha vazios se não quiser alterá-la.</p>
-              </div>
-
-              <!-- Current Password Input -->
-              <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Senha Atual</label>
-                <input type="password" name="senhaAntiga" [(ngModel)]="formData.senhaAntiga" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-705 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all outline-none text-sm placeholder-slate-400" placeholder="Digite a senha atual se for mudar de senha">
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <!-- New Password Input -->
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nova Senha</label>
-                  <input type="password" name="novaSenha" [(ngModel)]="formData.novaSenha" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-705 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all outline-none text-sm placeholder-slate-400" placeholder="Nova senha">
-                </div>
-
-                <!-- Confirm New Password Input -->
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Confirmar Nova Senha</label>
-                  <input type="password" name="confirmarSenha" [(ngModel)]="formData.confirmarSenha" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-705 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all outline-none text-sm placeholder-slate-400" placeholder="Confirme a nova senha">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Custom Toast / Feedback Messages -->
-          <div *ngIf="message" class="p-4 rounded-2xl flex items-center gap-3 animate-fade-in border transition-all" [class]="isError ? 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200/50 dark:border-red-500/20' : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-500/20'">
-            <span class="text-lg">{{ isError ? '⚠️' : '✅' }}</span>
-            <span class="text-sm font-semibold">{{ message }}</span>
-          </div>
-
-          <!-- Actions -->
-          <div class="flex items-center justify-end gap-3 mt-2">
-            <button type="button" (click)="voltar()" class="px-6 py-3.5 rounded-2xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-all font-bold text-sm">
-              Cancelar
-            </button>
-            <button type="submit" [disabled]="!settingsForm.form.valid" class="px-7 py-3.5 bg-gradient-to-r from-red-600 to-red-550 hover:from-red-550 hover:to-red-700 text-white font-bold text-sm rounded-2xl shadow-lg shadow-red-500/15 dark:shadow-none hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 transition-all duration-200 disabled:opacity-45 disabled:cursor-not-allowed disabled:transform-none">
-              💾 Salvar Alterações
-            </button>
-          </div>
-
-        </form>
-      </div>
-
     </div>
-  </div>
+  </main>
 </div>
