@@ -27,14 +27,10 @@
           <!-- Avatar Uploader -->
           <div class="relative z-10 mt-8 mb-4">
             <div class="w-28 h-28 rounded-full border-4 border-white dark:border-slate-800 shadow-xl overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center relative cursor-pointer group/avatar" (click)="fileInput.click()">
-              <!-- Real user photo from static folder -->
-              <img *ngIf="!previewUrl && usuarioLogado?.foto" [src]="usuarioLogado?.foto | urlAnexo:'avatar'" alt="Foto de perfil" class="w-full h-full object-cover">
+              <!-- Real user photo from static folder with /uploads/foto.jpg fallback as mock -->
+              <img *ngIf="!previewUrl" [src]="(usuarioLogado?.foto || '/uploads/foto.jpg') | urlAnexo:'avatar'" alt="Foto de perfil" class="w-full h-full object-cover">
               <!-- Selected preview photo -->
               <img *ngIf="previewUrl" [src]="previewUrl" alt="Prévia" class="w-full h-full object-cover">
-              <!-- Initial fallback if no photo -->
-              <span *ngIf="!previewUrl && !usuarioLogado?.foto" class="text-3xl font-bold text-slate-450 dark:text-slate-350 select-none">
-                {{ usuarioLogado?.nome?.charAt(0)?.toUpperCase() }}
-              </span>
               
               <!-- Hover overlay with Camera Icon -->
               <div class="absolute inset-0 bg-black/50 opacity-0 group-hover/avatar:opacity-100 flex flex-col items-center justify-center text-white text-xs font-semibold transition-opacity duration-300 gap-1">
