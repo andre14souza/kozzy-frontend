@@ -199,4 +199,30 @@ export class AuthService {
       }
     }
   }
+
+  atualizarPerfil(formData: FormData): Observable<any> {
+    return this.http.put<any>(`${this.API_USUARIOS}/perfil`, formData, { withCredentials: true }).pipe(
+      tap(res => {
+        if (res && res.usuario) {
+          this.atualizarDadosUsuario({
+            nome: res.usuario.nomeCompleto,
+            email: res.usuario.email,
+            foto: res.usuario.fotoPerfil
+          });
+        }
+      })
+    );
+  }
+
+  uploadFotoPerfil(formData: FormData): Observable<any> {
+    return this.http.put<any>(`${this.API_USUARIOS}/perfil`, formData, { withCredentials: true }).pipe(
+      tap(res => {
+        if (res && res.usuario) {
+          this.atualizarDadosUsuario({
+            foto: res.usuario.fotoPerfil
+          });
+        }
+      })
+    );
+  }
 }

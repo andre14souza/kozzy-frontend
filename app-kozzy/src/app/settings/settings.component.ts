@@ -116,10 +116,29 @@ export class SettingsComponent implements OnInit {
   }
 
   onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedFile = file;
-      this.previewUrl = URL.createObjectURL(file);
+    const arquivoSelecionado = event.target.files[0];
+    if (arquivoSelecionado) {
+      this.selectedFile = arquivoSelecionado;
+      this.previewUrl = URL.createObjectURL(arquivoSelecionado);
+
+      const formData = new FormData();
+      formData.append('foto', arquivoSelecionado);
+
+      this.authService.uploadFotoPerfil(formData).subscribe({
+        next: (res: any) => {
+          this.mostrarMensagem('Foto de perfil atualizada com sucesso!', false);
+          if (res && res.usuario) {
+            const fotoUrl = res.usuario.fotoPerfil;
+            if (this.usuarioLogado) {
+              this.usuarioLogado.foto = fotoUrl;
+            }
+            this.previewUrl = null;
+          }
+        },
+        error: (err) => {
+          this.mostrarMensagem(err.error?.mensagem || 'Erro ao enviar foto de perfil.', true);
+        }
+      });
     }
   }
 
@@ -144,11 +163,7 @@ export class SettingsComponent implements OnInit {
       formData.append('senhaAntiga', this.formData.senhaAntiga);
     }
 
-    if (this.selectedFile) {
-      formData.append('foto', this.selectedFile);
-    }
-
-    this.http.put(`${environment.apiUrl}/usuarios/perfil`, formData, { withCredentials: true }).subscribe({
+    this.authService.atualizarPerfil(formData).subscribe({
       next: (res: any) => {
         this.mostrarMensagem('Perfil atualizado com sucesso!', false);
         this.formData.senhaAntiga = '';
@@ -156,15 +171,6 @@ export class SettingsComponent implements OnInit {
         this.formData.confirmarSenha = '';
         this.selectedFile = null;
         this.previewUrl = null;
-        
-        // Sincroniza a sessão de forma reativa globalmente
-        if (res.usuario) {
-          this.authService.atualizarDadosUsuario({
-            nome: res.usuario.nomeCompleto,
-            email: res.usuario.email,
-            foto: res.usuario.fotoPerfil
-          });
-        }
       },
       error: (err) => {
         this.mostrarMensagem(err.error?.mensagem || 'Erro ao atualizar perfil.', true);
