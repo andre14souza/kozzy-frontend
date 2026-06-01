@@ -2,14 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { AuthService, UsuarioLogado } from '../auth.service';
 import { environment } from '../../environments/environment';
 import { ThemeService } from '../theme.service';
+import { UrlAnexoPipe } from '../url-anexo.pipe';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UrlAnexoPipe],
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.css']
 })
@@ -27,25 +29,45 @@ export class SettingsComponent implements OnInit {
   message = '';
   isError = false;
   isDarkMode = false;
+  
+  selectedFile: File | null = null;
+  previewUrl: string | null = null;
 
   constructor(
     private authService: AuthService, 
     private http: HttpClient,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    private router: Router
   ) {}
 
   ngOnInit() {
-    this.usuarioLogado = this.authService.getUsuarioLogado();
-    if (this.usuarioLogado) {
-      this.formData.nome = this.usuarioLogado.nome;
-      this.formData.email = this.usuarioLogado.email;
-    }
+    this.authService.usuarioLogado$.subscribe(user => {
+      this.usuarioLogado = user;
+      if (user) {
+        this.formData.nome = user.nome;
+        this.formData.email = user.email;
+      }
+    });
     this.isDarkMode = this.themeService.isDarkTheme();
   }
 
   toggleTheme() {
     this.themeService.toggleTheme();
     this.isDarkMode = this.themeService.isDarkTheme();
+    
+    // Envia a preferência de tema ao backend silenciosamente
+    const payload = {
+      preferenciaTema: this.isDarkMode ? 'dark' : 'light'
+    };
+    this.http.put(`${environment.apiUrl}/usuarios/perfil`, payload, { withCredentials: true }).subscribe();
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+      this.previewUrl = URL.createObjectURL(file);
+    }
   }
 
   salvarPerfil() {
@@ -54,33 +76,55 @@ export class SettingsComponent implements OnInit {
       return;
     }
 
-    const payload = {
-      nome: this.formData.nome,
-      email: this.formData.email,
-      senhaAntiga: this.formData.senhaAntiga,
-      novaSenha: this.formData.novaSenha,
-      preferenciaTema: this.isDarkMode ? 'dark' : 'light'
-    };
+    if (this.formData.novaSenha && !this.formData.senhaAntiga) {
+      this.mostrarMensagem('Digite a senha atual para alterá-la.', true);
+      return;
+    }
 
-    // Chamada pro backend usando API de perfil
-    this.http.put(`${environment.apiUrl}/usuarios/perfil`, payload, { withCredentials: true }).subscribe({
+    const formData = new FormData();
+    formData.append('nome', this.formData.nome);
+    formData.append('email', this.formData.email);
+    formData.append('preferenciaTema', this.isDarkMode ? 'dark' : 'light');
+
+    if (this.formData.novaSenha) {
+      formData.append('senha', this.formData.novaSenha);
+      formData.append('senhaAntiga', this.formData.senhaAntiga);
+    }
+
+    if (this.selectedFile) {
+      formData.append('foto', this.selectedFile);
+    }
+
+    this.http.put(`${environment.apiUrl}/usuarios/perfil`, formData, { withCredentials: true }).subscribe({
       next: (res: any) => {
         this.mostrarMensagem('Perfil atualizado com sucesso!', false);
         this.formData.senhaAntiga = '';
         this.formData.novaSenha = '';
         this.formData.confirmarSenha = '';
+        this.selectedFile = null;
+        this.previewUrl = null;
         
-        // Atualiza localStorage se necessário
-        if (this.usuarioLogado) {
-           this.usuarioLogado.nome = this.formData.nome;
-           this.usuarioLogado.email = this.formData.email;
-           localStorage.setItem('usuarioLogado', JSON.stringify(this.usuarioLogado));
+        // Atualiza a sessão de forma reativa globalmente
+        if (res.usuario) {
+          this.authService.atualizarDadosUsuario({
+            nome: res.usuario.nomeCompleto,
+            email: res.usuario.email,
+            foto: res.usuario.fotoPerfil
+          });
         }
       },
       error: (err) => {
         this.mostrarMensagem(err.error?.mensagem || 'Erro ao atualizar perfil.', true);
       }
     });
+  }
+
+  voltar() {
+    if (this.authService.isSupervisor()) {
+      this.router.navigate(['/supervisor']);
+    } else {
+      this.router.navigate(['/central']);
+    }
   }
 
   mostrarMensagem(msg: string, isError: boolean) {

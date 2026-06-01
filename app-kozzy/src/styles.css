@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --bg-main: #f8fafc;
   --bg-sidebar: #ffffff;
@@ -19,7 +23,7 @@
   --badge-fechado-text: #10b981;
 }
 
-.dark-theme {
+.dark {
   --bg-main: #0f172a;
   --bg-sidebar: #1e293b;
   --bg-card: #1e293b;
@@ -37,6 +41,10 @@
   --badge-andamento-text: #fcd34d;
   --badge-fechado-bg: rgba(16, 185, 129, 0.15);
   --badge-fechado-text: #6ee7b7;
+}
+
+body {
+  @apply bg-white text-gray-900 dark:bg-gray-900 dark:text-white transition-colors duration-300;
 }
 
 html, body {

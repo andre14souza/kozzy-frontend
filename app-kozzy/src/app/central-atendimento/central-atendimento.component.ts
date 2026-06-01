@@ -85,7 +85,9 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    this.usuarioLogado = this.authService.getUsuarioLogado();
+    this.authService.usuarioLogado$.subscribe(user => {
+      this.usuarioLogado = user;
+    });
     this.isDarkTheme = this.themeService.isDarkTheme();
     this.carregarDados();
     this.checkScreenSize();

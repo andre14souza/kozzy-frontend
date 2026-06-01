@@ -49,7 +49,8 @@ export class AuthService {
           nome: usuarioBack.nomeCompleto,
           perfil: usuarioBack.perfilAcesso,
           token: response.token,
-          areas: usuarioBack.areas || []
+          areas: usuarioBack.areas || [],
+          foto: usuarioBack.fotoPerfil || usuarioBack.foto
         };
 
         this.definirSessao(usuarioFormatado, rememberMe);
@@ -180,5 +181,22 @@ export class AuthService {
     const usuario = this.getUsuarioLogado();
     if (!usuario) return false;
     return usuario.perfil === 'supervisor' || usuario.perfil === 'atendente';
+  }
+
+  atualizarDadosUsuario(dados: Partial<UsuarioLogado>): void {
+    const usuarioAtual = this.getUsuarioLogado();
+    if (!usuarioAtual) return;
+    
+    const usuarioNovo = { ...usuarioAtual, ...dados };
+    this.usuarioLogadoSubject.next(usuarioNovo);
+    
+    if (isPlatformBrowser(this.platformId)) {
+      if (localStorage.getItem('usuario')) {
+        localStorage.setItem('usuario', JSON.stringify(usuarioNovo));
+      }
+      if (sessionStorage.getItem('usuario')) {
+        sessionStorage.setItem('usuario', JSON.stringify(usuarioNovo));
+      }
+    }
   }
 }

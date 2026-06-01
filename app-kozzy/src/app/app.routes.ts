@@ -32,6 +32,11 @@ export const routes: Routes = [
     component: SettingsComponent,
     canActivate: [AtendenteGuard]
   },
+  {
+    path: 'settings',
+    component: SettingsComponent,
+    canActivate: [AtendenteGuard]
+  },
   
   { path: '**', redirectTo: '/login' },
 ];

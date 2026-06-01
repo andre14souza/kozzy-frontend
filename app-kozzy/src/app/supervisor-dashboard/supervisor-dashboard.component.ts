@@ -82,7 +82,9 @@ export class SupervisorDashboardComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    this.usuarioLogado = this.authService.getUsuarioLogado();
+    this.authService.usuarioLogado$.subscribe(user => {
+      this.usuarioLogado = user;
+    });
     this.isDarkTheme = this.themeService.isDarkTheme();
     this.initCharts();
     this.carregarDados(); // Carrega os chamados ao iniciar
