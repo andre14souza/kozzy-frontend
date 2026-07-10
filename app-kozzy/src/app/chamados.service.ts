@@ -255,8 +255,13 @@ export class ChamadosService {
 
   // 3. PUT (Atualização)
   atualizarChamado(chamado: Chamado): Observable<any> {
-    const idAtendente = (chamado.atendente && typeof chamado.atendente === 'object')
-      ? chamado.atendente._id : chamado.atendente;
+    // Usa atendenteId (ObjectId limpo) com fallback para extração do objeto atendente.
+    // chamado.atendente pode ser uma string de nome (ex: "Nathalia Adorno") após mapItem,
+    // então nunca usar chamado.atendente diretamente como ID.
+    const idAtendente = chamado.atendenteId ||
+      (chamado.atendente && typeof chamado.atendente === 'object'
+        ? (chamado.atendente._id || chamado.atendente.id)
+        : null);
     const payload = {
       tipoCliente: chamado.cliente,
       nomeCliente: chamado.nomeCliente,
