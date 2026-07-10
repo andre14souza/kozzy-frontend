@@ -148,8 +148,7 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
 
   populateFormForEdit() {
     if (!this.chamadoParaEditar) return;
-    const a = this.chamadoParaEditar.atendente;
-    const idAtendente = (a && typeof a === 'object') ? (a.id || a._id) : a;
+    const idAtendente = this.chamadoParaEditar.atendenteId;
 
     this.ticketForm.patchValue({
       origem: this.chamadoParaEditar.origem,
@@ -204,9 +203,12 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
 
     let atendenteFinal;
     if (this.isEditMode) {
-      const opt = this.atendenteOptions.find(o => o.value === val.atendente);
-      // ✅ CORREÇÃO: Se não encontrou na lista (ex: é supervisor), mantém o objeto original
-      atendenteFinal = opt ? { _id: opt.value, nomeCompleto: opt.label } : this.chamadoParaEditar?.atendente;
+      if (!val.atendente || val.atendente === '' || val.atendente === 'Não Atribuído') {
+        atendenteFinal = null;
+      } else {
+        const opt = this.atendenteOptions.find(o => o.value === val.atendente);
+        atendenteFinal = opt ? { _id: opt.value, nomeCompleto: opt.label } : { _id: val.atendente };
+      }
     } else {
       atendenteFinal = { _id: user?.id, nomeCompleto: user?.nome };
     }
@@ -214,6 +216,8 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
     const dados = {
       ...val,
       atendente: atendenteFinal,
+      atendenteId: val.atendente || null,
+      categoria: val.assunto,
       ...(this.selectedFile && !this.isEditMode ? { arquivo: this.selectedFile } : {})
     };
 
