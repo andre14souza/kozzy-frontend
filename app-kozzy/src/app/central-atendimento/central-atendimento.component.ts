@@ -9,6 +9,8 @@ import { ChamadosService, Chamado, NovoChamado, RelatorioFilters } from '../cham
 import { AuthService, UsuarioLogado } from '../auth.service';
 import { LoadingService } from '../loading.service';
 import { ThemeService } from '../theme.service';
+import { SocketService } from '../socket.service';
+import { NotificacaoService, Notificacao } from '../notificacao.service';
 import { environment } from '../../environments/environment';
 
 import { CreateTicketModalComponent } from '../create-ticket-modal/create-ticket-modal.component';
@@ -77,11 +79,19 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   listaAtendentes: { id: string; nome: string }[] = [];
   toast: ToastMessage = { message: '', type: 'info', visible: false };
 
+  // Notificações
+  notificacoes: Notificacao[] = [];
+  showNotificacoesDropdown: boolean = false;
+
+  private socketSubscriptions: Subscription[] = [];
+
   constructor(
     public chamadosService: ChamadosService,
     public authService: AuthService,
     private loadingService: LoadingService,
-    public themeService: ThemeService
+    public themeService: ThemeService,
+    public socketService: SocketService,
+    public notificacaoService: NotificacaoService
   ) { }
 
   ngOnInit(): void {
@@ -104,11 +114,89 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
       { label: 'Design System', icon: '🎨', route: '/design-system' }
     ];
     this.carregarAtendentes();
+    this.iniciarSocket();
   }
 
   ngOnDestroy(): void {
     if (this.chamadosSubscription) this.chamadosSubscription.unsubscribe();
+    this.socketSubscriptions.forEach(s => s.unsubscribe());
+    this.socketService.disconnect();
     window.removeEventListener('resize', this.checkScreenSize.bind(this));
+  }
+
+  iniciarSocket(): void {
+    this.socketService.connect();
+
+    // Entra na sala pessoal do usuário para receber notificações
+    const userId = this.usuarioLogado?.id || this.authService.getUsuarioLogado()?.id;
+    if (userId) this.socketService.joinUserRoom(userId);
+
+    // Aguarda o login antes de entrar na sala
+    const userSub = this.authService.usuarioLogado$.subscribe(user => {
+      if (user?.id) this.socketService.joinUserRoom(user.id);
+    });
+    this.socketSubscriptions.push(userSub);
+
+    // Escuta novos chamados — atualiza a lista automaticamente
+    const novoSub = this.socketService.on<any>('chamado:novo').subscribe(dados => {
+      const novoChamado = this.chamadosService['mapItem'](dados);
+      const existente = this.chamados.findIndex(c => c.id === novoChamado.id);
+      if (existente === -1) {
+        this.chamados = [novoChamado, ...this.chamados];
+        this.chamadosService['chamadosSubject'].next(this.chamados);
+        this.updateStatusCounts();
+        this.updateMenuBadge();
+        this.updateKanbanColumns();
+      }
+    });
+    this.socketSubscriptions.push(novoSub);
+
+    // Escuta atualizações de chamados
+    const updateSub = this.socketService.on<any>('chamado:atualizado').subscribe(dados => {
+      const chamadoAtualizado = this.chamadosService['mapItem'](dados);
+      const idx = this.chamados.findIndex(c => c.id === chamadoAtualizado.id);
+      if (idx !== -1) {
+        this.chamados[idx] = chamadoAtualizado;
+        this.chamados = [...this.chamados];
+        this.chamadosService['chamadosSubject'].next(this.chamados);
+        // Atualiza o detalhe se estiver aberto
+        if (this.showDetailScreen && this.chamadoDetalhe?.id === chamadoAtualizado.id) {
+          this.chamadoDetalhe = chamadoAtualizado;
+        }
+        this.updateStatusCounts();
+        this.updateMenuBadge();
+        this.updateKanbanColumns();
+      } else {
+        // Chamado não está na lista ainda (possivel race) — recarrega
+        this.carregarDados();
+      }
+    });
+    this.socketSubscriptions.push(updateSub);
+
+    // Escuta notificações pessoais
+    const notifSub = this.socketService.on<any>('notificacao:nova').subscribe(notif => {
+      this.notificacaoService.adicionarNotificacao(notif);
+      this.notificacoes = this.notificacaoService['notificacoesSubject'].value;
+      this.showToast(notif.mensagem, 'info');
+    });
+    this.socketSubscriptions.push(notifSub);
+
+    // Sincroniza observable de notificações
+    const listaSub = this.notificacaoService.notificacoes$.subscribe(lista => {
+      this.notificacoes = lista;
+    });
+    this.socketSubscriptions.push(listaSub);
+  }
+
+  toggleNotificacoes(): void {
+    this.showNotificacoesDropdown = !this.showNotificacoesDropdown;
+    if (this.showNotificacoesDropdown) {
+      this.notificacaoService.marcarTodasComoLidas();
+    }
+  }
+
+  fecharNotificacoes(): void {
+    this.showNotificacoesDropdown = false;
   }
 
   carregarAtendentes(): void {

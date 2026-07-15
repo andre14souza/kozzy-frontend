@@ -110,20 +110,24 @@
         </div>
 
         <div class="form-group" *ngIf="!isEditMode">
-          <label class="form-label">Anexo <span class="field-optional">(opcional)</span></label>
-          <div class="file-upload-wrapper" style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
-            <input type="file" id="anexo" (change)="onFileSelected($event)" accept="image/*,.pdf" style="display: none"
-              #fileInput>
+          <label class="form-label">Anexos <span class="field-optional">(opcional — múltiplos arquivos)</span></label>
+          <div class="file-upload-wrapper" style="margin-top: 5px;">
+            <input type="file" id="anexo" (change)="onFileSelected($event)" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" style="display: none"
+              #fileInput multiple>
             <button type="button" class="btn-upload"
               style="background:#e2e8f0; border:none; padding:8px 12px; border-radius:6px; cursor:pointer;"
               (click)="fileInput.click()">
-              📎 Escolher Arquivo
+              📎 Escolher Arquivos
             </button>
-            <span class="file-name" *ngIf="selectedFile" style="font-size:13px; color: var(--text-secondary);">{{ selectedFile.name
-              }}</span>
-            <button type="button" class="btn-remove-file" *ngIf="selectedFile" (click)="removeFile()"
-              style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:12px;"
-              title="Remover anexo">✖</button>
+            <!-- Lista de arquivos selecionados -->
+            <div *ngIf="selectedFiles.length > 0" style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">
+              <div *ngFor="let f of selectedFiles; let i = index"
+                style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 4px; padding: 4px 8px;">
+                <span style="font-size: 12px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 260px;">{{ f.name }}</span>
+                <button type="button" (click)="removeFile(i)"
+                  style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:12px; flex-shrink:0; margin-left:6px;" title="Remover">✖</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -139,7 +143,11 @@
           <p><strong>Área:</strong> {{ getPreviewData().area }}</p>
           <p><strong>Assunto:</strong> {{ getPreviewData().assunto }}</p>
           <p><strong>Descrição:</strong> {{ getPreviewData().descricao }}</p>
-          <p *ngIf="selectedFile && !isEditMode"><strong>Anexo:</strong> 📎 {{ selectedFile.name }}</p>
+          <p *ngIf="selectedFiles.length > 0 && !isEditMode"><strong>Anexos:</strong>
+            <span *ngFor="let f of selectedFiles; let i = index">
+              📎 {{ f.name }}<span *ngIf="i < selectedFiles.length - 1">, </span>
+            </span>
+          </p>
         </div>
       </div>
     </div>

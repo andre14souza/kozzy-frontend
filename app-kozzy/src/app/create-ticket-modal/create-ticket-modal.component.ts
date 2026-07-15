@@ -30,7 +30,7 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
   isEditMode = false;
   isLoading = false;
   showPreview = false;
-  selectedFile: File | null = null;
+  selectedFiles: File[] = [];  // NOVO: suporte a múltiplos arquivos
 
   origemOptions: SelectOption[] = [
     { value: 'email', label: '📧 E-mail' },
@@ -90,7 +90,7 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
     if (changes['isVisible'] && this.isVisible) {
       this.isEditMode = !!this.chamadoParaEditar;
       this.showPreview = false;
-      this.selectedFile = null;
+      this.selectedFiles = [];
       this.carregarAtendentes();
       this.initializeForm();
       if (this.isEditMode) {
@@ -183,12 +183,16 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
+      this.selectedFiles = Array.from(input.files);
     }
   }
 
-  removeFile() {
-    this.selectedFile = null;
+  removeFile(index: number = -1) {
+    if (index >= 0) {
+      this.selectedFiles.splice(index, 1);
+    } else {
+      this.selectedFiles = [];
+    }
   }
 
   salvarChamado() {
@@ -218,7 +222,7 @@ export class CreateTicketModalComponent implements OnInit, OnChanges {
       atendente: atendenteFinal,
       atendenteId: val.atendente || null,
       categoria: val.assunto,
-      ...(this.selectedFile && !this.isEditMode ? { arquivo: this.selectedFile } : {})
+      ...(this.selectedFiles.length > 0 && !this.isEditMode ? { arquivos: this.selectedFiles } : {})
     };
 
     if (this.isEditMode) {

@@ -42,7 +42,8 @@ export interface NovoChamado {
   hora: string;
   dataHoraCriacao: string;
   origem?: 'whatsapp' | 'email';
-  arquivo?: File;
+  arquivo?: File;      // legado
+  arquivos?: File[];   // NOVO: múltiplos arquivos
   chamadoPai?: string;
 }
 
@@ -68,11 +69,19 @@ export interface Chamado {
   dataLimite?: string;
   slaStatus?: string;
   slaClass?: string;
+  // Campo legado (retrocompatibilidade)
   anexo?: {
     nomeOriginal: string;
     url: string;
     caminho?: string;
   };
+  // NOVO: múltiplos anexos
+  anexos?: {
+    nomeOriginal: string;
+    url: string;
+    caminho?: string;
+    mimetype?: string;
+  }[];
   chamadoPai?: string | any;
   subChamados?: Chamado[] | any[];
 }
@@ -141,6 +150,13 @@ export class ChamadosService {
               caminho: item.anexo.caminho
             }
       ) : undefined,
+      // Múltiplos anexos
+      anexos: Array.isArray(item.anexos) ? item.anexos.map((a: any) => ({
+        nomeOriginal: a.nomeOriginal || 'Arquivo',
+        url: this.getAnexoUrl(a.url || a.caminho),
+        caminho: a.caminho,
+        mimetype: a.mimetype
+      })) : [],
       chamadoPai: item.chamadoPai,
       subChamados: item.subChamados || []
     } as Chamado;
@@ -177,7 +193,13 @@ export class ChamadosService {
     const idAtendente = (chamado.atendente && typeof chamado.atendente === 'object')
       ? chamado.atendente._id : chamado.atendente;
 
-    if (chamado.arquivo) {
+    // Unifica arquivo (legado) e arquivos[] em um único array
+    const arquivos: File[] = [
+      ...(chamado.arquivos || []),
+      ...(chamado.arquivo ? [chamado.arquivo] : [])
+    ];
+
+    if (arquivos.length > 0) {
       const formData = new FormData();
       if (chamado.numeroProtocolo) formData.append('numeroProtocolo', chamado.numeroProtocolo);
       formData.append('tipoCliente', chamado.cliente);
@@ -191,7 +213,8 @@ export class ChamadosService {
       if (idAtendente) formData.append('atendente', idAtendente);
       formData.append('avanco', 'aberto');
       if (chamado.origem) formData.append('origem', chamado.origem);
-      formData.append('anexo', chamado.arquivo);
+      // Envia todos os arquivos com o campo 'anexos'
+      arquivos.forEach(f => formData.append('anexos', f));
       return this.http.post(this.API_URL, formData, { withCredentials: true });
     }
 
