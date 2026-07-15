@@ -150,8 +150,8 @@
 }
 
 .relatorio-table tbody tr.row-highlight {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border-left: 4px solid #f59e0b;
+  background: var(--row-highlight-bg);
+  border-left: 4px solid var(--row-highlight-border);
 }
 
 .relatorio-table td {
@@ -191,10 +191,10 @@
 .status-fechado .status-dot { background: var(--badge-fechado-text); }
 
 .priority-icon { font-size: 0.875rem; }
-.priority-urgent { background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%); color: #dc2626; border: 1px solid #f87171; }
-.priority-alta { background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%); color: #ea580c; border: 1px solid #fb923c; }
-.priority-media { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #d97706; border: 1px solid #fcd34d; }
-.priority-baixa { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); color: #059669; border: 1px solid #86efac; }
+.priority-urgent { background: var(--priority-urgente-bg); color: var(--priority-urgente-text); border: 1px solid var(--priority-urgente-border); }
+.priority-alta { background: var(--priority-alta-bg); color: var(--priority-alta-text); border: 1px solid var(--priority-alta-border); }
+.priority-media { background: var(--priority-media-bg); color: var(--priority-media-text); border: 1px solid var(--priority-media-border); }
+.priority-baixa { background: var(--priority-baixa-bg); color: var(--priority-baixa-text); border: 1px solid var(--priority-baixa-border); }
 
 /* Ações */
 .actions-cell { width: 100px; }
