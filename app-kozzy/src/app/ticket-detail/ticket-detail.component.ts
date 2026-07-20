@@ -166,10 +166,16 @@ export class TicketDetailComponent {
     return this.chamadosService.getAnexoUrl(caminho);
   }
 
-  isImageAttachment(caminho: string | undefined): boolean {
+  isImageAttachment(caminho: string | undefined, mimetype?: string): boolean {
     if (!caminho) return false;
+    // Verifica pelo mimetype (mais confiável)
+    if (mimetype && mimetype.startsWith('image/')) return true;
     const lower = caminho.toLowerCase();
-    return lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.gif') || lower.endsWith('.webp');
+    // Verifica pela extensão no final da URL
+    if (lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.gif') || lower.endsWith('.webp')) return true;
+    // URLs do Cloudinary não têm extensão — detecta pelo domínio + path de imagem
+    if (lower.includes('cloudinary.com') && lower.includes('/image/upload/')) return true;
+    return false;
   }
 
   getClienteIcon(tipoCliente: string): string {

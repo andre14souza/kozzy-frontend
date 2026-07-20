@@ -88,7 +88,7 @@
             <span class="attachment-icon">📁</span>
             <span class="attachment-name">{{ chamado.anexo.nomeOriginal }}</span>
           </a>
-          <div *ngIf="isImageAttachment(chamado.anexo.url || chamado.anexo.caminho)" style="margin-top: 12px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); max-width: 100%;">
+          <div *ngIf="isImageAttachment(chamado.anexo.url || chamado.anexo.caminho, chamado.anexo.mimetype)" style="margin-top: 12px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); max-width: 100%;">
             <img [src]="(chamado.anexo.url || chamado.anexo.caminho) | urlAnexo" alt="Anexo do Chamado" style="max-height: 280px; width: auto; max-width: 100%; display: block; object-fit: contain;">
           </div>
         </div>
@@ -104,7 +104,7 @@
                 <span class="attachment-icon">📁</span>
                 <span class="attachment-name">{{ a.nomeOriginal }}</span>
               </a>
-              <div *ngIf="isImageAttachment(a.url || a.caminho)" style="border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); max-width: 100%;">
+              <div *ngIf="isImageAttachment(a.url || a.caminho, a.mimetype)" style="border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); max-width: 100%;">
                 <img [src]="(a.url || a.caminho) | urlAnexo" [alt]="a.nomeOriginal" style="max-height: 200px; width: auto; max-width: 100%; display: block; object-fit: contain;">
               </div>
             </div>
@@ -138,7 +138,7 @@
               </a>
 
               <!-- Visualização de Imagem se o anexo do comentário for imagem -->
-              <div *ngIf="isImageAttachment(com.anexo.url || com.anexo.caminho)" style="margin-top: 8px; border-radius: 4px; overflow: hidden; border: 1px solid var(--border-color); max-width: 100%;">
+              <div *ngIf="isImageAttachment(com.anexo.url || com.anexo.caminho, com.anexo.mimetype)" style="margin-top: 8px; border-radius: 4px; overflow: hidden; border: 1px solid var(--border-color); max-width: 100%;">
                 <img [src]="(com.anexo.url || com.anexo.caminho) | urlAnexo" alt="Anexo do comentário" style="max-height: 150px; width: auto; max-width: 100%; display: block; object-fit: contain;">
               </div>
             </div>
