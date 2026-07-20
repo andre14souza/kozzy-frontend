@@ -74,6 +74,7 @@ export interface Chamado {
     nomeOriginal: string;
     url: string;
     caminho?: string;
+    mimetype?: string;
   };
   // NOVO: múltiplos anexos
   anexos?: {
@@ -147,7 +148,8 @@ export class ChamadosService {
           : {
               nomeOriginal: item.anexo.nomeOriginal || 'Arquivo Anexo',
               url: this.getAnexoUrl(item.anexo.url || item.anexo.caminho),
-              caminho: item.anexo.caminho
+              caminho: item.anexo.caminho,
+              mimetype: item.anexo.mimetype
             }
       ) : undefined,
       // Múltiplos anexos

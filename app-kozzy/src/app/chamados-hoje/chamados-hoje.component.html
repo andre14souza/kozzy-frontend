@@ -1,4 +1,4 @@
-<div class="app-container">
+﻿<div class="app-container">
   <div class="sidebar-overlay" *ngIf="isMobileMenuOpen" (click)="toggleMenu()"></div>
   <aside class="sidebar" [class.collapsed]="menuCollapsed" [class.mobile-open]="isMobileMenuOpen">
     <div class="logo-area" style="padding: 20px; display: flex; align-items: center; justify-content: space-between;">
@@ -37,7 +37,7 @@
       <div style="display: flex; align-items: center; gap: 12px;">
         <div class="user-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; overflow: hidden; flex-shrink: 0; border: 2px solid var(--border-color);">
           <img *ngIf="usuarioLogado.foto" [src]="usuarioLogado.foto | urlAnexo:'avatar'" alt="Foto de perfil" style="width: 100%; height: 100%; object-fit: cover;">
-          <span *ngIf="!usuarioLogado.foto">{{ usuarioLogado.nome?.charAt(0)?.toUpperCase() }}</span>
+          <span *ngIf="!usuarioLogado.foto">{{ usuarioLogado.nome.charAt(0).toUpperCase() }}</span>
         </div>
         <div class="user-info" *ngIf="!menuCollapsed" style="display: flex; flex-direction: column; line-height: 1.2;">
           <strong style="color: var(--text-primary); font-size: 14px;">{{ usuarioLogado.nome }}</strong>

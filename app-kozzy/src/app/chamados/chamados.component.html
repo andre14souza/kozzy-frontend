@@ -1,4 +1,4 @@
-<div class="app-container">
+﻿<div class="app-container">
   <aside class="sidebar" [class.collapsed]="menuCollapsed">
     
     <div class="logo-section">
@@ -58,7 +58,7 @@
     <div class="user-section">
       <div class="user-info" [class.hidden]="menuCollapsed" *ngIf="usuarioLogado">
         <div class="user-avatar">
-          <span>{{ usuarioLogado.nome?.charAt(0)?.toUpperCase() }}</span>
+          <span>{{ usuarioLogado.nome.charAt(0).toUpperCase() }}</span>
         </div>
         <div class="user-details">
           <p class="user-name">{{ usuarioLogado.nome }}</p>
