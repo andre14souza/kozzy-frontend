@@ -30,6 +30,13 @@ export class SettingsComponent implements OnInit {
   formData = {
     nome: '',
     email: '',
+    telefone: '',
+    cargo: '',
+    departamento: '',
+    biografia: '',
+    statusPresenca: 'online',
+    notificacoesEmail: true,
+    notificacoesSons: true,
     senhaAntiga: '',
     novaSenha: '',
     confirmarSenha: ''
@@ -57,8 +64,15 @@ export class SettingsComponent implements OnInit {
     this.authService.usuarioLogado$.subscribe(user => {
       this.usuarioLogado = user;
       if (user) {
-        this.formData.nome = user.nome;
-        this.formData.email = user.email;
+        this.formData.nome = user.nome || '';
+        this.formData.email = user.email || '';
+        this.formData.telefone = user.telefone || '';
+        this.formData.cargo = user.cargo || '';
+        this.formData.departamento = user.departamento || '';
+        this.formData.biografia = user.biografia || '';
+        this.formData.statusPresenca = user.statusPresenca || 'online';
+        this.formData.notificacoesEmail = user.notificacoesEmail ?? true;
+        this.formData.notificacoesSons = user.notificacoesSons ?? true;
       }
     });
     this.isDarkMode = this.themeService.isDarkTheme();
@@ -142,6 +156,24 @@ export class SettingsComponent implements OnInit {
     }
   }
 
+  removerFoto() {
+    if (confirm('Deseja remover sua foto de perfil?')) {
+      const formData = new FormData();
+      formData.append('fotoPerfil', '');
+      this.authService.atualizarPerfil(formData).subscribe({
+        next: () => {
+          if (this.usuarioLogado) {
+            this.usuarioLogado.foto = '';
+          }
+          this.previewUrl = null;
+          this.selectedFile = null;
+          this.mostrarMensagem('Foto de perfil removida.', false);
+        },
+        error: () => this.mostrarMensagem('Erro ao remover foto.', true)
+      });
+    }
+  }
+
   salvarPerfil() {
     if (this.formData.novaSenha && this.formData.novaSenha !== this.formData.confirmarSenha) {
       this.mostrarMensagem('As senhas não coincidem.', true);
@@ -156,11 +188,22 @@ export class SettingsComponent implements OnInit {
     const formData = new FormData();
     formData.append('nome', this.formData.nome);
     formData.append('email', this.formData.email);
+    formData.append('telefone', this.formData.telefone || '');
+    formData.append('cargo', this.formData.cargo || '');
+    formData.append('departamento', this.formData.departamento || '');
+    formData.append('biografia', this.formData.biografia || '');
+    formData.append('statusPresenca', this.formData.statusPresenca || 'online');
+    formData.append('notificacoesEmail', String(this.formData.notificacoesEmail));
+    formData.append('notificacoesSons', String(this.formData.notificacoesSons));
     formData.append('preferenciaTema', this.isDarkMode ? 'dark' : 'light');
 
     if (this.formData.novaSenha) {
       formData.append('senha', this.formData.novaSenha);
       formData.append('senhaAntiga', this.formData.senhaAntiga);
+    }
+
+    if (this.selectedFile) {
+      formData.append('foto', this.selectedFile);
     }
 
     this.authService.atualizarPerfil(formData).subscribe({

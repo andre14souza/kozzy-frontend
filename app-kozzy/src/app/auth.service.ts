@@ -14,6 +14,13 @@ export interface UsuarioLogado {
   token?: string;
   areas: string[];
   foto?: string;
+  telefone?: string;
+  cargo?: string;
+  departamento?: string;
+  biografia?: string;
+  notificacoesEmail?: boolean;
+  notificacoesSons?: boolean;
+  statusPresenca?: string;
 }
 
 @Injectable({
@@ -50,7 +57,14 @@ export class AuthService {
           perfil: usuarioBack.perfilAcesso,
           token: response.token,
           areas: usuarioBack.areas || [],
-          foto: usuarioBack.fotoPerfil || usuarioBack.foto
+          foto: usuarioBack.fotoPerfil || usuarioBack.foto || '',
+          telefone: usuarioBack.telefone || '',
+          cargo: usuarioBack.cargo || '',
+          departamento: usuarioBack.departamento || '',
+          biografia: usuarioBack.biografia || '',
+          notificacoesEmail: usuarioBack.notificacoesEmail ?? true,
+          notificacoesSons: usuarioBack.notificacoesSons ?? true,
+          statusPresenca: usuarioBack.statusPresenca || 'online'
         };
 
         this.definirSessao(usuarioFormatado, rememberMe);
@@ -207,7 +221,14 @@ export class AuthService {
           this.atualizarDadosUsuario({
             nome: res.usuario.nomeCompleto,
             email: res.usuario.email,
-            foto: res.usuario.fotoPerfil
+            foto: res.usuario.fotoPerfil,
+            telefone: res.usuario.telefone,
+            cargo: res.usuario.cargo,
+            departamento: res.usuario.departamento,
+            biografia: res.usuario.biografia,
+            notificacoesEmail: res.usuario.notificacoesEmail,
+            notificacoesSons: res.usuario.notificacoesSons,
+            statusPresenca: res.usuario.statusPresenca
           });
         }
       })

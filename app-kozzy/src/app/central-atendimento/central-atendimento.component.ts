@@ -18,6 +18,8 @@ import { RelatorioFiltroModalComponent } from '../relatorio-filtro-modal/relator
 import { RelatorioScreenComponent } from '../relatorio-screen/relatorio-screen.component';
 import { SearchProtocolModalComponent } from '../search-protocol-modal/search-protocol-modal.component';
 import { TicketDetailComponent } from '../ticket-detail/ticket-detail.component';
+import { ChatDrawerComponent } from '../chat-drawer/chat-drawer.component';
+import { ChatService } from '../chat.service';
 import { UrlAnexoPipe } from '../url-anexo.pipe';
 
 interface MenuItem { label: string; icon: string; route?: string; action?: () => void; badge?: number; active?: boolean; }
@@ -30,6 +32,7 @@ interface ToastMessage { message: string; type: 'success' | 'info' | 'warning' |
     CommonModule, FormsModule, RouterModule, DragDropModule,
     CreateTicketModalComponent, RelatorioFiltroModalComponent,
     RelatorioScreenComponent, SearchProtocolModalComponent, TicketDetailComponent,
+    ChatDrawerComponent,
     UrlAnexoPipe
   ],
   templateUrl: './central-atendimento.component.html',
@@ -82,6 +85,7 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
   // Notificações
   notificacoes: Notificacao[] = [];
   showNotificacoesDropdown: boolean = false;
+  filtroNotificacao: 'todas' | 'nao_lidas' = 'todas';
 
   private socketSubscriptions: Subscription[] = [];
 
@@ -91,7 +95,8 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
     private loadingService: LoadingService,
     public themeService: ThemeService,
     public socketService: SocketService,
-    public notificacaoService: NotificacaoService
+    public notificacaoService: NotificacaoService,
+    public chatService: ChatService
   ) { }
 
   ngOnInit(): void {
@@ -197,6 +202,59 @@ export class CentralAtendimentoComponent implements OnInit, OnDestroy {
 
   fecharNotificacoes(): void {
     this.showNotificacoesDropdown = false;
+  }
+
+  setFiltroNotificacao(filtro: 'todas' | 'nao_lidas'): void {
+    this.filtroNotificacao = filtro;
+  }
+
+  getNotificacoesFiltradas(): Notificacao[] {
+    if (this.filtroNotificacao === 'nao_lidas') {
+      return this.notificacoes.filter(n => !n.lida);
+    }
+    return this.notificacoes;
+  }
+
+  onClicarNotificacao(n: Notificacao): void {
+    this.notificacaoService.marcarComoLida(n.id);
+    this.fecharNotificacoes();
+
+    if (n.tipo === 'mensagem_chat' || n.tipo === 'chamado_compartilhado') {
+      this.chatService.abrirChat();
+      if (n.chamadoId) {
+        this.abrirChamadoPorId(n.chamadoId);
+      }
+    } else if (n.chamadoId) {
+      this.abrirChamadoPorId(n.chamadoId);
+    }
+  }
+
+  abrirChamadoPorId(chamadoId?: string): void {
+    if (!chamadoId) return;
+
+    const encontrado = this.chamados.find(c => c.id === chamadoId || c.numeroProtocolo === chamadoId);
+    if (encontrado) {
+      this.chamadoDetalhe = encontrado;
+      this.showDetailScreen = true;
+      this.showRelatorioScreen = false;
+      this.origemDetalhe = 'dashboard';
+    } else {
+      this.chamadosService.getChamadoPorId(chamadoId).subscribe({
+        next: (chamado) => {
+          this.chamadoDetalhe = chamado;
+          this.showDetailScreen = true;
+          this.showRelatorioScreen = false;
+          this.origemDetalhe = 'dashboard';
+        },
+        error: () => {
+          this.showToast('Não foi possível carregar os detalhes deste chamado.', 'warning');
+        }
+      });
+    }
+  }
+
+  abrirChat(): void {
+    this.chatService.toggleChat();
   }
 
   carregarAtendentes(): void {

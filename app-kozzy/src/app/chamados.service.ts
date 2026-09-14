@@ -310,6 +310,12 @@ export class ChamadosService {
     return this.chamadosSubject.value.find(c => c.numeroProtocolo === protocolo);
   }
 
+  getChamadoPorId(id: string): Observable<Chamado> {
+    return this.http.get<any>(`${this.API_URL}/${id}`, { withCredentials: true }).pipe(
+      map(item => this.mapItem(item))
+    );
+  }
+
   adicionarComentario(id: string, mensagem: string, arquivo?: File, isPrivado: boolean = false): Observable<any> {
     if (arquivo) {
       const formData = new FormData();

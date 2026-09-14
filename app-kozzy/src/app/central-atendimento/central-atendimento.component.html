@@ -1,4 +1,4 @@
-﻿<div class="app-container">
+<div class="app-container">
   <div class="sidebar-overlay" *ngIf="isMobileMenuOpen" (click)="toggleMenu()"></div>
   <aside class="sidebar" [class.collapsed]="menuCollapsed" [class.mobile-open]="isMobileMenuOpen">
     <div class="logo-area" style="padding: 20px; display: flex; align-items: center; justify-content: space-between;">
@@ -76,7 +76,17 @@
               <span *ngIf="!themeService.isDarkTheme()">🌙</span>
             </button>
 
-            <!-- 🔔 SINO DE NOTIFICAÇÕES -->
+            <!-- 💬 BOTÃO DO CHAT DA EQUIPE -->
+            <button class="chat-btn" (click)="abrirChat()" title="Chat da Equipe"
+              style="position: relative; background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--text-secondary); padding: 4px;">
+              💬
+              <span *ngIf="(chatService.totalNaoLidas$ | async)! > 0"
+                style="position: absolute; top: -2px; right: -4px; background: #ef4444; color: white; font-size: 10px; font-weight: 700; border-radius: 50%; width: 17px; height: 17px; display: flex; align-items: center; justify-content: center; line-height: 1;">
+                {{ (chatService.totalNaoLidas$ | async)! > 9 ? '9+' : (chatService.totalNaoLidas$ | async) }}
+              </span>
+            </button>
+
+            <!-- 🔔 SINO DE NOTIFICAÇÕES RICAS -->
             <div class="notification-wrapper" style="position: relative;">
               <button class="notification-btn" (click)="toggleNotificacoes()" title="Notificações"
                 style="position: relative; background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--text-secondary); padding: 4px;">
@@ -87,28 +97,94 @@
                 </span>
               </button>
 
-              <!-- Dropdown de notificações -->
+              <!-- Dropdown de notificações moderno e rico -->
               <div *ngIf="showNotificacoesDropdown" class="notification-dropdown"
-                style="position: absolute; right: 0; top: calc(100% + 10px); width: 340px; max-height: 420px; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 1000;">
-                <div style="padding: 14px 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-                  <span style="font-weight: 600; font-size: 14px; color: var(--text-primary);">🔔 Notificações</span>
-                  <button (click)="notificacaoService.limparTodas(); fecharNotificacoes()"
-                    style="background: none; border: none; font-size: 12px; color: var(--text-secondary); cursor: pointer;">Limpar</button>
-                </div>
-                <div *ngIf="notificacoes.length === 0" style="padding: 20px; text-align: center; color: var(--text-secondary); font-size: 13px;">
-                  Nenhuma notificação
-                </div>
-                <div *ngFor="let n of notificacoes" class="notif-item"
-                  [style.background]="n.lida ? 'transparent' : 'rgba(239,68,68,0.05)'"
-                  style="padding: 12px 16px; border-bottom: 1px solid var(--border-color); cursor: default; transition: background 0.15s;">
-                  <div style="display: flex; align-items: flex-start; gap: 10px;">
-                    <span style="font-size: 18px; flex-shrink: 0;">{{ n.tipo === 'chamado_criado' ? '🆕' : '✏️' }}</span>
-                    <div>
-                      <p style="margin: 0; font-size: 13px; color: var(--text-primary); line-height: 1.4;">{{ n.mensagem }}</p>
-                      <small style="color: var(--text-secondary); font-size: 11px;">{{ n.timestamp | date:'dd/MM HH:mm' }}</small>
-                    </div>
-                    <span *ngIf="!n.lida" style="width: 7px; height: 7px; background: #ef4444; border-radius: 50%; flex-shrink: 0; margin-top: 4px;"></span>
+                style="position: absolute; right: 0; top: calc(100% + 10px); width: 380px; max-height: 480px; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: 0 12px 32px rgba(0,0,0,0.18); z-index: 1000;">
+                
+                <div style="padding: 14px 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--bg-secondary);">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-weight: 700; font-size: 14px; color: var(--text-primary);">🔔 Notificações</span>
+                    <span *ngIf="notificacaoService.naoLidas > 0" style="background: #ef4444; color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px;">
+                      {{ notificacaoService.naoLidas }} novas
+                    </span>
                   </div>
+                  <div style="display: flex; gap: 10px;">
+                    <button (click)="notificacaoService.marcarTodasComoLidas()"
+                      style="background: none; border: none; font-size: 11px; color: #3b82f6; cursor: pointer; font-weight: 600;">Lidas</button>
+                    <button (click)="notificacaoService.limparTodas(); fecharNotificacoes()"
+                      style="background: none; border: none; font-size: 11px; color: var(--text-secondary); cursor: pointer;">Limpar</button>
+                  </div>
+                </div>
+
+                <!-- Abas Rápidas: Todas / Não Lidas -->
+                <div style="display: flex; border-bottom: 1px solid var(--border-color); background: var(--bg-card); padding: 4px 12px;">
+                  <button (click)="setFiltroNotificacao('todas')" 
+                    [style.color]="filtroNotificacao === 'todas' ? '#ef4444' : 'var(--text-secondary)'"
+                    [style.borderBottom]="filtroNotificacao === 'todas' ? '2px solid #ef4444' : 'none'"
+                    style="background: none; border: none; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer;">
+                    Todas ({{ notificacoes.length }})
+                  </button>
+                  <button (click)="setFiltroNotificacao('nao_lidas')" 
+                    [style.color]="filtroNotificacao === 'nao_lidas' ? '#ef4444' : 'var(--text-secondary)'"
+                    [style.borderBottom]="filtroNotificacao === 'nao_lidas' ? '2px solid #ef4444' : 'none'"
+                    style="background: none; border: none; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer;">
+                    Não Lidas ({{ notificacaoService.naoLidas }})
+                  </button>
+                </div>
+
+                <div *ngIf="getNotificacoesFiltradas().length === 0" style="padding: 30px 20px; text-align: center; color: var(--text-secondary); font-size: 13px;">
+                  <span style="font-size: 24px; display: block; margin-bottom: 6px;">📭</span>
+                  Nenhuma notificação por aqui
+                </div>
+
+                <!-- Lista de Notificações Ricas -->
+                <div *ngFor="let n of getNotificacoesFiltradas()" class="notif-item"
+                  (click)="onClicarNotificacao(n)"
+                  [style.background]="n.lida ? 'transparent' : 'rgba(239,68,68,0.06)'"
+                  style="padding: 12px 16px; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background 0.15s; display: flex; gap: 12px; align-items: flex-start;">
+                  
+                  <!-- Ícone Contextual -->
+                  <div style="width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;"
+                    [style.background]="n.tipo === 'chamado_atribuido' ? '#dbeafe' : (n.tipo === 'status_alterado' ? '#fef3c7' : (n.tipo === 'mensagem_chat' ? '#f3e8ff' : '#fee2e2'))"
+                    [style.color]="n.tipo === 'chamado_atribuido' ? '#2563eb' : (n.tipo === 'status_alterado' ? '#d97706' : (n.tipo === 'mensagem_chat' ? '#9333ea' : '#dc2626'))">
+                    <span *ngIf="n.tipo === 'chamado_atribuido'">🎫</span>
+                    <span *ngIf="n.tipo === 'status_alterado'">🔄</span>
+                    <span *ngIf="n.tipo === 'novo_comentario'">💬</span>
+                    <span *ngIf="n.tipo === 'chamado_compartilhado'">📎</span>
+                    <span *ngIf="n.tipo === 'mensagem_chat'">📨</span>
+                    <span *ngIf="n.tipo === 'chamado_criado' || !n.tipo">🆕</span>
+                  </div>
+
+                  <div style="flex: 1; min-width: 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">
+                      <strong style="font-size: 12.5px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        {{ n.titulo || 'Notificação' }}
+                      </strong>
+                      <small style="color: var(--text-secondary); font-size: 10.5px; flex-shrink: 0;">
+                        {{ n.timestamp | date:'dd/MM HH:mm' }}
+                      </small>
+                    </div>
+
+                    <p style="margin: 0 0 4px; font-size: 12px; color: var(--text-secondary); line-height: 1.4;">
+                      {{ n.mensagem }}
+                    </p>
+
+                    <!-- Tags Extras: Protocolo, Prioridade, Cliente -->
+                    <div *ngIf="n.numeroProtocolo || n.prioridade || n.status" style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;">
+                      <span *ngIf="n.numeroProtocolo" style="background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px; font-size: 10px; font-family: monospace; font-weight: 700; color: #ef4444;">
+                        #{{ n.numeroProtocolo }}
+                      </span>
+                      <span *ngIf="n.prioridade" style="background: #fef2f2; color: #dc2626; padding: 1px 5px; border-radius: 4px; font-size: 10px; font-weight: 600;">
+                        {{ n.prioridade }}
+                      </span>
+                      <span *ngIf="n.status" style="background: #e0f2fe; color: #0284c7; padding: 1px 5px; border-radius: 4px; font-size: 10px; font-weight: 600; text-transform: capitalize;">
+                        {{ n.status }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Dot de não lida -->
+                  <span *ngIf="!n.lida" style="width: 7px; height: 7px; background: #ef4444; border-radius: 50%; flex-shrink: 0; margin-top: 6px;"></span>
                 </div>
               </div>
             </div>
@@ -116,7 +192,6 @@
             <button class="btn btn-primary" *ngIf="authService.podeGerenciarChamados()"
               (click)="abrirModalCriarChamado()">
               + Novo Chamado
-
             </button>
           </div>
         </div>
@@ -400,6 +475,8 @@
 <app-search-protocol-modal [isVisible]="showSearchModal" (close)="fecharModalBusca()"
   (search)="onBuscarProtocolo($event)">
 </app-search-protocol-modal>
+
+<app-chat-drawer (abrirChamado)="abrirChamadoPorId($event)"></app-chat-drawer>
 
 <div class="toast-container" [class.show]="toast.visible" *ngIf="toast.visible">
   <div class="toast" [class]="'toast-' + toast.type">{{ toast.message }}</div>

@@ -1,0 +1,290 @@
+<!-- Overlay de fundo (mobile / backdrop) -->
+<div class="chat-backdrop" *ngIf="isOpen" (click)="fecharChat()"></div>
+
+<!-- Drawer Container Principal -->
+<div class="chat-drawer" [class.open]="isOpen">
+  
+  <!-- BARRA LATERAL: LISTA DE CONTATOS & SALAS -->
+  <div class="chat-sidebar">
+    <div class="sidebar-header">
+      <div class="header-title">
+        <span class="chat-icon">💬</span>
+        <h3>Chat da Equipe</h3>
+      </div>
+      <button class="btn-close-mobile" (click)="fecharChat()" title="Fechar Chat">✕</button>
+    </div>
+
+    <!-- Campo de Busca de Colegas -->
+    <div class="sidebar-search">
+      <span class="search-icon">🔍</span>
+      <input type="text" [(ngModel)]="buscaContato" (input)="filtrarContatos()" placeholder="Buscar colega..." />
+    </div>
+
+    <!-- Lista de Conversas & Contatos -->
+    <div class="contatos-list">
+      
+      <!-- Item Canal Geral -->
+      <div class="contato-item" [class.active]="contatoAtivo?.id === 'geral'" (click)="selecionarCanalGeral()">
+        <div class="avatar-wrapper canal-geral-avatar">
+          <span>👥</span>
+        </div>
+        <div class="contato-info">
+          <div class="contato-top">
+            <strong class="contato-nome"># Canal da Equipe</strong>
+            <span *ngIf="canalGeral?.ultimaMensagem?.data" class="msg-tempo">
+              {{ canalGeral.ultimaMensagem.data | date:'HH:mm' }}
+            </span>
+          </div>
+          <p class="contato-preview">
+            <span *ngIf="canalGeral?.ultimaMensagem?.autor" class="preview-autor">{{ canalGeral.ultimaMensagem.autor }}: </span>
+            {{ canalGeral?.ultimaMensagem?.texto || 'Comunicação geral com toda a equipe' }}
+          </p>
+        </div>
+        <span *ngIf="canalGeral?.naoLidas > 0" class="badge-nao-lidas">{{ canalGeral.naoLidas }}</span>
+      </div>
+
+      <div class="secao-divider">
+        <span>MEMBROS DA EQUIPE</span>
+      </div>
+
+      <!-- Lista de Colegas -->
+      <div *ngFor="let user of contatosFiltrados" class="contato-item" [class.active]="contatoAtivo?._id === user._id" (click)="selecionarContato(user)">
+        <div class="avatar-wrapper">
+          <img *ngIf="user.fotoPerfil" [src]="user.fotoPerfil | urlAnexo:'avatar'" alt="Avatar" class="avatar-img" />
+          <span *ngIf="!user.fotoPerfil" class="avatar-letra">{{ user.nomeCompleto.charAt(0).toUpperCase() }}</span>
+          <span class="status-dot" [ngClass]="'status-' + (user.statusPresenca || 'online')"></span>
+        </div>
+        <div class="contato-info">
+          <div class="contato-top">
+            <strong class="contato-nome">{{ user.nomeCompleto }}</strong>
+          </div>
+          <p class="contato-cargo">
+            {{ user.cargo || user.perfilAcesso || 'Colaborador' }}
+            <span *ngIf="user.departamento"> • {{ user.departamento }}</span>
+          </p>
+        </div>
+      </div>
+
+      <div *ngIf="contatosFiltrados.length === 0" class="empty-contatos">
+        Nenhum colega encontrado
+      </div>
+    </div>
+  </div>
+
+  <!-- PAINEL PRINCIPAL: ÁREA DE CONVERSA -->
+  <div class="chat-main" *ngIf="contatoAtivo">
+    
+    <!-- Header da Conversa Ativa -->
+    <div class="chat-main-header">
+      <div class="active-user-info">
+        <div class="avatar-wrapper small">
+          <ng-container *ngIf="contatoAtivo.id === 'geral'">
+            <span class="avatar-icon">👥</span>
+          </ng-container>
+          <ng-container *ngIf="contatoAtivo.id !== 'geral'">
+            <img *ngIf="contatoAtivo.fotoPerfil" [src]="contatoAtivo.fotoPerfil | urlAnexo:'avatar'" class="avatar-img" />
+            <span *ngIf="!contatoAtivo.fotoPerfil" class="avatar-letra">{{ contatoAtivo.nomeCompleto.charAt(0).toUpperCase() }}</span>
+            <span class="status-dot" [ngClass]="'status-' + (contatoAtivo.statusPresenca || 'online')"></span>
+          </ng-container>
+        </div>
+        <div class="header-details">
+          <h4>{{ contatoAtivo.nome || contatoAtivo.nomeCompleto }}</h4>
+          <span class="sub-status" *ngIf="contatoAtivo.id === 'geral'">Canal aberto para avisos e compartilhamento</span>
+          <span class="sub-status" *ngIf="contatoAtivo.id !== 'geral'">
+            {{ contatoAtivo.cargo || contatoAtivo.perfilAcesso || 'Equipe Kozzy' }}
+            <span *ngIf="digitandoMapa[contatoAtivo._id]" class="digitando-text"> • digitando...</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn-action" (click)="abrirSeletorChamado()" title="Compartilhar Chamado">
+          <span>📎</span> Compartilhar Chamado
+        </button>
+        <button class="btn-close-chat" (click)="fecharChat()" title="Fechar">✕</button>
+      </div>
+    </div>
+
+    <!-- Feed de Mensagens -->
+    <div class="chat-messages-container" #messagesContainer>
+      
+      <!-- Mensagem de boas-vindas da conversa -->
+      <div class="chat-welcome">
+        <div class="welcome-icon">{{ contatoAtivo.id === 'geral' ? '📢' : '🤝' }}</div>
+        <h4>{{ contatoAtivo.id === 'geral' ? 'Canal Geral da Equipe' : 'Início da conversa com ' + (contatoAtivo.nomeCompleto || contatoAtivo.nome) }}</h4>
+        <p>Compartilhe atualizações, tire dúvidas e envie chamados diretamente aqui.</p>
+      </div>
+
+      <!-- Lista de Balões de Mensagem -->
+      <div *ngFor="let msg of mensagens" class="message-row" [class.mine]="isMinhaMensagem(msg)">
+        
+        <!-- Avatar do Remetente (se não for minha) -->
+        <div *ngIf="!isMinhaMensagem(msg)" class="avatar-wrapper message-avatar">
+          <img *ngIf="msg.remetente.fotoPerfil" [src]="msg.remetente.fotoPerfil | urlAnexo:'avatar'" class="avatar-img" />
+          <span *ngIf="!msg.remetente.fotoPerfil" class="avatar-letra">{{ (msg.remetente.nomeCompleto || 'U').charAt(0).toUpperCase() }}</span>
+        </div>
+
+        <div class="message-bubble">
+          <!-- Nome do Remetente em Canais Gerais -->
+          <div *ngIf="!isMinhaMensagem(msg) && msg.tipoCanal === 'geral'" class="message-author">
+            {{ msg.remetente.nomeCompleto || 'Colega' }}
+          </div>
+
+          <!-- CARD DE CHAMADO COMPARTILHADO -->
+          <div *ngIf="msg.chamado" class="chamado-card-preview" [ngClass]="getPrioridadeBadgeClass(msg.chamado.nivelPrioridade)">
+            <div class="chamado-card-header">
+              <span class="chamado-tag">🎫 CHAMADO COMPARTILHADO</span>
+              <span class="chamado-protocolo">#{{ msg.chamado.numeroProtocolo }}</span>
+            </div>
+            
+            <div class="chamado-card-body">
+              <h5 class="chamado-card-title">{{ msg.chamado.assuntoEspecifico || msg.chamado.categoriaAssunto || 'Atendimento' }}</h5>
+              <p class="chamado-card-cliente" *ngIf="msg.chamado.nomeCliente || msg.chamado.tipoCliente">
+                <strong>Cliente:</strong> {{ msg.chamado.nomeCliente || msg.chamado.tipoCliente }}
+              </p>
+              <div class="chamado-card-badges">
+                <span class="badge-prioridade" [ngClass]="getPrioridadeBadgeClass(msg.chamado.nivelPrioridade)">
+                  {{ msg.chamado.nivelPrioridade || 'Média' }}
+                </span>
+                <span class="badge-status" [ngClass]="getStatusBadgeClass(msg.chamado.avanco)">
+                  {{ msg.chamado.avanco || 'Aberto' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="chamado-card-footer">
+              <button class="btn-abrir-chamado" (click)="onAbrirChamado(msg.chamado._id || msg.chamado.id)" type="button">
+                🔍 Ver Chamado Completo
+              </button>
+            </div>
+          </div>
+
+          <!-- Texto da Mensagem -->
+          <p *ngIf="msg.texto" class="message-text">{{ msg.texto }}</p>
+
+          <!-- Anexos de Imagem ou Arquivo -->
+          <div *ngIf="msg.anexos && msg.anexos.length > 0" class="message-anexos">
+            <div *ngFor="let anexo of msg.anexos" class="anexo-item">
+              <a [href]="anexo.url | urlAnexo" target="_blank" rel="noopener noreferrer" class="anexo-link">
+                <span class="anexo-icon">📎</span>
+                <span class="anexo-nome">{{ anexo.nomeOriginal || 'Anexo' }}</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Rodapé do Balão: Horário e Status -->
+          <div class="message-time">
+            {{ msg.createdAt | date:'HH:mm' }}
+            <span *ngIf="isMinhaMensagem(msg)" class="read-check">
+              {{ msg.lida ? '✓✓' : '✓' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PREVIEW DE CHAMADO SELECIONADO PARA ENVIAR -->
+    <div *ngIf="chamadoParaCompartilhar" class="chamado-attached-bar">
+      <div class="attached-info">
+        <span class="icon">🎫</span>
+        <div>
+          <strong>#{{ chamadoParaCompartilhar.numeroProtocolo }}</strong> - {{ chamadoParaCompartilhar.categoria || chamadoParaCompartilhar.cliente }}
+        </div>
+      </div>
+      <button class="btn-remove-attach" (click)="cancelarChamadoParaCompartilhar()" title="Remover">✕</button>
+    </div>
+
+    <!-- PREVIEW DE ARQUIVO SELECIONADO -->
+    <div *ngIf="arquivoSelecionado" class="arquivo-attached-bar">
+      <div class="attached-info">
+        <span class="icon">📎</span>
+        <span class="file-name">{{ arquivoSelecionado.name }}</span>
+      </div>
+      <button class="btn-remove-attach" (click)="removerArquivo()" title="Remover">✕</button>
+    </div>
+
+    <!-- INPUT FOOTER: ENVIAR MENSAGENS -->
+    <div class="chat-input-area">
+      <div class="input-actions-left">
+        <!-- Botão Anexar Arquivo -->
+        <button class="btn-icon-action" (click)="fileUploadInput.click()" title="Anexar arquivo ou imagem" type="button">
+          <span>📎</span>
+        </button>
+        <input type="file" #fileUploadInput (change)="onFileChange($event)" class="hidden-input" />
+
+        <!-- Botão Compartilhar Chamado -->
+        <button class="btn-icon-action" (click)="abrirSeletorChamado()" title="Compartilhar um chamado" type="button">
+          <span>🎫</span>
+        </button>
+      </div>
+
+      <!-- Input de Texto -->
+      <textarea
+        class="chat-textarea"
+        [(ngModel)]="textoMensagem"
+        (input)="onInputMensagem()"
+        (keydown.enter)="$event.preventDefault(); enviarMensagem()"
+        placeholder="Escreva sua mensagem... (Enter para enviar)"
+        rows="1"
+      ></textarea>
+
+      <!-- Botão Enviar -->
+      <button 
+        class="btn-send"
+        (click)="enviarMensagem()"
+        [disabled]="(!textoMensagem.trim() && !chamadoParaCompartilhar && !arquivoSelecionado) || isEnviando"
+        title="Enviar mensagem"
+        type="button"
+      >
+        <span *ngIf="!isEnviando">➤</span>
+        <span *ngIf="isEnviando">...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL / POPUP: SELETOR DE CHAMADO PARA COMPARTILHAR -->
+<div class="modal-backdrop-chamado" *ngIf="showModalCompartilharChamado">
+  <div class="modal-chamado-card">
+    <div class="modal-header">
+      <div class="title-wrap">
+        <span class="icon">🎫</span>
+        <h4>Selecione um Chamado para Compartilhar</h4>
+      </div>
+      <button class="btn-close-modal" (click)="fecharSeletorChamado()">✕</button>
+    </div>
+
+    <div class="modal-search">
+      <input 
+        type="text" 
+        [(ngModel)]="buscaChamadoTermo" 
+        (input)="filtrarChamadosParaCompartilhar()" 
+        placeholder="Buscar por protocolo, cliente ou assunto..." 
+      />
+    </div>
+
+    <div class="modal-chamados-list">
+      <div 
+        *ngFor="let ch of chamadosFiltradosParaEnvio" 
+        class="chamado-picker-item" 
+        (click)="compartilharChamadoSelecionado(ch)"
+      >
+        <div class="picker-top">
+          <span class="picker-protocolo">#{{ ch.numeroProtocolo }}</span>
+          <span class="picker-prioridade" [ngClass]="getPrioridadeBadgeClass(ch.prioridade)">
+            {{ ch.prioridade }}
+          </span>
+        </div>
+        <h5 class="picker-titulo">{{ ch.categoria || ch.descricao }}</h5>
+        <div class="picker-meta">
+          <span><strong>Cliente:</strong> {{ ch.nomeCliente || ch.cliente }}</span>
+          <span><strong>Status:</strong> {{ ch.status }}</span>
+        </div>
+      </div>
+
+      <div *ngIf="chamadosFiltradosParaEnvio.length === 0" class="empty-state-picker">
+        Nenhum chamado encontrado com este filtro.
+      </div>
+    </div>
+  </div>
+</div>
